@@ -480,10 +480,10 @@ function tiles( img, rows, columns, W, H )
         {
             x = w/columns*i*100/w; y = h/rows*j*100/h;
             bx = -W/columns*i; by = -H/rows*j;
-            pieces[i*rows+j] = {piece:tile=$el('<div class="imagik-tile"></div>'), r:rows, c:columns, i:i, j:j, x:x, y:y, bx:bx, by:by, w:w, h:h, W:W, H:H, img:img};
-            tile.style.backgroundImage = 'url("'+String(img)+'")';
-            tile.style.backgroundPosition = String(bx)+'px '+String(by)+'px';
-            tile.style.backgroundSize = String(W)+'px auto';
+            pieces[i*rows+j] = {piece:tile=$el('<div class="imagik-tile"><div class="imagik-tile-inside"></div></div>'), r:rows, c:columns, i:i, j:j, x:x, y:y, bx:bx, by:by, w:w, h:h, W:W, H:H, img:img};
+            tile.firstChild.style.backgroundImage = 'url("'+String(img)+'")';
+            tile.firstChild.style.backgroundPosition = String(bx)+'px '+String(by)+'px';
+            tile.firstChild.style.backgroundSize = String(W)+'px auto';
         }
     }
     return pieces;
@@ -589,18 +589,31 @@ function Imagik( el, options )
 
     self.id = ID();
     self.el = el;
+    if ( !self.el.id ) self.el.id = 'imagik-instance-'+self.id;
     self.options = options;
     self.style = $el('<style id="imagik-css-'+self.id+'" type="text/css" media="all"></style>');
     $append(self.style, document.createTextNode(''));
     $append(document.head, self.style);
 
     // global vars
-    var holder, caption, controls, thisimg, nextimg, imgs = [], fx = [], captions = [], ind = [],
+    var holder, caption, controls, imageLayer, animationLayer, imgs = [], fx = [], captions = [], ind = [],
         current = -1, prevcurrent = -1, timer, dotimer = true, paused = false, p = null, p2 = null,
         numpiec = 0, style = '', lastfx = null, evtCarrier = null, W, H,
         randtrans = shuffle(Imagik.Static.randomTransitions.slice()), randindex = 0,
         getRandomTransition, toggleActive, prepareTransition, clearPrev, endHandler, endTransition
     ;
+
+    self.autoResize = function( ) {
+        if ( self.el && holder )
+        {
+            W = stdMath.round(self.el.clientWidth); H = stdMath.round(W/self.options.aspectRatio);
+            holder.style.width = String(W)+'px';
+            holder.style.height = String(H)+'px';
+            imageLayer.style.backgroundSize = String(W)+'px auto';
+            //animationLayer.style.perspective = String(stdMath.round(1.5*W))+'px';
+        }
+        return self;
+    };
 
     self.init = function( ) {
         if ( !self.el || $$('.imagik-holder', self.el).length ) return self;
@@ -611,12 +624,7 @@ function Imagik( el, options )
         holder.style.height = String(H)+'px';
 
         // resize handler
-        hook(self.id, function(evt){
-            W = stdMath.round(self.el.clientWidth); H = stdMath.round(W/self.options.aspectRatio);
-            holder.style.width = String(W)+'px';
-            holder.style.height = String(H)+'px';
-            thisimg.style.backgroundSize = String(W)+'px auto';
-        });
+        hook(self.id, function(evt){self.autoResize();});
 
         // parse dom data
         slice.call(self.el.children).forEach(function( div ) {
@@ -680,14 +688,14 @@ function Imagik( el, options )
 
         $append(self.el, holder);
 
-        thisimg = $el('<div class="imagik-thisimg"></div>');
-        thisimg.style.zIndex = 2;
-        thisimg.style.backgroundSize = String(W)+'px auto';
-        nextimg = $el('<div class="imagik-nextimg"></div>');
-        nextimg.style.zIndex = 1;
-        nextimg.style.backgroundSize = String(W)+'px auto';
-        $append(holder, thisimg);
-        $append(holder, nextimg);
+        imageLayer = $el('<div class="imagik-image-layer"></div>');
+        imageLayer.style.zIndex = 2;
+        imageLayer.style.backgroundSize = String(W)+'px auto';
+        animationLayer = $el('<div class="imagik-animation-layer"></div>');
+        animationLayer.style.zIndex = 1;
+        //animationLayer.style.perspective = String(stdMath.round(1.5*W))+'px';
+        $append(holder, imageLayer);
+        $append(holder, animationLayer);
 
         var i, anc, prevBt, nextBt, playBt, bullets, buttons;
 
@@ -736,8 +744,8 @@ function Imagik( el, options )
                 $append(bullets, anc);
                 $ev(anc, 'click', (function( index ){
                     return function( evt ) {
-                    if ( paused ) return;
-                    self.doTransition(String(index));
+                        if ( paused ) return;
+                        self.doTransition(String(index));
                 };})(i));
             }
         }
@@ -747,7 +755,7 @@ function Imagik( el, options )
         if ( self.options.randomOrder ) shuffle(ind);
 
         prevcurrent = 0; current = 0;
-        thisimg.style.backgroundImage = 'url("'+imgs[ind[current]]+'")';
+        imageLayer.style.backgroundImage = 'url("'+imgs[ind[current]]+'")';
         if ( self.options.controls )
         {
             toggleActive();
@@ -764,7 +772,7 @@ function Imagik( el, options )
     getRandomTransition = function( ) {
         if ( randindex >= randtrans.length )
         {
-            randtrans = shuffle(randtrans);
+            randtrans = shuffle(Imagik.Static.randomTransitions.slice());
             randindex = 0;
         }
         return randtrans[randindex++];
@@ -778,9 +786,9 @@ function Imagik( el, options )
     clearPrev = function( ) {
         if ( evtCarrier )
         {
-            $ev(lastfx.transition==="fade-zoom"||lastfx.transition==="shuffle-left"||lastfx.transition==="shuffle-right" ? evtCarrier.firstChild : evtCarrier, 'animationend', endHandler, false);
-            $empty(nextimg);
-            $removeClass(nextimg, 'imagik-fx-'+lastfx.transition);
+            $ev(lastfx.transition==="fade-zoom" ? evtCarrier.firstChild.firstChild : (lastfx.transition==="shuffle-left"||lastfx.transition==="shuffle-right" ? evtCarrier.firstChild : evtCarrier), 'animationend', endHandler, false);
+            $empty(animationLayer);
+            $removeClass(animationLayer, 'imagik-fx-'+lastfx.transition);
         }
         if ( p2!=null ) p2 = destroy(p2);
         if ( p!=null ) p = destroy(p);
@@ -800,15 +808,15 @@ function Imagik( el, options )
     endTransition = function( ) {
         if ( !imgs ) return;
         clearPrev();
-        thisimg.style.backgroundImage = 'url("'+imgs[ind[current]]+'")';
-        thisimg.style.zIndex = 2;
+        imageLayer.style.backgroundImage = 'url("'+imgs[ind[current]]+'")';
+        imageLayer.style.zIndex = 2;
         if ( self.options.caption && captions[ind[current]]!=null && captions[ind[current]]!="" )
             $addClass($html(caption, captions[ind[current]]), 'show');
         prepareTransition();
     };
 
     self.doTransition = function( dir ) {
-        var i, dd, fxi, order, ease, r, c, temp, ordobj, ngroups, d, sd, del, max = 0, odd, animations = {};
+        var i, dd, fxi, transition, order, ease, r, c, ordobj, ngroups, d, sd, del, max, odd, animations = {}, selector;
 
         clearTimeout(timer);
         clearPrev();
@@ -825,16 +833,18 @@ function Imagik( el, options )
 
         $style(self.style, style='');
         fxi = fx[ind[current]]; if ( "random"===fxi.transition ) fxi = getRandomTransition();
+        transition = extend({}, Imagik.Static.transitions[fxi.transition]);
         order = fxi.order || 'rows-first'; if ( !HAS.call(Imagik.Static.order, order) ) order = 'rows-first';
         ease = fxi.ease || 'linear'; if ( HAS.call(Imagik.Static.ease, ease) ) ease = Imagik.Static.ease[ease];
-        r = null!=Imagik.Static.transitions[fxi.transition].rows ? Imagik.Static.transitions[fxi.transition].rows : fxi.rows;
-        c = null!=Imagik.Static.transitions[fxi.transition].columns ? Imagik.Static.transitions[fxi.transition].columns : fxi.columns;
+        r = null!=transition.rows ? transition.rows : fxi.rows;
+        c = null!=transition.columns ? transition.columns : fxi.columns;
+        selector = is_string(transition.selector) ? transition.selector : '';
         lastfx = fxi;
 
-        if ( Imagik.Static.transitions[fxi.transition].reverse )
+        if ( transition.reverse )
         {
             p = tiles(imgs[ind[prevcurrent]], r, c, W, H);
-            thisimg.style.backgroundImage = 'url("'+imgs[ind[current]]+'")';
+            imageLayer.style.backgroundImage = 'url("'+imgs[ind[current]]+'")';
         }
         else
         {
@@ -842,195 +852,204 @@ function Imagik( el, options )
         }
 
         numpiec = p.length;
-        if ( fxi.transition==="flip-horizontal" || fxi.transition==="flip-vertical" || fxi.transition==="fade-zoom" ||
-            fxi.transition==="shuffle-left" || fxi.transition==="shuffle-right" ||
-            fxi.transition==="fold-left" || fxi.transition==="fold-right" )
+        if ( transition.composite || (transition.current && transition.next) )
         {
-            thisimg.style.backgroundImage = 'none';
+            imageLayer.style.backgroundImage = 'none';
             p2 = tiles(imgs[ind[prevcurrent]], r, c, W, H);
             for(i=0;i<numpiec;i++)
             {
                 dd = $el('<div class="imagik-tile-wrapper"></div>');
-                p[i].piece.id = 'imagik-'+self.id+'-next-'+p[i].i+'-'+p[i].j;
-                p2[i].piece.id = 'imagik-'+self.id+'-current-'+p2[i].i+'-'+p2[i].j;
+                p[i].piece.id = self.el.id+'-next-'+p[i].i+'-'+p[i].j;
+                p2[i].piece.id = self.el.id+'-current-'+p2[i].i+'-'+p2[i].j;
                 $append(dd, $addClass($addClass(p2[i].piece, 'imagik-tile-current'), 'imagik-tile-'+p2[i].i+'-'+p2[i].j));
                 $append(dd, $addClass($addClass(p[i].piece, 'imagik-tile-next'), 'imagik-tile-'+p[i].i+'-'+p[i].j));
-                if ( fxi.transition==="flip-vertical" )
+
+                if ( is_obj(transition.current) )
+                    style += "\n" + '#'+p2[i].piece.id+'{'+$css(translate(extend({}, transition.current), p2[i]))+'}';
+                if ( is_obj(transition.next) )
+                    style += "\n" + '#'+p[i].piece.id+'{'+$css(translate(extend({}, transition.next), p[i]))+'}';
+
+                if ( fxi.transition==="fold-left" )
                 {
-                    p2[i].piece.style.transform = 'rotateX(0deg)';
-                    p[i].piece.style.transform = 'rotateX(180deg)';
-                }
-                else if ( fxi.transition==="flip-horizontal" )
-                {
-                    p2[i].piece.style.transform = 'rotateY(0deg)';
-                    p[i].piece.style.transform = 'rotateY(-180deg)';
-                }
-                else if ( fxi.transition==="fold-left" )
-                {
-                    p2[i].piece.style.transformOrigin = '0 center';
-                    p[i].piece.style.transformOrigin = '100% center';
                     p2[i].piece.style.transform = 'rotateY(0deg) translate3d(0,0,-'+W+'px)';
-                    p[i].piece.style.transform = 'rotateY(-90deg) translate3d(0,0,0)';
                 }
                 else if ( fxi.transition==="fold-right" )
                 {
-                    p2[i].piece.style.transformOrigin = '0 center';
-                    p[i].piece.style.transformOrigin = '0 center';
                     p2[i].piece.style.transform = 'rotateY(0deg) translate3d(0,0,-'+W+'px)';
-                    p[i].piece.style.transform = 'rotateY(90deg) translate3d(0,0,0)';
                 }
+
                 p2[i].piece = dd;
                 p[i].piece = dd;
             }
         }
-        else if ( Imagik.Static.transitions[fxi.transition].current && Imagik.Static.transitions[fxi.transition].next )
-        {
-            thisimg.style.backgroundImage = 'none';
-            p2 = tiles(imgs[ind[prevcurrent]], r, c, W, H);
-            for(i=0;i<numpiec;i++)
-            {
-                dd = $el('<div class="imagik-tile-wrapper"></div>');
-                p[i].piece.id = 'imagik-'+self.id+'-next-'+p[i].i+'-'+p[i].j;
-                p2[i].piece.id = 'imagik-'+self.id+'-current-'+p2[i].i+'-'+p2[i].j;
-                $append(dd, $addClass($addClass(p2[i].piece, 'imagik-tile-current'), 'imagik-tile-'+p2[i].i+'-'+p2[i].j));
-                $append(dd, $addClass($addClass(p[i].piece, 'imagik-tile-next'), 'imagik-tile-'+p[i].i+'-'+p[i].j));
 
-                style += "\n" + '#'+p2[i].piece.id+'{left:'+p2[i].x+'%;top:'+p2[i].y+'%;width:'+p2[i].w+'%;height:'+p2[i].h+'%;}';
-                style += "\n" + '#'+p[i].piece.id+'{left:'+p[i].x+'%;top:'+p[i].y+'%;width:'+p[i].w+'%;height:'+p[i].h+'%;}';
-
-                if ( is_obj(Imagik.Static.transitions[fxi.transition].current) )
-                    style += "\n" + '#'+p2[i].piece.id+'{'+$css(translate(extend({}, Imagik.Static.transitions[fxi.transition].current), p2[i]))+'}';
-                if ( is_obj(Imagik.Static.transitions[fxi.transition].next) )
-                    style += "\n" + '#'+p[i].piece.id+'{'+$css(translate(extend({}, Imagik.Static.transitions[fxi.transition].next), p[i]))+'}';
-
-                p[i].piece = dd;
-                p2[i].piece = dd;
-
-                if ( 'pan-' === fxi.transition.slice(0,4) ) { dd.style.width = '200%'; dd.style.height = '200%'; }
-            }
-        }
         ordobj = Imagik.Static.order[order](p,r,c);
         p = ordobj.pieces;
-        thisimg.style.zIndex = 0;
+        imageLayer.style.zIndex = 0;
         ngroups = ordobj.groups;
         d = fxi.duration/(ngroups-(ngroups-1)*fxi.overlap);
-        sd = d-d*fxi.overlap;
+        sd = d*(1-fxi.overlap);
         max = 0;
         odd = false;
 
-        temp = extend({}, Imagik.Static.transitions[fxi.transition]);
-        if ( is_array(temp.steps) && 2<=temp.steps.length )
+        if ( (is_array(transition.steps) && 2<=transition.steps.length) || (is_array(transition.steps1) && 2<=transition.steps1.length && is_array(transition.steps2) && 2<=transition.steps2.length) )
         {
-            animations['animation-'+self.id] = '@keyframes imagik-animation-'+self.id+'{'+temp.steps.map(function(step, n){
-                return String(100*n/(temp.steps.length-1))+'%{'+$css(translate(step, p[0]))+'}';
-            }).join("\n")+'}';
-        }
-        else if ( temp.end && (temp.start || (temp.start1 && temp.start2)) )
-        {
-            if ( temp.start1 && temp.start2 )
+            if ( transition.steps1 && transition.steps2 )
             {
-                temp.start = temp.start2;
-                temp._start = translate(temp.start, p[0]);
-                temp._end = translate(temp.end, p[0]);
-                animations['animation-'+self.id+'-even'] = '@keyframes imagik-animation-'+self.id+'-even{from{'+$css(temp._start)+'}to{'+$css(temp._end)+'}}';
-
+                animations['animation-'+self.el.id+'-even'] = '@keyframes imagik-animation-'+self.el.id+'-even{'+transition.steps2.map(function(step, n){
+                    return String(100*n/(transition.steps2.length-1))+'%{'+$css(translate(step, p[0]))+'}';
+                }).join("\n")+'}';
                 if ( 1<p.length )
                 {
-                    temp.start = temp.start1;
-                    temp._start = translate(temp.start, p[1]);
-                    temp._end = translate(temp.end, p[1]);
-                    animations['animation-'+self.id+'-odd'] = '@keyframes imagik-animation-'+self.id+'-odd{from{'+$css(temp._start)+'}to{'+$css(temp._end)+'}}';
+                    animations['animation-'+self.el.id+'-odd'] = '@keyframes imagik-animation-'+self.el.id+'-odd{'+transition.steps1.map(function(step, n){
+                        return String(100*n/(transition.steps1.length-1))+'%{'+$css(translate(step, p[1]))+'}';
+                    }).join("\n")+'}';
                 }
             }
             else
             {
-                temp._start = translate(temp.start, p[0]);
-                temp._end = translate(temp.end, p[0]);
-                animations['animation-'+self.id] = '@keyframes imagik-animation-'+self.id+'{from{'+$css(temp._start)+'}to{'+$css(temp._end)+'}}';
+                animations['animation-'+self.el.id] = '@keyframes imagik-animation-'+self.el.id+'{'+transition.steps.map(function(step, n){
+                    return String(100*n/(transition.steps.length-1))+'%{'+$css(translate(step, p[0]))+'}';
+                }).join("\n")+'}';
+            }
+        }
+        else if ( transition.end && (transition.start || (transition.start1 && transition.start2)) )
+        {
+            if ( transition.start1 && transition.start2 )
+            {
+                transition._start = translate(transition.start2, p[0]);
+                transition._end = translate(transition.end, p[0]);
+                animations['animation-'+self.el.id+'-even'] = '@keyframes imagik-animation-'+self.el.id+'-even{from{'+$css(transition._start)+'}to{'+$css(transition._end)+'}}';
+
+                if ( 1<p.length )
+                {
+                    transition._start = translate(transition.start1, p[1]);
+                    transition._end = translate(transition.end, p[1]);
+                    animations['animation-'+self.el.id+'-odd'] = '@keyframes imagik-animation-'+self.el.id+'-odd{from{'+$css(transition._start)+'}to{'+$css(transition._end)+'}}';
+                }
+            }
+            else
+            {
+                transition._start = translate(transition.start, p[0]);
+                transition._end = translate(transition.end, p[0]);
+                animations['animation-'+self.el.id] = '@keyframes imagik-animation-'+self.el.id+'{from{'+$css(transition._start)+'}to{'+$css(transition._end)+'}}';
             }
         }
 
         for(i=0;i<numpiec;i++)
         {
             del = ordobj.delays[i]*sd;
+            p[i].piece.id = self.el.id+'-tile-'+p[i].i+'-'+p[i].j;
+            style += "\n" + '#'+p[i].piece.id+'{left:'+p[i].x+'%;top:'+p[i].y+'%;width:'+p[i].w+'%;height:'+p[i].h+'%;}';
+            $append(animationLayer, p[i].piece);
             if ( !evtCarrier || max<=del )
             {
-                evtCarrier = p[i].piece;
+                evtCarrier = selector.length ? ($$('#'+p[i].piece.id+selector, animationLayer)[0]||p[i].piece) : p[i].piece;
                 max = del;
             }
-            p[i].piece.id = 'imagik-'+self.id+'-'+p[i].i+'-'+p[i].j;
-            style += "\n" + '#'+p[i].piece.id+'{left:'+p[i].x+'%;top:'+p[i].y+'%;width:'+p[i].w+'%;height:'+p[i].h+'%;}';
-            $append(nextimg, p[i].piece);
-            temp = Imagik.Static.transitions[fxi.transition];
-            if ( temp.animation || (temp.animation1 && temp.animation2) )
+            if ( transition.animation || (transition.animation1 && transition.animation2) )
             {
                 if ( fxi.transition==="fade-zoom" )
                 {
-                    style += "\n" + '#'+p[i].piece.childNodes[0].id+'{animation:imagik-animation-'+temp.animation+' '+d+'s '+ease+' '+del+'s 1 normal both running;}';
-                    style += "\n" + '#'+p[i].piece.childNodes[1].id+'{animation:imagik-animation-'+temp.animation+' '+d+'s '+ease+' '+del+'s 1 reverse both running;}';
+                    style += "\n" + '#'+p[i].piece.childNodes[0].id+'>.imagik-tile-inside{animation:imagik-animation-'+transition.animation+' '+d+'s '+ease+' '+del+'s 1 normal both running;}';
+                    style += "\n" + '#'+p[i].piece.childNodes[1].id+'>.imagik-tile-inside{animation:imagik-animation-'+transition.animation+' '+d+'s '+ease+' '+del+'s 1 reverse both running;}';
                 }
                 else if ( fxi.transition==="shuffle-left" )
                 {
-                    style += "\n" + '#'+p[i].piece.childNodes[0].id+'{animation:imagik-animation-shuffle-left_1 '+d+'s '+ease+' '+del+'s 1 normal both running;}';
-                    style += "\n" + '#'+p[i].piece.childNodes[1].id+'{animation:imagik-animation-shuffle-left_2 '+d+'s '+ease+' '+del+'s 1 normal both running;}';
+                    if ( !animations['animation-'+self.el.id+'-shuffle-left_1'] )
+                    {
+                        animations['animation-'+self.el.id+'-shuffle-left_1'] = '@keyframes imagik-animation-'+self.el.id+'-shuffle-left_1{'+transition._steps[0].map(function(step, n){
+                            return String(100*n/(transition._steps[0].length-1))+'%{'+$css(translate(step, p[0]))+'}';
+                        }).join("\n")+'}';
+                    }
+                    if ( !animations['animation-'+self.el.id+'-shuffle-left_2'] )
+                    {
+                        animations['animation-'+self.el.id+'-shuffle-left_2'] = '@keyframes imagik-animation-'+self.el.id+'-shuffle-left_2{'+transition._steps[1].map(function(step, n){
+                            return String(100*n/(transition._steps[1].length-1))+'%{'+$css(translate(step, p[0]))+'}';
+                        }).join("\n")+'}';
+                    }
+                    style += "\n" + '#'+p[i].piece.childNodes[0].id+'{animation:imagik-animation-'+self.el.id+'-shuffle-left_1 '+d+'s '+ease+' '+del+'s 1 normal both running;}';
+                    style += "\n" + '#'+p[i].piece.childNodes[1].id+'{animation:imagik-animation-'+self.el.id+'-shuffle-left_2 '+d+'s '+ease+' '+del+'s 1 normal both running;}';
                 }
                 else if ( fxi.transition==="shuffle-right" )
                 {
-                    style += "\n" + '#'+p[i].piece.childNodes[0].id+'{animation:imagik-animation-shuffle-right_1 '+d+'s '+ease+' '+del+'s 1 normal both running;}';
-                    style += "\n" + '#'+p[i].piece.childNodes[1].id+'{animation:imagik-animation-shuffle-right_2 '+d+'s '+ease+' '+del+'s 1 normal both running;}';
+                    if ( !animations['animation-'+self.el.id+'-shuffle-right_1'] )
+                    {
+                        animations['animation-'+self.el.id+'-shuffle-right_1'] = '@keyframes imagik-animation-'+self.el.id+'-shuffle-right_1{'+transition._steps[0].map(function(step, n){
+                            return String(100*n/(transition._steps[0].length-1))+'%{'+$css(translate(step, p[0]))+'}';
+                        }).join("\n")+'}';
+                    }
+                    if ( !animations['animation-'+self.el.id+'-shuffle-right_2'] )
+                    {
+                        animations['animation-'+self.el.id+'-shuffle-right_2'] = '@keyframes imagik-animation-'+self.el.id+'-shuffle-right_2{'+transition._steps[1].map(function(step, n){
+                            return String(100*n/(transition._steps[1].length-1))+'%{'+$css(translate(step, p[0]))+'}';
+                        }).join("\n")+'}';
+                    }
+                    style += "\n" + '#'+p[i].piece.childNodes[0].id+'{animation:imagik-animation-'+self.el.id+'-shuffle-right_1 '+d+'s '+ease+' '+del+'s 1 normal both running;}';
+                    style += "\n" + '#'+p[i].piece.childNodes[1].id+'{animation:imagik-animation-'+self.el.id+'-shuffle-right_2 '+d+'s '+ease+' '+del+'s 1 normal both running;}';
                 }
                 else
                 {
-                    if ( temp.animation1 && temp.animation2 )
+                    if ( transition.animation1 && transition.animation2 )
                     {
                         if ( odd )
                         {
-                            style += "\n" + '#'+p[i].piece.id+'{animation:imagik-animation-'+temp.animation1+' '+d+'s '+ease+' '+del+'s 1 '+(temp.reverse?'reverse both':'normal both')+' running;}';
+                            style += "\n" + '#'+p[i].piece.id+selector+'{animation:imagik-animation-'+transition.animation1+' '+d+'s '+ease+' '+del+'s 1 '+(transition.reverse?'reverse both':'normal both')+' running;}';
                         }
                         else
                         {
-                            style += "\n" + '#'+p[i].piece.id+'{animation:imagik-animation-'+temp.animation2+' '+d+'s '+ease+' '+del+'s 1 '+(temp.reverse?'reverse both':'normal both')+' running;}';
+                            style += "\n" + '#'+p[i].piece.id+selector+'{animation:imagik-animation-'+transition.animation2+' '+d+'s '+ease+' '+del+'s 1 '+(transition.reverse?'reverse both':'normal both')+' running;}';
                         }
                     }
                     else
                     {
-                        style += "\n" + '#'+p[i].piece.id+'{animation:imagik-animation-'+temp.animation+' '+d+'s '+ease+' '+del+'s 1 '+(temp.reverse?'reverse both':'normal both')+' running;}';
+                        style += "\n" + '#'+p[i].piece.id+selector+'{animation:imagik-animation-'+transition.animation+' '+d+'s '+ease+' '+del+'s 1 '+(transition.reverse?'reverse both':'normal both')+' running;}';
                     }
                 }
             }
-            else if ( is_array(temp.steps) && 2<=temp.steps.length )
+            else if ( is_array(transition.steps1) && 2<=transition.steps1.length && is_array(transition.steps2) && 2<=transition.steps2.length )
             {
-                style += "\n" + '#'+p[i].piece.id+'{animation:imagik-animation-'+self.id+' '+d+'s '+ease+' '+del+'s 1 normal both running;}';
+                if ( odd )
+                {
+                    style += "\n" + '#'+p[i].piece.id+selector+'{animation:imagik-animation-'+self.el.id+'-odd '+d+'s '+ease+' '+del+'s 1 normal both running;}';
+                }
+                else
+                {
+                    style += "\n" + '#'+p[i].piece.id+selector+'{animation:imagik-animation-'+self.el.id+'-even '+d+'s '+ease+' '+del+'s 1 normal both running;}';
+                }
             }
-            else if ( temp.end && (temp.start || (temp.start1 && temp.start2)) )
+            else if ( is_array(transition.steps) && 2<=transition.steps.length )
             {
-                if ( temp.start1 && temp.start2 )
+                style += "\n" + '#'+p[i].piece.id+selector+'{animation:imagik-animation-'+self.el.id+' '+d+'s '+ease+' '+del+'s 1 normal both running;}';
+            }
+            else if ( transition.end && (transition.start || (transition.start1 && transition.start2)) )
+            {
+                if ( transition.start1 && transition.start2 )
                 {
                     if ( odd )
                     {
-                        style += "\n" + '#'+p[i].piece.id+'{animation:imagik-animation-'+self.id+'-odd '+d+'s '+ease+' '+del+'s 1 normal both running;}';
+                        style += "\n" + '#'+p[i].piece.id+selector+'{animation:imagik-animation-'+self.el.id+'-odd '+d+'s '+ease+' '+del+'s 1 normal both running;}';
                     }
                     else
                     {
-                        style += "\n" + '#'+p[i].piece.id+'{animation:imagik-animation-'+self.id+'-even '+d+'s '+ease+' '+del+'s 1 normal both running;}';
+                        style += "\n" + '#'+p[i].piece.id+selector+'{animation:imagik-animation-'+self.el.id+'-even '+d+'s '+ease+' '+del+'s 1 normal both running;}';
                     }
                 }
                 else
                 {
-                    style += "\n" + '#'+p[i].piece.id+'{animation:imagik-animation-'+self.id+' '+d+'s '+ease+' '+del+'s 1 normal both running;}';
+                    style += "\n" + '#'+p[i].piece.id+selector+'{animation:imagik-animation-'+self.el.id+' '+d+'s '+ease+' '+del+'s 1 normal both running;}';
                 }
             }
             odd = !odd;
         }
-        $addClass(nextimg, 'imagik-fx-'+lastfx.transition);
+        $addClass(animationLayer, 'imagik-fx-'+lastfx.transition);
         for(i in animations)
         {
             if ( HAS.call(animations, i) )
                 style = "\n" + animations[i] + style;
         }
         $style(self.style, style);
-        $ev(lastfx.transition==="fade-zoom"||lastfx.transition==="shuffle-left"||lastfx.transition==="shuffle-right" ? evtCarrier.firstChild : evtCarrier, 'animationend', endHandler);
-        //setTimeout(function( ){endTransition();}, 1000*fxi.duration+20);
+        $ev(lastfx.transition==="fade-zoom" ? evtCarrier.firstChild.firstChild : (lastfx.transition==="shuffle-left"||lastfx.transition==="shuffle-right" ? evtCarrier.firstChild : evtCarrier), 'animationend', endHandler);
 
         return self;
     };
@@ -1058,14 +1077,14 @@ function Imagik( el, options )
         hook(self.id, false);
         if ( p2!=null ) p2 = destroy(p2);
         if ( p!=null ) p = destroy(p);
-        $remove(holder);
-        $empty(nextimg);
+        $empty(animationLayer);
         $empty(holder);
-        holder = null;
-        thisimg = null;
-        nextimg = null;
-        imgs = null;
+        $remove(holder);
         $remove(self.style);
+        holder = null;
+        imageLayer = null;
+        animationLayer = null;
+        imgs = null;
         self.style = null;
         self.options = null;
         self.el = null;
@@ -1080,186 +1099,453 @@ Imagik.Static = {
 
     transitions: {
         "fold-left":{
+            composite:true,
             rows:1,
             columns:1,
             steps: [
                 {
-                    //"transform-origin":"0 center",
-                    transform:"rotateY(0deg) translate3d(0,0,X(W)px)"
+                    transform:"translate3d(0,0,X(W)px) rotateY(0deg)"
                 }
                 ,{
-                    transform:"rotateY(4.5deg) translate3d(0,0,$(0.715*X(W))px)"
+                    transform:"translate3d(0,0,$(0.7125*X(W))px) rotateY(4.5deg)"
                 }
                 ,{
-                    transform:"rotateY(9deg) translate3d(0,0,$(0.46*X(W))px)"
+                    transform:"translate3d(0,0,$(0.45*X(W))px) rotateY(9deg)"
                 }
                 ,{
-                    transform:"rotateY(13.5deg) translate3d(0,0,$(0.235*X(W))px)"
+                    transform:"translate3d(0,0,$(0.2125*X(W))px) rotateY(13.5deg)"
                 }
                 ,{
-                    transform:"rotateY(18deg) translate3d(0,0,$(0.04*X(W))px)"
+                    transform:"translate3d(0,0,$(0*X(W))px) rotateY(18deg)"
                 }
                 ,{
-                    transform:"rotateY(22.5deg) translate3d(0,0,$(-0.125*X(W))px)"
+                    transform:"translate3d(0,0,$(-0.1875*X(W))px) rotateY(22.5deg)"
                 }
                 ,{
-                    transform:"rotateY(27deg) translate3d(0,0,$(-0.26*X(W))px)"
+                    transform:"translate3d(0,0,$(-0.35*X(W))px) rotateY(27deg)"
                 }
                 ,{
-                    transform:"rotateY(31.5deg) translate3d(0,0,$(-0.365*X(W))px)"
+                    transform:"translate3d(0,0,$(-0.4875*X(W))px) rotateY(31.5deg)"
                 }
                 ,{
-                    transform:"rotateY(36deg) translate3d(0,0,$(-0.44*X(W))px)"
+                    transform:"translate3d(0,0,$(-0.6*X(W))px) rotateY(36deg)"
                 }
                 ,{
-                    transform:"rotateY(40.5deg) translate3d(0,0,$(-0.485*X(W))px)"
+                    transform:"translate3d(0,0,$(-0.6875*X(W))px) rotateY(40.5deg)"
                 }
                 ,{
-                    transform:"rotateY(45deg) translate3d(0,0,$(-0.5*X(W))px)"
+                    transform:"translate3d(0,0,$(-0.75*X(W))px) rotateY(45deg)"
                 }
                 ,{
-                    transform:"rotateY(49.5deg) translate3d(0,0,$(-0.485*X(W))px)"
+                    transform:"translate3d(0,0,$(-0.7875*X(W))px) rotateY(49.5deg)"
                 }
                 ,{
-                    transform:"rotateY(54deg) translate3d(0,0,$(-0.44*X(W))px)"
+                    transform:"translate3d(0,0,$(-0.8*X(W))px) rotateY(54deg)"
                 }
                 ,{
-                    transform:"rotateY(58.5deg) translate3d(0,0,$(-0.365*X(W))px)"
+                    transform:"translate3d(0,0,$(-0.7875*X(W))px) rotateY(58.5deg)"
                 }
                 ,{
-                    transform:"rotateY(63deg) translate3d(0,0,$(-0.26*X(W))px)"
+                    transform:"translate3d(0,0,$(-0.75*X(W))px) rotateY(63deg)"
                 }
                 ,{
-                    transform:"rotateY(67.5deg) translate3d(0,0,$(-0.125*X(W))px)"
+                    transform:"translate3d(0,0,$(-0.6875*X(W))px) rotateY(67.5deg)"
                 }
                 ,{
-                    transform:"rotateY(72deg) translate3d(0,0,$(0.04*X(W))px)"
+                    transform:"translate3d(0,0,$(-0.6*X(W))px) rotateY(72deg)"
                 }
                 ,{
-                    transform:"rotateY(76.5deg) translate3d(0,0,$(0.235*X(W))px)"
+                    transform:"translate3d(0,0,$(-0.4875*X(W))px) rotateY(76.5deg)"
                 }
                 ,{
-                    transform:"rotateY(81deg) translate3d(0,0,$(0.46*X(W))px)"
+                    transform:"translate3d(0,0,$(-0.35*X(W))px) rotateY(81deg)"
                 }
                 ,{
-                    transform:"rotateY(85.5deg) translate3d(0,0,$(0.715*X(W))px)"
+                    transform:"translate3d(0,0,$(-0.1875*X(W))px) rotateY(85.5deg)"
                 }
                 ,{
-                    transform:"rotateY(90deg) translate3d(0,0,X(W)px)"
+                    transform:"translate3d(0,0,0) rotateY(90deg)"
                 }
             ]
         }
         ,"fold-right":{
+            composite:true,
             rows:1,
             columns:1,
             steps: [
                 {
-                    //"transform-origin":"100% center",
-                    transform:"rotateY(0deg) translate3d(0,0,X(W)px)"
+                    transform:"translate3d(0,0,X(W)px) rotateY(0deg)"
                 }
                 ,{
-                    transform:"rotateY(-4.5deg) translate3d(0,0,$(0.715*X(W))px)"
+                    transform:"translate3d(0,0,$(0.7125*X(W))px) rotateY(-4.5deg)"
                 }
                 ,{
-                    transform:"rotateY(-9deg) translate3d(0,0,$(0.46*X(W))px)"
+                    transform:"translate3d(0,0,$(0.45*X(W))px) rotateY(-9deg)"
                 }
                 ,{
-                    transform:"rotateY(-13.5deg) translate3d(0,0,$(0.235*X(W))px)"
+                    transform:"translate3d(0,0,$(0.2125*X(W))px) rotateY(-13.5deg)"
                 }
                 ,{
-                    transform:"rotateY(-18deg) translate3d(0,0,$(0.04*X(W))px)"
+                    transform:"translate3d(0,0,$(0*X(W))px) rotateY(-18deg)"
                 }
                 ,{
-                    transform:"rotateY(-22.5deg) translate3d(0,0,$(-0.125*X(W))px)"
+                    transform:"translate3d(0,0,$(-0.1875*X(W))px) rotateY(-22.5deg)"
                 }
                 ,{
-                    transform:"rotateY(-27deg) translate3d(0,0,$(-0.26*X(W))px)"
+                    transform:"translate3d(0,0,$(-0.35*X(W))px) rotateY(-27deg)"
                 }
                 ,{
-                    transform:"rotateY(-31.5deg) translate3d(0,0,$(-0.365*X(W))px)"
+                    transform:"translate3d(0,0,$(-0.4875*X(W))px) rotateY(-31.5deg)"
                 }
                 ,{
-                    transform:"rotateY(-36deg) translate3d(0,0,$(-0.44*X(W))px)"
+                    transform:"translate3d(0,0,$(-0.6*X(W))px) rotateY(-36deg)"
                 }
                 ,{
-                    transform:"rotateY(-40.5deg) translate3d(0,0,$(-0.485*X(W))px)"
+                    transform:"translate3d(0,0,$(-0.6875*X(W))px) rotateY(-40.5deg)"
                 }
                 ,{
-                    transform:"rotateY(-45deg) translate3d(0,0,$(-0.5*X(W))px)"
+                    transform:"translate3d(0,0,$(-0.75*X(W))px) rotateY(-45deg)"
                 }
                 ,{
-                    transform:"rotateY(-49.5deg) translate3d(0,0,$(-0.485*X(W))px)"
+                    transform:"translate3d(0,0,$(-0.7875*X(W))px) rotateY(-49.5deg)"
                 }
                 ,{
-                    transform:"rotateY(-54deg) translate3d(0,0,$(-0.44*X(W))px)"
+                    transform:"translate3d(0,0,$(-0.8*X(W))px) rotateY(-54deg)"
                 }
                 ,{
-                    transform:"rotateY(-58.5deg) translate3d(0,0,$(-0.365*X(W))px)"
+                    transform:"translate3d(0,0,$(-0.7875*X(W))px) rotateY(-58.5deg)"
                 }
                 ,{
-                    transform:"rotateY(-63deg) translate3d(0,0,$(-0.26*X(W))px)"
+                    transform:"translate3d(0,0,$(-0.75*X(W))px) rotateY(-63deg)"
                 }
                 ,{
-                    transform:"rotateY(-67.5deg) translate3d(0,0,$(-0.125*X(W))px)"
+                    transform:"translate3d(0,0,$(-0.6875*X(W))px) rotateY(-67.5deg)"
                 }
                 ,{
-                    transform:"rotateY(-72deg) translate3d(0,0,$(0.04*X(W))px)"
+                    transform:"translate3d(0,0,$(-0.6*X(W))px) rotateY(-72deg)"
                 }
                 ,{
-                    transform:"rotateY(-76.5deg) translate3d(0,0,$(0.235*X(W))px)"
+                    transform:"translate3d(0,0,$(-0.4875*X(W))px) rotateY(-76.5deg)"
                 }
                 ,{
-                    transform:"rotateY(-81deg) translate3d(0,0,$(0.46*X(W))px)"
+                    transform:"translate3d(0,0,$(-0.35*X(W))px) rotateY(-81deg)"
                 }
                 ,{
-                    transform:"rotateY(-85.5deg) translate3d(0,0,$(0.715*X(W))px)"
+                    transform:"translate3d(0,0,$(-0.1875*X(W))px) rotateY(-85.5deg)"
                 }
                 ,{
-                    transform:"rotateY(-90deg) translate3d(0,0,X(W)px)"
+                    transform:"translate3d(0,0,0) rotateY(-90deg)"
                 }
             ]
         }
         ,"shuffle-left":{
+            composite:true,
             rows:1,
             columns:1,
-            animation: "shuffle-left"
+            animation:true,
+            _steps: [[
+                /* Bezier Through (x=25%,rotY=60deg) */
+                {
+                    transform:"translate3d(0,0,0) rotateY(0deg)"
+                }
+                ,{
+                    transform:"translate3d(-4.75%,0,$(-0.05*1.5*X(W))px) rotateY(11.4deg)"
+                }
+                ,{
+                    transform:"translate3d(-9%,0,$(-0.10*1.5*X(W))px) rotateY(21.6deg)"
+                }
+                ,{
+                    transform:"translate3d(-12.75%,0,$(-0.15*1.5*X(W))px) rotateY(30.6deg)"
+                }
+                ,{
+                    transform:"translate3d(-16%,0,$(-0.20*1.5*X(W))px) rotateY(38.4deg)"
+                }
+                ,{
+                    transform:"translate3d(-18.75%,0,$(-0.25*1.5*X(W))px) rotateY(45deg)"
+                }
+                ,{
+                    transform:"translate3d(-21%,0,$(-0.30*1.5*X(W))px) rotateY(50.4deg)"
+                }
+                ,{
+                    transform:"translate3d(-22.75%,0,$(-0.35*1.5*X(W))px) rotateY(54.6deg)"
+                }
+                ,{
+                    transform:"translate3d(-24%,0,$(-0.40*1.5*X(W))px) rotateY(57.6deg)"
+                }
+                ,{
+                    transform:"translate3d(-24.75%,0,$(-0.45*1.5*X(W))px) rotateY(59.4deg)"
+                }
+                ,{
+                    transform:"translate3d(-25%,0,$(-0.50*1.5*X(W))px) rotateY(60deg)"
+                }
+                ,{
+                    transform:"translate3d(-24.75%,0,$(-0.55*1.5*X(W))px) rotateY(59.4deg)"
+                }
+                ,{
+                    transform:"translate3d(-24%,0,$(-0.60*1.5*X(W))px) rotateY(57.6deg)"
+                }
+                ,{
+                    transform:"translate3d(-22.75%,0,$(-0.65*1.5*X(W))px) rotateY(54.6deg)"
+                }
+                ,{
+                    transform:"translate3d(-21%,0,$(-0.70*1.5*X(W))px) rotateY(50.4deg)"
+                }
+                ,{
+                    transform:"translate3d(-18.75%,0,$(-0.75*1.5*X(W))px) rotateY(45deg)"
+                }
+                ,{
+                    transform:"translate3d(-16%,0,$(-0.80*1.5*X(W))px) rotateY(38.4deg)"
+                }
+                ,{
+                    transform:"translate3d(-12.75%,0,$(-0.85*1.5*X(W))px) rotateY(30.6deg)"
+                }
+                ,{
+                    transform:"translate3d(-9%,0,$(-0.90*1.5*X(W))px) rotateY(21.6deg)"
+                }
+                ,{
+                    transform:"translate3d(-4.75%,0,$(-0.95*1.5*X(W))px) rotateY(11.4deg)"
+                }
+                ,{
+                    transform:"translate3d(0,0,$(-1.5*X(W))px) rotateY(0deg)"
+                }],[
+                /* Bezier Through (x=25%,rotY=60deg) */
+                {
+                    transform:"translate3d(0,0,$(-1.5*X(W))px) rotateY(0deg)"
+                }
+                ,{
+                    transform:"translate3d(4.75%,0,$(-0.95*1.5*X(W))px) rotateY(-11.4deg)"
+                }
+                ,{
+                    transform:"translate3d(9%,0,$(-0.90*1.5*X(W))px) rotateY(-21.6deg)"
+                }
+                ,{
+                    transform:"translate3d(12.75%,0,$(-0.85*1.5*X(W))px) rotateY(-30.6deg)"
+                }
+                ,{
+                    transform:"translate3d(16%,0,$(-0.80*1.5*X(W))px) rotateY(-38.4deg)"
+                }
+                ,{
+                    transform:"translate3d(18.75%,0,$(-0.75*1.5*X(W))px) rotateY(-45deg)"
+                }
+                ,{
+                    transform:"translate3d(21%,0,$(-0.70*1.5*X(W))px) rotateY(-50.4deg)"
+                }
+                ,{
+                    transform:"translate3d(22.75%,0,$(-0.65*1.5*X(W))px) rotateY(-54.6deg)"
+                }
+                ,{
+                    transform:"translate3d(24%,0,$(-0.60*1.5*X(W))px) rotateY(-57.6deg)"
+                }
+                ,{
+                    transform:"translate3d(24.75%,0,$(-0.55*1.5*X(W))px) rotateY(-59.4deg)"
+                }
+                ,{
+                    transform:"translate3d(25%,0,$(-0.50*1.5*X(W))px) rotateY(-60deg)"
+                }
+                ,{
+                    transform:"translate3d(24.75%,0,$(-0.45*1.5*X(W))px) rotateY(-59.4deg)"
+                }
+                ,{
+                    transform:"translate3d(24%,0,$(-0.40*1.5*X(W))px) rotateY(-57.6deg)"
+                }
+                ,{
+                    transform:"translate3d(22.75%,0,$(-0.35*1.5*X(W))px) rotateY(-54.6deg)"
+                }
+                ,{
+                    transform:"translate3d(21%,0,$(-0.30*1.5*X(W))px) rotateY(-50.4deg)"
+                }
+                ,{
+                    transform:"translate3d(18.75%,0,$(-0.25*1.5*X(W))px) rotateY(-45deg)"
+                }
+                ,{
+                    transform:"translate3d(16%,0,$(-0.20*1.5*X(W))px) rotateY(-38.4deg)"
+                }
+                ,{
+                    transform:"translate3d(12.75%,0,$(-0.15*1.5*X(W))px) rotateY(-30.6deg)"
+                }
+                ,{
+                    transform:"translate3d(9%,0,$(-0.10*1.5*X(W))px) rotateY(-21.6deg)"
+                }
+                ,{
+                    transform:"translate3d(4.75%,0,$(-0.05*1.5*X(W))px) rotateY(-11.4deg)"
+                }
+                ,{
+                    transform:"translate3d(0,0,0) rotateY(0deg)"
+                }
+            ]]
         }
         ,"shuffle-right":{
+            composite:true,
             rows:1,
             columns:1,
-            animation: "shuffle-right"
+            animation:true,
+            _steps: [[
+                /* Bezier Through (x=25%,rotY=60deg) */
+                {
+                    transform:"translate3d(0,0,0) rotateY(0deg)"
+                }
+                ,{
+                    transform:"translate3d(4.75%,0,$(-0.05*1.5*X(W))px) rotateY(-11.4deg)"
+                }
+                ,{
+                    transform:"translate3d(9%,0,$(-0.10*1.5*X(W))px) rotateY(-21.6deg)"
+                }
+                ,{
+                    transform:"translate3d(12.75%,0,$(-0.15*1.5*X(W))px) rotateY(-30.6deg)"
+                }
+                ,{
+                    transform:"translate3d(16%,0,$(-0.20*1.5*X(W))px) rotateY(-38.4deg)"
+                }
+                ,{
+                    transform:"translate3d(18.75%,0,$(-0.25*1.5*X(W))px) rotateY(-45deg)"
+                }
+                ,{
+                    transform:"translate3d(21%,0,$(-0.30*1.5*X(W))px) rotateY(-50.4deg)"
+                }
+                ,{
+                    transform:"translate3d(22.75%,0,$(-0.35*1.5*X(W))px) rotateY(-54.6deg)"
+                }
+                ,{
+                    transform:"translate3d(24%,0,$(-0.40*1.5*X(W))px) rotateY(-57.6deg)"
+                }
+                ,{
+                    transform:"translate3d(24.75%,0,$(-0.45*1.5*X(W))px) rotateY(-59.4deg)"
+                }
+                ,{
+                    transform:"translate3d(25%,0,$(-0.50*1.5*X(W))px) rotateY(-60deg)"
+                }
+                ,{
+                    transform:"translate3d(24.75%,0,$(-0.55*1.5*X(W))px) rotateY(-59.4deg)"
+                }
+                ,{
+                    transform:"translate3d(24%,0,$(-0.60*1.5*X(W))px) rotateY(-57.6deg)"
+                }
+                ,{
+                    transform:"translate3d(22.75%,0,$(-0.65*1.5*X(W))px) rotateY(-54.6deg)"
+                }
+                ,{
+                    transform:"translate3d(21%,0,$(-0.70*1.5*X(W))px) rotateY(-50.4deg)"
+                }
+                ,{
+                    transform:"translate3d(18.75%,0,$(-0.75*1.5*X(W))px) rotateY(-45deg)"
+                }
+                ,{
+                    transform:"translate3d(16%,0,$(-0.80*1.5*X(W))px) rotateY(-38.4deg)"
+                }
+                ,{
+                    transform:"translate3d(12.75%,0,$(-0.85*1.5*X(W))px) rotateY(-30.6deg)"
+                }
+                ,{
+                    transform:"translate3d(9%,0,$(-0.90*1.5*X(W))px) rotateY(-21.6deg)"
+                }
+                ,{
+                    transform:"translate3d(4.75%,0,$(-0.95*1.5*X(W))px) rotateY(-11.4deg)"
+                }
+                ,{
+                    transform:"translate3d(0,0,$(-1.5*X(W))px) rotateY(0deg)"
+                }],[
+                /* Bezier Through (x=25%,rotY=60deg) */
+                {
+                    transform:"translate3d(0,0,$(-1.5*X(W))px) rotateY(0deg)"
+                }
+                ,{
+                    transform:"translate3d(-4.75%,0,$(-0.95*1.5*X(W))px) rotateY(11.4deg)"
+                }
+                ,{
+                    transform:"translate3d(-9%,0,$(-0.90*1.5*X(W))px) rotateY(21.6deg)"
+                }
+                ,{
+                    transform:"translate3d(-12.75%,0,$(-0.85*1.5*X(W))px) rotateY(30.6deg)"
+                }
+                ,{
+                    transform:"translate3d(-16%,0,$(-0.80*1.5*X(W))px) rotateY(38.4deg)"
+                }
+                ,{
+                    transform:"translate3d(-18.75%,0,$(-0.75*1.5*X(W))px) rotateY(45deg)"
+                }
+                ,{
+                    transform:"translate3d(-21%,0,$(-0.70*1.5*X(W))px) rotateY(50.4deg)"
+                }
+                ,{
+                    transform:"translate3d(-22.75%,0,$(-0.65*1.5*X(W))px) rotateY(54.6deg)"
+                }
+                ,{
+                    transform:"translate3d(-24%,0,$(-0.60*1.5*X(W))px) rotateY(57.6deg)"
+                }
+                ,{
+                    transform:"translate3d(-24.75%,0,$(-0.55*1.5*X(W))px) rotateY(59.4deg)"
+                }
+                ,{
+                    transform:"translate3d(-25%,0,$(-0.50*1.5*X(W))px) rotateY(60deg)"
+                }
+                ,{
+                    transform:"translate3d(-24.75%,0,$(-0.45*1.5*X(W))px) rotateY(59.4deg)"
+                }
+                ,{
+                    transform:"translate3d(-24%,0,$(-0.40*1.5*X(W))px) rotateY(54.6deg)"
+                }
+                ,{
+                    transform:"translate3d(-22.75%,0,$(-0.35*1.5*X(W))px) rotateY(54.6deg)"
+                }
+                ,{
+                    transform:"translate3d(-21%,0,$(-0.30*1.5*X(W))px) rotateY(50.4deg)"
+                }
+                ,{
+                    transform:"translate3d(-18.75%,0,$(-0.25*1.5*X(W))px) rotateY(45deg)"
+                }
+                ,{
+                    transform:"translate3d(-16%,0,$(-0.20*1.5*X(W))px) rotateY(38.4deg)"
+                }
+                ,{
+                    transform:"translate3d(-12.75%,0,$(-0.15*1.5*X(W))px) rotateY(30.6deg)"
+                }
+                ,{
+                    transform:"translate3d(-9%,0,$(-0.10*1.5*X(W))px) rotateY(21.6deg)"
+                }
+                ,{
+                    transform:"translate3d(-4.75%,0,$(-0.05*1.5*X(W))px) rotateY(11.4deg)"
+                }
+                ,{
+                    transform:"translate3d(0,0,0) rotateY(0deg)"
+                }
+            ]]
         }
         ,"rotate":{
-            animation: "rotate"
+            animation:"rotate"
         }
         ,"rotate-reverse":{
             reverse:true,
-            animation: "rotate"
+            animation:"rotate"
         }
         ,"flip-horizontal":{
-            animation: "flip-horizontal"
+            composite:true,
+            animation:"flip-horizontal"
         }
         ,"flip-vertical":{
-            animation: "flip-vertical"
+            composite:true,
+            animation:"flip-vertical"
         }
         ,"iris":{
             rows:1,
             columns:1,
-            animation: "iris"
+            animation:"iris",
+            selector:">.imagik-tile-inside"
         }
         ,"iris-reverse":{
             reverse:true,
             rows:1,
             columns:1,
-            animation: "iris"
+            animation:"iris",
+            selector:">.imagik-tile-inside"
         }
         ,"fade":{
-            animation: "fade"
+            animation:"fade"
         }
         ,"fade-zoom":{
+            composite:true,
             rows:1,
             columns:1,
-            animation: "fade-zoom"
+            animation:"fade-zoom"
         }
         ,"move-down":{
             animation:"move-down"
@@ -1302,48 +1588,54 @@ Imagik.Static = {
             animation2:"move-fade-left"
         }
         ,"fade-grow":{
-            start:{opacity:"0",width:"0%",height:"0%"},
-            end:{opacity:"1",width:"X(w)%",height:"X(h)%"}
+            animation:"fade-grow",
+            selector:">.imagik-tile-inside"
         }
         ,"fade-shrink":{
             reverse:true,
-            start:{opacity:"1",width:"X(w)%",height:"X(h)%"},
-            end:{opacity:"0",width:"0%",height:"0%"}
+            animation:"fade-grow",
+            selector:">.imagik-tile-inside"
+        }
+        ,"grow":{
+            animation:"grow",
+            selector:">.imagik-tile-inside"
         }
         ,"shrink":{
             reverse:true,
-            start:{width:"X(w)%",height:"X(h)%"},
-            end:{width:"0%",height:"0%"}
+            animation:"grow",
+            selector:">.imagik-tile-inside"
         }
-        ,"grow":{
-            start:{width:"0%",height:"0%"},
-            end:{width:"X(w)%",height:"X(h)%"}
+        ,"grow-horizontal":{
+            rows:1,
+            animation:"grow-horizontal",
+            selector:">.imagik-tile-inside"
         }
         ,"shrink-horizontal":{
             reverse:true,
-            start:{width:"X(w)%"},
-            end:{width:"0%"}
-        }
-        ,"grow-horizontal":{
-            start:{width:"0%"},
-            end:{width:"X(w)%"}
-        }
-        ,"grow-fade-vertical":{
-            start:{height:"0%",opacity:"0"},
-            end:{height:"X(h)%",opacity:"1"}
-        }
-        ,"grow-fade-horizontal":{
-            start:{width:"0%",opacity:"0"},
-            end:{width:"X(w)%",opacity:"1"}
+            rows:1,
+            animation:"grow-horizontal",
+            selector:">.imagik-tile-inside"
         }
         ,"grow-vertical":{
-            start:{height:"0%"},
-            end:{height:"X(h)%"}
+            columns:1,
+            animation:"grow-vertical",
+            selector:">.imagik-tile-inside"
         }
         ,"shrink-vertical":{
             reverse:true,
-            start:{height:"X(h)%"},
-            end:{height:"0%"}
+            columns:1,
+            animation:"grow-vertical",
+            selector:">.imagik-tile-inside"
+        }
+        ,"fade-grow-horizontal":{
+            rows:1,
+            animation:"fade-grow-horizontal",
+            selector:">.imagik-tile-inside"
+        }
+        ,"fade-grow-vertical":{
+            columns:1,
+            animation:"fade-grow-vertical",
+            selector:">.imagik-tile-inside"
         }
         ,"fly-top-left":{
             rows:1,
@@ -1386,60 +1678,52 @@ Imagik.Static = {
             animation:"fly-bottom"
         }
         ,"pan-top-left":{
+            composite:true,
             rows:1,
             columns:1,
-            animation:"pan-top-left",
-            current:{left:"0%",top:"0%",width:"50%",height:"50%"},
-            next:{left:"50%",top:"50%",width:"50%",height:"50%"}
+            animation:"pan-top-left"
         }
         ,"pan-top-right":{
+            composite:true,
             rows:1,
             columns:1,
-            animation:"pan-top-right",
-            current:{left:"0%",top:"0%",width:"50%",height:"50%"},
-            next:{left:"-50%",top:"50%",width:"50%",height:"50%"}
+            animation:"pan-top-right"
         }
         ,"pan-bottom-right":{
+            composite:true,
             rows:1,
             columns:1,
-            animation:"pan-bottom-right",
-            current:{left:"0%",top:"0%",width:"50%",height:"50%"},
-            next:{left:"-50%",top:"-50%",width:"50%",height:"50%"}
+            animation:"pan-bottom-right"
         }
         ,"pan-bottom-left":{
+            composite:true,
             rows:1,
             columns:1,
-            animation:"pan-bottom-left",
-            current:{left:"0%",top:"0%",width:"50%",height:"50%"},
-            next:{left:"-50%",top:"50%",width:"50%",height:"50%"}
+            animation:"pan-bottom-left"
         }
         ,"pan-left":{
+            composite:true,
             rows:1,
             columns:1,
-            animation:"pan-left",
-            current:{left:"0%",top:"0%",width:"50%",height:"50%"},
-            next:{left:"50%",top:"0%",width:"50%",height:"50%"}
+            animation:"pan-left"
         }
         ,"pan-right":{
+            composite:true,
             rows:1,
             columns:1,
-            animation:"pan-right",
-            current:{left:"0%",top:"0%",width:"50%",height:"50%"},
-            next:{left:"-50%",top:"0%",width:"50%",height:"50%"}
+            animation:"pan-right"
         }
         ,"pan-top":{
+            composite:true,
             rows:1,
             columns:1,
-            animation:"pan-top",
-            current:{left:"0%",top:"0%",width:"50%",height:"50%"},
-            next:{left:"0%",top:"50%",width:"50%",height:"50%"}
+            animation:"pan-top"
         }
         ,"pan-bottom":{
+            composite:true,
             rows:1,
             columns:1,
-            animation:"pan-bottom",
-            current:{left:"0%",top:"0%",width:"50%",height:"50%"},
-            next:{left:"0%",top:"-50%",width:"50%",height:"50%"}
+            animation:"pan-bottom"
         }
     }
 
@@ -1506,44 +1790,46 @@ Imagik.Static = {
 
     ,randomTransitions: [
          {transition:"flip-horizontal",ease:"ease-out-back",duration:1.5,overlap:0.9,rows:1,columns:1,order:"rows-first"}
-        ,{transition:"flip-horizontal",ease:"ease-out-back",duration:1.5,overlap:0.9,rows:8,columns:8,order:"spiral-top-left"}
-        ,{transition:"flip-horizontal",ease:"ease-out-back",duration:1.5,overlap:0.9,rows:8,columns:8,order:"diagonal-top-left"}
-        ,{transition:"flip-horizontal",ease:"ease-out-back",duration:1.5,overlap:0.9,rows:8,columns:8,order:"diagonal-bottom-right"}
-        ,{transition:"flip-horizontal",ease:"ease-out-back",duration:1.5,overlap:0.9,rows:8,columns:8,order:"random"}
+        ,{transition:"flip-horizontal",ease:"ease-out-back",duration:1.5,overlap:0.9,rows:1,columns:6,order:"random"}
+        ,{transition:"flip-horizontal",ease:"ease-out-back",duration:1.5,overlap:0.9,rows:6,columns:6,order:"spiral-top-left"}
+        ,{transition:"flip-horizontal",ease:"ease-out-back",duration:1.5,overlap:0.9,rows:6,columns:6,order:"diagonal-top-left"}
+        ,{transition:"flip-horizontal",ease:"ease-out-back",duration:1.5,overlap:0.9,rows:6,columns:6,order:"diagonal-bottom-right"}
+        ,{transition:"flip-horizontal",ease:"ease-out-back",duration:1.5,overlap:0.9,rows:6,columns:6,order:"random"}
         ,{transition:"flip-vertical",ease:"ease-out-back",duration:1.5,overlap:0.9,rows:1,columns:1,order:"rows-first"}
-        ,{transition:"flip-vertical",ease:"ease-out-back",duration:1.5,overlap:0.9,rows:8,columns:8,order:"spiral-top-left"}
-        ,{transition:"flip-vertical",ease:"ease-out-back",duration:1.5,overlap:0.9,rows:8,columns:8,order:"diagonal-top-left"}
-        ,{transition:"flip-vertical",ease:"ease-out-back",duration:1.5,overlap:0.9,rows:8,columns:8,order:"diagonal-bottom-right"}
-        ,{transition:"flip-vertical",ease:"ease-out-back",duration:1.5,overlap:0.9,rows:8,columns:8,order:"random"}
+        ,{transition:"flip-vertical",ease:"ease-out-back",duration:1.5,overlap:0.9,rows:6,columns:1,order:"random"}
+        ,{transition:"flip-vertical",ease:"ease-out-back",duration:1.5,overlap:0.9,rows:6,columns:6,order:"spiral-top-left"}
+        ,{transition:"flip-vertical",ease:"ease-out-back",duration:1.5,overlap:0.9,rows:6,columns:6,order:"diagonal-top-left"}
+        ,{transition:"flip-vertical",ease:"ease-out-back",duration:1.5,overlap:0.9,rows:6,columns:6,order:"diagonal-bottom-right"}
+        ,{transition:"flip-vertical",ease:"ease-out-back",duration:1.5,overlap:0.9,rows:6,columns:6,order:"random"}
         ,{transition:"shuffle-left",ease:"ease-in-out",duration:1.5,overlap:1,rows:1,columns:1,order:"rows-first"}
         ,{transition:"shuffle-right",ease:"ease-in-out",duration:1.5,overlap:1,rows:1,columns:1,order:"rows-first"}
         ,{transition:"fold-left",ease:"ease-in-out",duration:1.5,overlap:1,rows:1,columns:1,order:"rows-first"}
         ,{transition:"fold-right",ease:"ease-in-out",duration:1.5,overlap:1,rows:1,columns:1,order:"rows-first"}
-        ,{transition:"rotate",ease:"ease-out",duration:1.5,overlap:1,rows:8,columns:8,order:"columns-first"}
-        ,{transition:"rotate-reverse",ease:"ease-out",duration:1.5,overlap:1,rows:8,columns:8,order:"columns-first"}
+        ,{transition:"rotate",ease:"ease-out",duration:1.5,overlap:1,rows:6,columns:6,order:"columns-first"}
+        ,{transition:"rotate-reverse",ease:"ease-out",duration:1.5,overlap:1,rows:6,columns:6,order:"columns-first"}
         ,{transition:"iris",ease:"ease-out",duration:1.5,overlap:0.9,rows:1,columns:1,order:"rows-first"}
         ,{transition:"iris-reverse",ease:"ease-out",duration:1.5,overlap:0.9,rows:1,columns:1,order:"rows-first"}
         ,{transition:"fade-zoom",ease:"ease-out",duration:1.5,rows:1,columns:1,order:"rows-first"}
         ,{transition:"fade",ease:"ease-in",duration:1.5,overlap:0.9,rows:1,columns:1,order:"rows-first"}
-        ,{transition:"fade",ease:"ease-in",duration:1.5,overlap:0.9,rows:8,columns:8,order:"diagonal-top-left"}
-        ,{transition:"fade",ease:"ease-in",duration:1.5,overlap:0.9,rows:8,columns:8,order:"diagonal-bottom-right"}
-        ,{transition:"fade",ease:"ease-in",duration:1.5,overlap:0.9,rows:8,columns:8,order:"random"}
-        ,{transition:"fade",ease:"ease-in",duration:1.5,overlap:0.9,rows:8,columns:8,order:"spiral-top-left"}
-        ,{transition:"fade",ease:"ease-in",duration:1.5,overlap:0.9,rows:8,columns:8,order:"spiral-bottom-right"}
-        ,{transition:"fade",ease:"ease-in",duration:1.5,overlap:0.9,rows:8,columns:8,order:"left-right"}
-        ,{transition:"fade",ease:"ease-in",duration:1.5,overlap:0.9,rows:8,columns:8,order:"up-down"}
-        ,{transition:"grow-horizontal",ease:"ease-out",duration:1.5,overlap:0.9,rows:1,columns:8,order:"random"}
-        ,{transition:"grow-vertical",ease:"ease-out",duration:1.5,overlap:0.9,rows:8,columns:1,order:"random"}
-        ,{transition:"grow-fade-horizontal",ease:"ease-out",duration:1.5,overlap:0.9,rows:1,columns:8,order:"random"}
-        ,{transition:"grow-fade-vertical",ease:"ease-out",duration:1.5,overlap:0.9,rows:8,columns:1,order:"random"}
-        ,{transition:"grow",ease:"ease-out",duration:1.5,overlap:0.9,rows:8,columns:8,order:"rows-first"}
-        ,{transition:"shrink",ease:"ease-out",duration:1.5,overlap:1,rows:8,columns:8,order:"columns-first"}
-        ,{transition:"fade-shrink",ease:"ease-out",duration:1.5,overlap:0.9,rows:8,columns:8,order:"left-right"}
-        ,{transition:"fade-shrink",ease:"ease-out",duration:1.5,overlap:0.9,rows:8,columns:8,order:"diagonal-bottom-right"}
-        ,{transition:"move-left-right",ease:"ease-out-back",duration:1.5,overlap:0.8,rows:8,columns:1,order:"columns-first"}
-        ,{transition:"move-right",ease:"ease-out-back",duration:1.5,overlap:0.8,rows:8,columns:1,order:"columns-first"}
+        ,{transition:"fade",ease:"ease-in",duration:1.5,overlap:0.9,rows:6,columns:6,order:"diagonal-top-left"}
+        ,{transition:"fade",ease:"ease-in",duration:1.5,overlap:0.9,rows:6,columns:6,order:"diagonal-bottom-right"}
+        ,{transition:"fade",ease:"ease-in",duration:1.5,overlap:0.9,rows:6,columns:6,order:"random"}
+        ,{transition:"fade",ease:"ease-in",duration:1.5,overlap:0.9,rows:6,columns:6,order:"spiral-top-left"}
+        ,{transition:"fade",ease:"ease-in",duration:1.5,overlap:0.9,rows:6,columns:6,order:"spiral-bottom-right"}
+        ,{transition:"fade",ease:"ease-in",duration:1.5,overlap:0.9,rows:6,columns:6,order:"left-right"}
+        ,{transition:"fade",ease:"ease-in",duration:1.5,overlap:0.9,rows:6,columns:6,order:"up-down"}
+        ,{transition:"grow-horizontal",ease:"ease-out",duration:1.5,overlap:0.9,rows:1,columns:6,order:"random"}
+        ,{transition:"grow-vertical",ease:"ease-out",duration:1.5,overlap:0.9,rows:6,columns:1,order:"random"}
+        ,{transition:"fade-grow-horizontal",ease:"ease-out",duration:1.5,overlap:0.9,rows:1,columns:6,order:"random"}
+        ,{transition:"fade-grow-vertical",ease:"ease-out",duration:1.5,overlap:0.9,rows:6,columns:1,order:"random"}
+        ,{transition:"grow",ease:"ease-out",duration:1.5,overlap:0.9,rows:6,columns:6,order:"rows-first"}
+        ,{transition:"shrink",ease:"ease-out",duration:1.5,overlap:1,rows:6,columns:6,order:"columns-first"}
+        ,{transition:"fade-shrink",ease:"ease-out",duration:1.5,overlap:0.9,rows:6,columns:6,order:"left-right"}
+        ,{transition:"fade-shrink",ease:"ease-out",duration:1.5,overlap:0.9,rows:6,columns:6,order:"diagonal-bottom-right"}
+        ,{transition:"move-left-right",ease:"ease-out-back",duration:1.5,overlap:0.8,rows:6,columns:1,order:"columns-first"}
+        ,{transition:"move-right",ease:"ease-out-back",duration:1.5,overlap:0.8,rows:6,columns:1,order:"columns-first"}
         ,{transition:"move-up-down",ease:"ease-out-back",duration:1.5,overlap:0.9,rows:1,columns:8,order:"columns-first"}
-        ,{transition:"move-up",ease:"ease-out-back",duration:1.5,overlap:0.9,rows:1,columns:8,order:"columns-first"}
+        ,{transition:"move-up",ease:"ease-out-back",duration:1.5,overlap:0.9,rows:1,columns:6,order:"columns-first"}
         ,{transition:"fly-top-left",ease:"ease-out-back",duration:1.5,overlap:0.9,rows:1,columns:1,order:"columns-first"}
         ,{transition:"fly-bottom-right",ease:"ease-out-back",duration:1.5,overlap:0.9,rows:1,columns:1,order:"columns-first"}
         ,{transition:"fly-left",ease:"ease-out-back",duration:1.5,overlap:0.9,rows:1,columns:1,order:"columns-first"}

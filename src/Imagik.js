@@ -45,11 +45,12 @@ function debounce( fn, delay )
         }, delay);
     };
 }
-function extend( o1, o2 )
+function extend( o1, o2, ignore )
 {
+    ignore = is_array(ignore) ? ignore : [];
     for(var k in o2)
     {
-        if ( !HAS.call(o2, k) ) continue;
+        if ( !HAS.call(o2, k) || (-1!==ignore.indexOf(k)) ) continue;
         if ( is_array(o2[k]) )
             o1[k] = extend(is_array(o1[k]) ? o1[k] : new Array(o2[k].length), o2[k]);
         else if ( is_obj(o2[k]) )
@@ -786,13 +787,12 @@ function Imagik( el, options )
     clearPrev = function( ) {
         if ( evtCarrier )
         {
-            $ev(lastfx.transition==="fade-zoom" ? evtCarrier.firstChild.firstChild : (lastfx.transition==="shuffle-left"||lastfx.transition==="shuffle-right" ? evtCarrier.firstChild : evtCarrier), 'animationend', endHandler, false);
+            $ev(evtCarrier, 'animationend', endHandler, false);
             $empty(animationLayer);
             $removeClass(animationLayer, 'imagik-fx-'+lastfx.transition);
         }
         if ( p2!=null ) p2 = destroy(p2);
         if ( p!=null ) p = destroy(p);
-        lastfx = null;
         evtCarrier = null;
     };
 
@@ -816,7 +816,7 @@ function Imagik( el, options )
     };
 
     self.doTransition = function( dir ) {
-        var i, dd, fxi, transition, order, ease, r, c, ordobj, ngroups, d, sd, del, max, odd, animations = {}, selector;
+        var i, dd, fxi, transition, order, ease, r, c, ordobj, ngroups, d, sd, del, max, odd, animations = {}, str, selector;
 
         clearTimeout(timer);
         clearPrev();
@@ -852,10 +852,22 @@ function Imagik( el, options )
         }
 
         numpiec = p.length;
-        if ( transition.composite || (transition.current && transition.next) )
+        if ( transition.composite || transition.current || transition.next )
         {
             imageLayer.style.backgroundImage = 'none';
             p2 = tiles(imgs[ind[prevcurrent]], r, c, W, H);
+            if ( is_obj(transition.current) && is_array(transition.current.steps) && 2<=transition.current.steps.length )
+            {
+                animations['animation-'+self.el.id+'-current'] = '@keyframes imagik-animation-'+self.el.id+'-current{'+transition.current.steps.map(function(step, n){
+                    return String(100*n/(transition.current.steps.length-1))+'%{'+$css(translate(step, p[0]))+'}';
+                }).join("\n")+'}';
+            }
+            if ( is_obj(transition.next) && is_array(transition.next.steps) && 2<=transition.next.steps.length )
+            {
+                animations['animation-'+self.el.id+'-next'] = '@keyframes imagik-animation-'+self.el.id+'-next{'+transition.next.steps.map(function(step, n){
+                    return String(100*n/(transition.next.steps.length-1))+'%{'+$css(translate(step, p[0]))+'}';
+                }).join("\n")+'}';
+            }
             for(i=0;i<numpiec;i++)
             {
                 dd = $el('<div class="imagik-tile-wrapper"></div>');
@@ -865,17 +877,14 @@ function Imagik( el, options )
                 $append(dd, $addClass($addClass(p[i].piece, 'imagik-tile-next'), 'imagik-tile-'+p[i].i+'-'+p[i].j));
 
                 if ( is_obj(transition.current) )
-                    style += "\n" + '#'+p2[i].piece.id+'{'+$css(translate(extend({}, transition.current), p2[i]))+'}';
-                if ( is_obj(transition.next) )
-                    style += "\n" + '#'+p[i].piece.id+'{'+$css(translate(extend({}, transition.next), p[i]))+'}';
-
-                if ( fxi.transition==="fold-left" )
                 {
-                    p2[i].piece.style.transform = 'rotateY(0deg) translate3d(0,0,-'+W+'px)';
+                    str = $css(translate(extend({}, transition.current, ['animation','steps','selector','reverse']), p2[i]));
+                    if ( str.length ) style += "\n" + '#'+p2[i].piece.id+'{'+str+'}';
                 }
-                else if ( fxi.transition==="fold-right" )
+                if ( is_obj(transition.next) )
                 {
-                    p2[i].piece.style.transform = 'rotateY(0deg) translate3d(0,0,-'+W+'px)';
+                    str = $css(translate(extend({}, transition.next, ['animation','steps','selector','reverse']), p[i]));
+                    if ( str.length ) style += "\n" + '#'+p[i].piece.id+'{'+str+'}';
                 }
 
                 p2[i].piece = dd;
@@ -944,70 +953,23 @@ function Imagik( el, options )
             $append(animationLayer, p[i].piece);
             if ( !evtCarrier || max<=del )
             {
-                evtCarrier = selector.length ? ($$('#'+p[i].piece.id+selector, animationLayer)[0]||p[i].piece) : p[i].piece;
+                if ( transition.next && (transition.next.animation || transition.next.steps) )
+                    evtCarrier = transition.next.selector ? ($$('#'+p[i].piece.childNodes[1].id+transition.next.selector, animationLayer)[0]||p[i].piece.childNodes[1]) : p[i].piece.childNodes[1];
+                else if ( transition.current && (transition.current.animation || transition.current.steps) )
+                    evtCarrier = transition.current.selector ? ($$('#'+p[i].piece.childNodes[0].id+transition.current.selector, animationLayer)[0]||p[i].piece.childNodes[0]) : p[i].piece.childNodes[0];
+                else
+                    evtCarrier = selector.length ? ($$('#'+p[i].piece.id+selector, animationLayer)[0]||p[i].piece) : p[i].piece;
                 max = del;
             }
-            if ( transition.animation || (transition.animation1 && transition.animation2) )
+            if ( is_obj(transition.current) && (transition.current.animation || transition.current.steps) )
             {
-                if ( fxi.transition==="fade-zoom" )
-                {
-                    style += "\n" + '#'+p[i].piece.childNodes[0].id+'>.imagik-tile-inside{animation:imagik-animation-'+transition.animation+' '+d+'s '+ease+' '+del+'s 1 normal both running;}';
-                    style += "\n" + '#'+p[i].piece.childNodes[1].id+'>.imagik-tile-inside{animation:imagik-animation-'+transition.animation+' '+d+'s '+ease+' '+del+'s 1 reverse both running;}';
-                }
-                else if ( fxi.transition==="shuffle-left" )
-                {
-                    if ( !animations['animation-'+self.el.id+'-shuffle-left_1'] )
-                    {
-                        animations['animation-'+self.el.id+'-shuffle-left_1'] = '@keyframes imagik-animation-'+self.el.id+'-shuffle-left_1{'+transition._steps[0].map(function(step, n){
-                            return String(100*n/(transition._steps[0].length-1))+'%{'+$css(translate(step, p[0]))+'}';
-                        }).join("\n")+'}';
-                    }
-                    if ( !animations['animation-'+self.el.id+'-shuffle-left_2'] )
-                    {
-                        animations['animation-'+self.el.id+'-shuffle-left_2'] = '@keyframes imagik-animation-'+self.el.id+'-shuffle-left_2{'+transition._steps[1].map(function(step, n){
-                            return String(100*n/(transition._steps[1].length-1))+'%{'+$css(translate(step, p[0]))+'}';
-                        }).join("\n")+'}';
-                    }
-                    style += "\n" + '#'+p[i].piece.childNodes[0].id+'{animation:imagik-animation-'+self.el.id+'-shuffle-left_1 '+d+'s '+ease+' '+del+'s 1 normal both running;}';
-                    style += "\n" + '#'+p[i].piece.childNodes[1].id+'{animation:imagik-animation-'+self.el.id+'-shuffle-left_2 '+d+'s '+ease+' '+del+'s 1 normal both running;}';
-                }
-                else if ( fxi.transition==="shuffle-right" )
-                {
-                    if ( !animations['animation-'+self.el.id+'-shuffle-right_1'] )
-                    {
-                        animations['animation-'+self.el.id+'-shuffle-right_1'] = '@keyframes imagik-animation-'+self.el.id+'-shuffle-right_1{'+transition._steps[0].map(function(step, n){
-                            return String(100*n/(transition._steps[0].length-1))+'%{'+$css(translate(step, p[0]))+'}';
-                        }).join("\n")+'}';
-                    }
-                    if ( !animations['animation-'+self.el.id+'-shuffle-right_2'] )
-                    {
-                        animations['animation-'+self.el.id+'-shuffle-right_2'] = '@keyframes imagik-animation-'+self.el.id+'-shuffle-right_2{'+transition._steps[1].map(function(step, n){
-                            return String(100*n/(transition._steps[1].length-1))+'%{'+$css(translate(step, p[0]))+'}';
-                        }).join("\n")+'}';
-                    }
-                    style += "\n" + '#'+p[i].piece.childNodes[0].id+'{animation:imagik-animation-'+self.el.id+'-shuffle-right_1 '+d+'s '+ease+' '+del+'s 1 normal both running;}';
-                    style += "\n" + '#'+p[i].piece.childNodes[1].id+'{animation:imagik-animation-'+self.el.id+'-shuffle-right_2 '+d+'s '+ease+' '+del+'s 1 normal both running;}';
-                }
-                else
-                {
-                    if ( transition.animation1 && transition.animation2 )
-                    {
-                        if ( odd )
-                        {
-                            style += "\n" + '#'+p[i].piece.id+selector+'{animation:imagik-animation-'+transition.animation1+' '+d+'s '+ease+' '+del+'s 1 '+(transition.reverse?'reverse both':'normal both')+' running;}';
-                        }
-                        else
-                        {
-                            style += "\n" + '#'+p[i].piece.id+selector+'{animation:imagik-animation-'+transition.animation2+' '+d+'s '+ease+' '+del+'s 1 '+(transition.reverse?'reverse both':'normal both')+' running;}';
-                        }
-                    }
-                    else
-                    {
-                        style += "\n" + '#'+p[i].piece.id+selector+'{animation:imagik-animation-'+transition.animation+' '+d+'s '+ease+' '+del+'s 1 '+(transition.reverse?'reverse both':'normal both')+' running;}';
-                    }
-                }
+                    style += "\n" + '#'+p[i].piece.childNodes[0].id+(transition.current.selector||'')+'{animation:imagik-animation-'+(transition.current.steps?(self.el.id+'-current'):transition.current.animation)+' '+d+'s '+ease+' '+del+'s 1 '+(transition.current.reverse?'reverse both':'normal both')+' running;}';
             }
-            else if ( is_array(transition.steps1) && 2<=transition.steps1.length && is_array(transition.steps2) && 2<=transition.steps2.length )
+            if ( is_obj(transition.next) && (transition.next.animation || transition.next.steps) )
+            {
+                    style += "\n" + '#'+p[i].piece.childNodes[1].id+(transition.next.selector||'')+'{animation:imagik-animation-'+(transition.next.steps?(self.el.id+'-next'):transition.next.animation)+' '+d+'s '+ease+' '+del+'s 1 '+(transition.next.reverse?'reverse both':'normal both')+' running;}';
+            }
+            if ( is_array(transition.steps1) && 2<=transition.steps1.length && is_array(transition.steps2) && 2<=transition.steps2.length )
             {
                 if ( odd )
                 {
@@ -1040,6 +1002,24 @@ function Imagik( el, options )
                     style += "\n" + '#'+p[i].piece.id+selector+'{animation:imagik-animation-'+self.el.id+' '+d+'s '+ease+' '+del+'s 1 normal both running;}';
                 }
             }
+            else if ( transition.animation || (transition.animation1 && transition.animation2) )
+            {
+                if ( transition.animation1 && transition.animation2 )
+                {
+                    if ( odd )
+                    {
+                        style += "\n" + '#'+p[i].piece.id+selector+'{animation:imagik-animation-'+transition.animation1+' '+d+'s '+ease+' '+del+'s 1 '+(transition.reverse?'reverse both':'normal both')+' running;}';
+                    }
+                    else
+                    {
+                        style += "\n" + '#'+p[i].piece.id+selector+'{animation:imagik-animation-'+transition.animation2+' '+d+'s '+ease+' '+del+'s 1 '+(transition.reverse?'reverse both':'normal both')+' running;}';
+                    }
+                }
+                else
+                {
+                    style += "\n" + '#'+p[i].piece.id+selector+'{animation:imagik-animation-'+transition.animation+' '+d+'s '+ease+' '+del+'s 1 '+(transition.reverse?'reverse both':'normal both')+' running;}';
+                }
+            }
             odd = !odd;
         }
         $addClass(animationLayer, 'imagik-fx-'+lastfx.transition);
@@ -1049,7 +1029,7 @@ function Imagik( el, options )
                 style = "\n" + animations[i] + style;
         }
         $style(self.style, style);
-        $ev(lastfx.transition==="fade-zoom" ? evtCarrier.firstChild.firstChild : (lastfx.transition==="shuffle-left"||lastfx.transition==="shuffle-right" ? evtCarrier.firstChild : evtCarrier), 'animationend', endHandler);
+        $ev(evtCarrier, 'animationend', endHandler);
 
         return self;
     };
@@ -1102,7 +1082,9 @@ Imagik.Static = {
             composite:true,
             rows:1,
             columns:1,
-            steps: [
+            current:{"transform-origin":"0 center",transform:"translate3d(0,0,-X(W)px) rotateY(0deg)"},
+            next:{"transform-origin":"100% center",transform:"translate3d(0,0,0) rotateY(-90deg)"},
+            steps:[
                 {
                     transform:"translate3d(0,0,X(W)px) rotateY(0deg)"
                 }
@@ -1172,7 +1154,9 @@ Imagik.Static = {
             composite:true,
             rows:1,
             columns:1,
-            steps: [
+            current:{"transform-origin":"0 center",transform:"translate3d(0,0,-X(W)px) rotateY(0deg)"},
+            next:{"transform-origin":"0 center",transform:"translate3d(0,0,0) rotateY(90deg)"},
+            steps:[
                 {
                     transform:"translate3d(0,0,X(W)px) rotateY(0deg)"
                 }
@@ -1242,8 +1226,7 @@ Imagik.Static = {
             composite:true,
             rows:1,
             columns:1,
-            animation:true,
-            _steps: [[
+            current:{steps:[
                 /* Bezier Through (x=25%,rotY=60deg) */
                 {
                     transform:"translate3d(0,0,0) rotateY(0deg)"
@@ -1307,7 +1290,9 @@ Imagik.Static = {
                 }
                 ,{
                     transform:"translate3d(0,0,$(-1.5*X(W))px) rotateY(0deg)"
-                }],[
+                }
+            ]},
+            next:{steps:[
                 /* Bezier Through (x=25%,rotY=60deg) */
                 {
                     transform:"translate3d(0,0,$(-1.5*X(W))px) rotateY(0deg)"
@@ -1372,14 +1357,13 @@ Imagik.Static = {
                 ,{
                     transform:"translate3d(0,0,0) rotateY(0deg)"
                 }
-            ]]
+            ]}
         }
         ,"shuffle-right":{
             composite:true,
             rows:1,
             columns:1,
-            animation:true,
-            _steps: [[
+            current:{steps:[
                 /* Bezier Through (x=25%,rotY=60deg) */
                 {
                     transform:"translate3d(0,0,0) rotateY(0deg)"
@@ -1443,7 +1427,9 @@ Imagik.Static = {
                 }
                 ,{
                     transform:"translate3d(0,0,$(-1.5*X(W))px) rotateY(0deg)"
-                }],[
+                }
+            ]},
+            next:{steps:[
                 /* Bezier Through (x=25%,rotY=60deg) */
                 {
                     transform:"translate3d(0,0,$(-1.5*X(W))px) rotateY(0deg)"
@@ -1508,7 +1494,7 @@ Imagik.Static = {
                 ,{
                     transform:"translate3d(0,0,0) rotateY(0deg)"
                 }
-            ]]
+            ]}
         }
         ,"rotate":{
             animation:"rotate"
@@ -1545,7 +1531,8 @@ Imagik.Static = {
             composite:true,
             rows:1,
             columns:1,
-            animation:"fade-zoom"
+            current:{animation:"fade-zoom",selector:">.imagik-tile-inside"},
+            next:{animation:"fade-zoom",reverse:true,selector:">.imagik-tile-inside"}
         }
         ,"move-down":{
             animation:"move-down"

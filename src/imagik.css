@@ -164,6 +164,7 @@
     backface-visibility:visible !important;
     transform-style:preserve-3d;
     transform-origin:center center;
+    transform:translate3d(0,0,0); /* enable hardware acceleration */
 }
 .imagik-tile
 {
@@ -180,6 +181,7 @@
     transform-origin:center center;
     overflow:hidden !important;
     backface-visibility:hidden !important;
+    transform:translate3d(0,0,0); /* enable hardware acceleration */
 }
 .imagik-tile-inside
 {
@@ -224,26 +226,6 @@
 .imagik-animation-layer.imagik-fx-flip-horizontal .imagik-tile-next
 {
     transform:rotateY(-180deg);
-}
-.imagik-animation-layer.imagik-fx-fold-left .imagik-tile-current
-{
-    transform-origin: 0 center;
-    transform: rotateY(0deg) translate3d(0,0,-100%);
-}
-.imagik-animation-layer.imagik-fx-fold-left .imagik-tile-next
-{
-    transform-origin: 100% center;
-    transform: rotateY(-90deg) translate3d(0,0,0);
-}
-.imagik-animation-layer.imagik-fx-fold-right .imagik-tile-current
-{
-    transform-origin: 0 center;
-    transform: rotateY(0deg) translate3d(0,0,-100%);
-}
-.imagik-animation-layer.imagik-fx-fold-right .imagik-tile-next
-{
-    transform-origin: 0 center;
-    transform: rotateY(90deg) translate3d(0,0,0);
 }
 .imagik-animation-layer.imagik-fx-pan-top-left .imagik-tile-current
 {

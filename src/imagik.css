@@ -6,102 +6,105 @@
 *
 **/
 /* public classes */
-.imagik-controls
+.imagik-prev
 {
-    position: absolute;
-    top: 0px;
-    left: 0px;
-    width: 100%;
-    z-index: 10;
+    position:absolute;
+    width:60px;
+    height:60px;
+    display:block;
+    background:rgba(255,255,255,0.6) url("./prev.png") no-repeat center center;
+    background-size:cover;
+    border-radius:50%;
+    overflow:hidden;
+    top:50%;
+    left:-60px;
+    margin-top:-30px;
+    z-index:5;
+    cursor:pointer;
+    transition:all 0.2s ease-out;
 }
-.imagik-controls .bullets
+.imagik-next
 {
-    position: absolute;
-    left: 0px;
-    top: 0px;
-    width: 70%;
+    position:absolute;
+    width:60px;
+    height:60px;
+    display:block;
+    background:rgba(255,255,255,0.6) url("./next.png") no-repeat center center;
+    background-size:cover;
+    border-radius:50%;
+    overflow:hidden;
+    top:50%;
+    right:-60px;
+    margin-top:-30px;
+    z-index:5;
+    cursor:pointer;
+    transition:all 0.2s ease-out;
 }
-.imagik-controls .bullet
+.imagik-holder:active .imagik-prev,
+.imagik-holder:hover .imagik-prev
 {
-    width: 10px;
-    height: 10px;
-    margin: 3px;
-    border: 1px solid transparent;
-    border-radius: 50%;
-    background-image: radial-gradient(circle, rgba(255,255,255,1) 0%, rgba(100,100,100,0.9) 100%);
-    display: inline-block;
+    left:0;
+    transition:all 0.2s ease-out;
 }
-.imagik-controls .bullet:hover
+.imagik-holder:active .imagik-next,
+.imagik-holder:hover .imagik-next
 {
-    border: 1px solid rgba(255,255,255,0.7);
+    right:0;
+    transition:all 0.2s ease-out;
 }
-.imagik-controls .active
+.paused .imagik-prev,
+.paused .imagik-next
 {
-    border: 1px solid rgb(255,255,255);
-    background-image: radial-gradient(circle, rgba(120,120,120,1) 0%, rgba(180,180,180,0.9) 100%);
+    display:none;
 }
-.imagik-controls .controls
+.imagik-play-pause
 {
-    position: absolute;
-    right: 0px;
-    top: 0px;
-    width: 120px;
+    position:absolute;
+    width:250px;
+    height:250px;
+    display:block;
+    background:rgba(255,255,255,0.6) url("./play.png") no-repeat center center;
+    background-size:cover;
+    border-radius:50%;
+    overflow:hidden;
+    top:50%;
+    left:50%;
+    margin-top:-125px;
+    margin-left:-125px;
+    z-index:5;
+    opacity:0;
+    transform:scale(0);
+    transition:all 0.2s cubic-bezier(0.175, 0.885, 0.320, 1.275);
+    cursor:pointer;
 }
-.imagik-controls .prev
+.paused .imagik-play-pause
 {
-    position: relative;
-    width: 30px;
-    height: 30px;
-    display: inline-block;
-    margin: 5px;
-    background: transparent url("./controls.png") no-repeat 0 -90px;
-    overflow: hidden;
-}
-.imagik-controls .next
-{
-    position: relative;
-    width: 30px;
-    height: 30px;
-    display: inline-block;
-    margin: 5px;
-    background: transparent url("./controls.png") no-repeat 0 -60px;
-    overflow: hidden;
-}
-.imagik-controls .play-pause
-{
-    position: relative;
-    width: 30px;
-    height: 30px;
-    display: inline-block;
-    margin: 5px;
-    background: transparent url("./controls.png") no-repeat 0 0;
-    overflow: hidden;
-}
-.imagik-controls .play-pause.paused
-{
-    background-position: 0px -30px;
+    background-image:url("./pause.png");
+    opacity:1;
+    transform:scale(1);
+    transition:all 0.2s cubic-bezier(0.175, 0.885, 0.320, 1.275);
 }
 .imagik-caption
 {
-    text-align: left;
-    background: rgba(34, 34, 34, .7);
-    color: #fefefe;
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    width: 100%;
-    padding: 20px;
-    font-size: 12px;
-    font-family: helvetica,sans-serif;
-    z-index: 4;
-    display: block;
-    transform: translate3d(0, 100%, 0);
-    transition: transform 0.2s ease-out;
+    text-align:left;
+    background:rgba(34, 34, 34, .7);
+    color:#fefefe;
+    position:absolute;
+    bottom:0;
+    left:0;
+    width:100%;
+    padding:20px;
+    font-size:12px;
+    font-family:helvetica,sans-serif;
+    z-index:4;
+    display:block;
+    transform:translate3d(0, 100%, 0);
+    transition:transform 0.2s ease-out;
 }
 .imagik-caption.show
 {
-    transform: translate3d(0, 0, 0);
-    transition: transform 0.4s ease-out;
+    transform:translate3d(0, 0, 0);
+    transition:transform 0.4s ease-out;
 }
 
 /* private classes */
@@ -112,12 +115,14 @@
     margin:0 !important;
     padding:0 !important;
     border:0 !important;
+    box-sizing:border-box;
     display:block;
     top:0;
     left:0;
     width:100%;
     height:100%;
     background:#000;
+    cursor:pointer;
 }
 .imagik-image-layer
 {
@@ -126,11 +131,13 @@
     padding:0 !important;
     border:0 !important;
     display:block;
+    box-sizing:border-box;
     top:0;
     left:0;
     width:100%;
     height:100%;
     background:transparent none no-repeat 0 0;
+    pointer-events:none;
 }
 .imagik-animation-layer
 {
@@ -138,7 +145,8 @@
     margin:0 !important;
     padding:0 !important;
     border:0 !important;
-    display: block;
+    display:block;
+    box-sizing:border-box;
     top:0;
     left:0;
     width:100%;
@@ -147,6 +155,7 @@
     perspective:1024px !important;
     perspective-origin:center !important;
     transform-style:preserve-3d;
+    pointer-events:none;
 }
 .imagik-tile-wrapper
 {
@@ -155,6 +164,7 @@
     padding:0 !important;
     border:0 !important;
     display:block;
+    box-sizing:border-box;
     top:0%;
     left:0%;
     width:100%;
@@ -173,6 +183,7 @@
     padding:0 !important;
     border:0 !important;
     display:block;
+    box-sizing:border-box;
     top:0%;
     left:0%;
     width:100%;
@@ -180,7 +191,8 @@
     background:none;
     transform-origin:center center;
     overflow:hidden !important;
-    backface-visibility:hidden !important;
+    backface-visibility:hidden;
+    transform-style:preserve-3d;
     transform:translate3d(0,0,0); /* enable hardware acceleration */
 }
 .imagik-tile-inside
@@ -190,7 +202,9 @@
     padding:0 !important;
     border:0 !important;
     overflow:hidden !important;
+    backface-visibility:hidden;
     display:block;
+    box-sizing:border-box;
     top:0%;
     left:0%;
     width:100%;
@@ -226,22 +240,6 @@
 .imagik-animation-layer.imagik-fx-fold-right .imagik-tile-wrapper
 {
     transform-origin:0 center;
-}
-.imagik-animation-layer.imagik-fx-flip-vertical .imagik-tile-current
-{
-    transform:rotateX(0deg);
-}
-.imagik-animation-layer.imagik-fx-flip-vertical .imagik-tile-next
-{
-    transform:rotateX(180deg);
-}
-.imagik-animation-layer.imagik-fx-flip-horizontal .imagik-tile-current
-{
-    transform:rotateY(0deg);
-}
-.imagik-animation-layer.imagik-fx-flip-horizontal .imagik-tile-next
-{
-    transform:rotateY(-180deg);
 }
 .imagik-animation-layer.imagik-fx-pan-top-left .imagik-tile-current
 {

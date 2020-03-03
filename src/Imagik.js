@@ -602,7 +602,7 @@ function Imagik( el, options )
             holder.style.width = String(W)+'px';
             holder.style.height = String(H)+'px';
             imageLayer.style.backgroundSize = String(W)+'px auto';
-            //animationLayer.style.perspective = String(stdMath.round(1.5*W))+'px';
+            //animationLayer.style.perspective = String(stdMath.round(1.5*stdMath.max(W, H)))+'px';
         }
         return self;
     };
@@ -685,7 +685,7 @@ function Imagik( el, options )
         imageLayer.style.backgroundSize = String(W)+'px auto';
         animationLayer = $el('<div class="imagik-animation-layer"></div>');
         animationLayer.style.zIndex = 1;
-        //animationLayer.style.perspective = String(stdMath.round(1.5*W))+'px';
+        //animationLayer.style.perspective = String(stdMath.round(1.5*stdMath.max(W, H)))+'px';
         $append(holder, imageLayer);
         $append(holder, animationLayer);
 
@@ -698,39 +698,41 @@ function Imagik( el, options )
         }
         if ( self.options.controls )
         {
-            controls = $el('<div class="imagik-controls"></div>');
-            $append(controls, bullets=$el('<div class="bullets"></div>'));
-            $append(controls, buttons=$el('<div class="controls"></div>'));
-            $append(holder, controls);
+            //controls = $el('<div class="imagik-controls"></div>');
+            //$append(controls, bullets=$el('<div class="bullets"></div>'));
+            //$append(controls, buttons=$el('<div class="controls"></div>'));
+            //$append(holder, controls);
 
-            prevBt = $el('<a class="prev" href="javascript:void(0)" title="Previous"></a>');
-            nextBt = $el('<a class="next" href="javascript:void(0)" title="Next"></a>');
-            playBt = $el('<a class="play-pause" href="javascript:void(0)" title="Play/Pause"></a>');
-            $append(buttons, prevBt);
-            $append(buttons, playBt);
-            $append(buttons, nextBt);
+            prevBt = $el('<a class="imagik-prev" href="javascript:void(0)" title="Previous"></a>');
+            nextBt = $el('<a class="imagik-next" href="javascript:void(0)" title="Next"></a>');
+            playBt = $el('<a class="imagik-play-pause" href="javascript:void(0)" title="Play/Pause"></a>');
+            $append(holder, prevBt);
+            $append(holder, nextBt);
+            $append(holder, playBt);
             $ev(prevBt, 'click', function( evt ) {
+                evt.stopPropagation();
                 if ( paused ) return;
                 self.prevTransition();
             });
             $ev(nextBt, 'click', function( evt ) {
+                evt.stopPropagation();
                 if ( paused ) return;
                 self.nextTransition();
             });
-            $ev(playBt, 'click', function( evt ) {
+            $ev(holder, 'click', function( evt ) {
                 paused = !paused;
                 if ( paused )
                 {
                     self.stopPlay();
-                    $addClass(playBt, 'paused');
+                    $addClass(holder, 'paused');
                 }
                 else
                 {
                     self.resumePlay();
-                    $removeClass(playBt, 'paused');
+                    $removeClass(holder, 'paused');
                 }
             });
-            for(i=0;i<imgs.length;i++)
+            /*for(i=0;i<imgs.length;i++)
             {
                 anc = $el('<a class="bullet" href="javascript:void(0)" rel="'+i+'" title="'+(i+1)+'"></a>');
                 $append(bullets, anc);
@@ -739,7 +741,7 @@ function Imagik( el, options )
                         if ( paused ) return;
                         self.doTransition(String(index));
                 };})(i));
-            }
+            }*/
         }
 
         ind = linearArray(imgs.length);
@@ -748,10 +750,10 @@ function Imagik( el, options )
 
         prevcurrent = 0; current = 0;
         imageLayer.style.backgroundImage = 'url("'+imgs[ind[current]]+'")';
-        if ( self.options.controls )
+        /*if ( self.options.controls )
         {
             toggleActive();
-        }
+        }*/
         if ( self.options.caption && captions[ind[current]]!=null && captions[ind[current]]!="" )
         {
             $html(caption, captions[ind[current]]);
@@ -767,13 +769,13 @@ function Imagik( el, options )
             randtrans = shuffle(Imagik.Static.randomTransitions.slice());
             randindex = 0;
         }
-        return randtrans[randindex++];
+        return randindex<randtrans.length ? randtrans[randindex++] : null;
     };
 
-    toggleActive = function( ) {
+    /*toggleActive = function( ) {
         $$(".bullet", controls).forEach(function(a){$removeClass(a, "active");});
         $addClass($$('[rel="'+current+'"]', controls)[0], "active");
-    };
+    };*/
 
     clearPrev = function( ) {
         if ( evtCarrier )
@@ -821,10 +823,15 @@ function Imagik( el, options )
         else  current = parseInt(dir, 10);
 
         if ( self.options.caption ) $removeClass(caption, 'show');
-        if ( self.options.controls ) toggleActive();
+        //if ( self.options.controls ) toggleActive();
 
         $style(self.style, style='');
         fxi = fx[ind[current]]; if ( "random"===fxi.transition ) fxi = getRandomTransition();
+        if ( !fxi )
+        {
+            imageLayer.style.backgroundImage = 'url("'+imgs[ind[current]]+'")';
+            return self;
+        }
         transition = extend({}, Imagik.Static.transitions[fxi.transition]);
         order = fxi.order || 'rows-first'; if ( !HAS.call(Imagik.Static.order, order) ) order = 'rows-first';
         ease = fxi.ease || 'linear'; if ( HAS.call(Imagik.Static.ease, ease) ) ease = Imagik.Static.ease[ease];
@@ -1064,7 +1071,7 @@ Imagik.Static = {
                     transform:"translate3d(0,9.6%,$(-1.6*X(W))px) rotateY(-36deg)"
                 }
                 ,{
-                    transform:"translate3d(0,9.9%%,$(-1.6875*X(W))px) rotateY(-40.5deg)"
+                    transform:"translate3d(0,9.9%,$(-1.6875*X(W))px) rotateY(-40.5deg)"
                 }
                 ,{
                     transform:"translate3d(0,10%,$(-1.75*X(W))px) rotateY(-45deg)"
@@ -1134,7 +1141,7 @@ Imagik.Static = {
                     transform:"translate3d(0,9.6%,$(-1.6*X(W))px) rotateY(36deg)"
                 }
                 ,{
-                    transform:"translate3d(0,9.9%%,$(-1.6875*X(W))px) rotateY(40.5deg)"
+                    transform:"translate3d(0,9.9%,$(-1.6875*X(W))px) rotateY(40.5deg)"
                 }
                 ,{
                     transform:"translate3d(0,10%,$(-1.75*X(W))px) rotateY(45deg)"
@@ -1180,64 +1187,64 @@ Imagik.Static = {
                     transform:"translate3d(0,0,0) rotateX(0deg)"
                 }
                 ,{
-                    transform:"translate3d(1.9%,0,$(-0.28625*X(W))px) rotateX(4.5deg)"
+                    transform:"translate3d(1.9%,0,$(-0.2875*X(H))px) rotateX(4.5deg)"
                 }
                 ,{
-                    transform:"translate3d(3.6%,0,$(-0.545*X(W))px) rotateX(9deg)"
+                    transform:"translate3d(3.6%,0,$(-0.55*X(H))px) rotateX(9deg)"
                 }
                 ,{
-                    transform:"translate3d(5.1%,0,$(-0.77625*X(W))px) rotateX(13.5deg)"
+                    transform:"translate3d(5.1%,0,$(-0.7875*X(H))px) rotateX(13.5deg)"
                 }
                 ,{
-                    transform:"translate3d(6.4%,0,$(-0.98*X(W))px) rotateX(18deg)"
+                    transform:"translate3d(6.4%,0,$(-1*X(H))px) rotateX(18deg)"
                 }
                 ,{
-                    transform:"translate3d(7.5%,0,$(-1.15625*X(W))px) rotateX(22.5deg)"
+                    transform:"translate3d(7.5%,0,$(-1.1875*X(H))px) rotateX(22.5deg)"
                 }
                 ,{
-                    transform:"translate3d(8.4%,0,$(-1.305*X(W))px) rotateX(27deg)"
+                    transform:"translate3d(8.4%,0,$(-1.35*X(H))px) rotateX(27deg)"
                 }
                 ,{
-                    transform:"translate3d(9.1%,0,$(-1.42625*X(W))px) rotateX(31.5deg)"
+                    transform:"translate3d(9.1%,0,$(-1.4875*X(H))px) rotateX(31.5deg)"
                 }
                 ,{
-                    transform:"translate3d(9.6%,0,$(-1.52*X(W))px) rotateX(36deg)"
+                    transform:"translate3d(9.6%,0,$(-1.6*X(H))px) rotateX(36deg)"
                 }
                 ,{
-                    transform:"translate3d(9.9%%,0,$(-1.58625*X(W))px) rotateX(40.5deg)"
+                    transform:"translate3d(9.9%,0,$(-1.6875*X(H))px) rotateX(40.5deg)"
                 }
                 ,{
-                    transform:"translate3d(10%,0,$(-1.625*X(W))px) rotateX(45deg)"
+                    transform:"translate3d(10%,0,$(-1.75*X(H))px) rotateX(45deg)"
                 }
                 ,{
-                    transform:"translate3d(9.9%,0,$(-1.63625*X(W))px) rotateX(49.5deg)"
+                    transform:"translate3d(9.9%,0,$(-1.7875*X(H))px) rotateX(49.5deg)"
                 }
                 ,{
-                    transform:"translate3d(9.6%,0,$(-1.62*X(W))px) rotateX(54deg)"
+                    transform:"translate3d(9.6%,0,$(-1.8*X(H))px) rotateX(54deg)"
                 }
                 ,{
-                    transform:"translate3d(9.1%,0,$(-1.57625*X(W))px) rotateX(58.5deg)"
+                    transform:"translate3d(9.1%,0,$(-1.7875*X(H))px) rotateX(58.5deg)"
                 }
                 ,{
-                    transform:"translate3d(8.4%,0,$(-1.505*X(W))px) rotateX(63deg)"
+                    transform:"translate3d(8.4%,0,$(-1.75*X(H))px) rotateX(63deg)"
                 }
                 ,{
-                    transform:"translate3d(7.5%,0,$(-1.40625*X(W))px) rotateX(67.5deg)"
+                    transform:"translate3d(7.5%,0,$(-1.6875*X(H))px) rotateX(67.5deg)"
                 }
                 ,{
-                    transform:"translate3d(6.4%,0,$(-1.28*X(W))px) rotateX(72deg)"
+                    transform:"translate3d(6.4%,0,$(-1.6*X(H))px) rotateX(72deg)"
                 }
                 ,{
-                    transform:"translate3d(5.1%,0,$(-1.12625*X(W))px) rotateX(76.5deg)"
+                    transform:"translate3d(5.1%,0,$(-1.4875*X(H))px) rotateX(76.5deg)"
                 }
                 ,{
-                    transform:"translate3d(3.6%,0,$(-0.945*X(W))px) rotateX(81deg)"
+                    transform:"translate3d(3.6%,0,$(-1.35*X(H))px) rotateX(81deg)"
                 }
                 ,{
-                    transform:"translate3d(1.9%,0,$(-0.73625*X(W))px) rotateX(85.5deg)"
+                    transform:"translate3d(1.9%,0,$(-1.1875*X(H))px) rotateX(85.5deg)"
                 }
                 ,{
-                    transform:"translate3d(0,0,$(-0.5*X(W))px) rotateX(90deg)"
+                    transform:"translate3d(0,0,-X(H)px) rotateX(90deg)"
                 }
             ]
         }
@@ -1250,64 +1257,64 @@ Imagik.Static = {
                     transform:"translate3d(0,0,0) rotateX(0deg)"
                 }
                 ,{
-                    transform:"translate3d(1.9%,0,$(-0.28625*X(W))px) rotateX(-4.5deg)"
+                    transform:"translate3d(1.9%,0,$(-0.2875*X(H))px) rotateX(-4.5deg)"
                 }
                 ,{
-                    transform:"translate3d(3.6%,0,$(-0.545*X(W))px) rotateX(-9deg)"
+                    transform:"translate3d(3.6%,0,$(-0.55*X(H))px) rotateX(-9deg)"
                 }
                 ,{
-                    transform:"translate3d(5.1%,0,$(-0.77625*X(W))px) rotateX(-13.5deg)"
+                    transform:"translate3d(5.1%,0,$(-0.7875*X(H))px) rotateX(-13.5deg)"
                 }
                 ,{
-                    transform:"translate3d(6.4%,0,$(-0.98*X(W))px) rotateX(-18deg)"
+                    transform:"translate3d(6.4%,0,$(-1*X(H))px) rotateX(-18deg)"
                 }
                 ,{
-                    transform:"translate3d(7.5%,0,$(-1.15625*X(W))px) rotateX(-22.5deg)"
+                    transform:"translate3d(7.5%,0,$(-1.1875*X(H))px) rotateX(-22.5deg)"
                 }
                 ,{
-                    transform:"translate3d(8.4%,0,$(-1.305*X(W))px) rotateX(-27deg)"
+                    transform:"translate3d(8.4%,0,$(-1.35*X(H))px) rotateX(-27deg)"
                 }
                 ,{
-                    transform:"translate3d(9.1%,0,$(-1.42625*X(W))px) rotateX(-31.5deg)"
+                    transform:"translate3d(9.1%,0,$(-1.4875*X(H))px) rotateX(-31.5deg)"
                 }
                 ,{
-                    transform:"translate3d(9.6%,0,$(-1.52*X(W))px) rotateX(-36deg)"
+                    transform:"translate3d(9.6%,0,$(-1.6*X(H))px) rotateX(-36deg)"
                 }
                 ,{
-                    transform:"translate3d(9.9%%,0,$(-1.58625*X(W))px) rotateX(-40.5deg)"
+                    transform:"translate3d(9.9%,0,$(-1.6875*X(H))px) rotateX(-40.5deg)"
                 }
                 ,{
-                    transform:"translate3d(10%,0,$(-1.625*X(W))px) rotateX(-45deg)"
+                    transform:"translate3d(10%,0,$(-1.75*X(H))px) rotateX(-45deg)"
                 }
                 ,{
-                    transform:"translate3d(9.9%,0,$(-1.63625*X(W))px) rotateX(-49.5deg)"
+                    transform:"translate3d(9.9%,0,$(-1.7875*X(H))px) rotateX(-49.5deg)"
                 }
                 ,{
-                    transform:"translate3d(9.6%,0,$(-1.62*X(W))px) rotateX(-54deg)"
+                    transform:"translate3d(9.6%,0,$(-1.8*X(H))px) rotateX(-54deg)"
                 }
                 ,{
-                    transform:"translate3d(9.1%,0,$(-1.57625*X(W))px) rotateX(-58.5deg)"
+                    transform:"translate3d(9.1%,0,$(-1.7875*X(H))px) rotateX(-58.5deg)"
                 }
                 ,{
-                    transform:"translate3d(8.4%,0,$(-1.505*X(W))px) rotateX(-63deg)"
+                    transform:"translate3d(8.4%,0,$(-1.75*X(H))px) rotateX(-63deg)"
                 }
                 ,{
-                    transform:"translate3d(7.5%,0,$(-1.40625*X(W))px) rotateX(-67.5deg)"
+                    transform:"translate3d(7.5%,0,$(-1.6875*X(H))px) rotateX(-67.5deg)"
                 }
                 ,{
-                    transform:"translate3d(6.4%,0,$(-1.28*X(W))px) rotateX(-72deg)"
+                    transform:"translate3d(6.4%,0,$(-1.6*X(H))px) rotateX(-72deg)"
                 }
                 ,{
-                    transform:"translate3d(5.1%,0,$(-1.12625*X(W))px) rotateX(-76.5deg)"
+                    transform:"translate3d(5.1%,0,$(-1.4875*X(H))px) rotateX(-76.5deg)"
                 }
                 ,{
-                    transform:"translate3d(3.6%,0,$(-0.945*X(W))px) rotateX(-81deg)"
+                    transform:"translate3d(3.6%,0,$(-1.35*X(H))px) rotateX(-81deg)"
                 }
                 ,{
-                    transform:"translate3d(1.9%,0,$(-0.73625*X(W))px) rotateX(-85.5deg)"
+                    transform:"translate3d(1.9%,0,$(-1.1875*X(H))px) rotateX(-85.5deg)"
                 }
                 ,{
-                    transform:"translate3d(0,0,$(-0.5*X(W))px) rotateX(-90deg)"
+                    transform:"translate3d(0,0,-X(H)px) rotateX(-90deg)"
                 }
             ]
         }
@@ -1725,22 +1732,22 @@ Imagik.Static = {
                 }
             ]}
         }
+        ,"flip-horizontal":{
+            current:{transform:"rotateY(0deg)"},
+            next:{transform:"rotateY(-180deg)"},
+            animation:"flip-horizontal"
+        }
+        ,"flip-vertical":{
+            current:{transform:"rotateX(0deg)"},
+            next:{transform:"rotateX(180deg)"},
+            animation:"flip-vertical"
+        }
         ,"rotate":{
             animation:"rotate"
         }
         ,"rotate-reverse":{
             reverse:true,
             animation:"rotate"
-        }
-        ,"flip-horizontal":{
-            current:true,
-            next:true,
-            animation:"flip-horizontal"
-        }
-        ,"flip-vertical":{
-            current:true,
-            next:true,
-            animation:"flip-vertical"
         }
         ,"iris":{
             rows:1,

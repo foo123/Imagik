@@ -203,6 +203,22 @@
 }
 
 /* fx */
+.imagik-animation-layer.imagik-fx-cubes-left .imagik-tile-wrapper
+{
+    transform-origin:0 center;
+}
+.imagik-animation-layer.imagik-fx-cubes-right .imagik-tile-wrapper
+{
+    transform-origin:100% center;
+}
+.imagik-animation-layer.imagik-fx-cubes-up .imagik-tile-wrapper
+{
+    transform-origin:center 0 0;
+}
+.imagik-animation-layer.imagik-fx-cubes-down .imagik-tile-wrapper
+{
+    transform-origin:center 100% 0;
+}
 .imagik-animation-layer.imagik-fx-fold-left .imagik-tile-wrapper
 {
     transform-origin:100% center;

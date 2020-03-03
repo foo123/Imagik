@@ -152,15 +152,6 @@ function $css( obj, style )
         return s;
     }
 }
-function evaluate( poly, x )
-{
-    // Horner scheme to evaluate polynomial given by coefficients poly from 0 to n-1
-    var n = b.length, px;
-    if ( !n ) return 0;
-    px = poly[--n];
-    while( 0 < n ) { px *= x; px += poly[--n]; }
-    return px;
-}
 function linearArray( howmany )
 {
     var a = new Array(howmany), i;
@@ -790,6 +781,7 @@ function Imagik( el, options )
             $ev(evtCarrier, 'animationend', endHandler, false);
             $empty(animationLayer);
             $removeClass(animationLayer, 'imagik-fx-'+lastfx.transition);
+            $removeClass(animationLayer, 'imagik-fx');
         }
         if ( p2!=null ) p2 = destroy(p2);
         if ( p!=null ) p = destroy(p);
@@ -852,20 +844,20 @@ function Imagik( el, options )
         }
 
         numpiec = p.length;
-        if ( transition.composite || transition.current || transition.next )
+        if ( transition.current || transition.next )
         {
             imageLayer.style.backgroundImage = 'none';
             p2 = tiles(imgs[ind[prevcurrent]], r, c, W, H);
-            if ( is_obj(transition.current) && is_array(transition.current.steps) && 2<=transition.current.steps.length )
+            if ( is_obj(transition.current) && is_array(transition.current.animation) && 2<=transition.current.animation.length )
             {
-                animations['animation-'+self.el.id+'-current'] = '@keyframes imagik-animation-'+self.el.id+'-current{'+transition.current.steps.map(function(step, n){
-                    return String(100*n/(transition.current.steps.length-1))+'%{'+$css(translate(step, p[0]))+'}';
+                animations['animation-'+self.el.id+'-current'] = '@keyframes imagik-animation-'+self.el.id+'-current{'+transition.current.animation.map(function(step, n){
+                    return String(100*n/(transition.current.animation.length-1))+'%{'+$css(translate(step, p[0]))+'}';
                 }).join("\n")+'}';
             }
-            if ( is_obj(transition.next) && is_array(transition.next.steps) && 2<=transition.next.steps.length )
+            if ( is_obj(transition.next) && is_array(transition.next.animation) && 2<=transition.next.animation.length )
             {
-                animations['animation-'+self.el.id+'-next'] = '@keyframes imagik-animation-'+self.el.id+'-next{'+transition.next.steps.map(function(step, n){
-                    return String(100*n/(transition.next.steps.length-1))+'%{'+$css(translate(step, p[0]))+'}';
+                animations['animation-'+self.el.id+'-next'] = '@keyframes imagik-animation-'+self.el.id+'-next{'+transition.next.animation.map(function(step, n){
+                    return String(100*n/(transition.next.animation.length-1))+'%{'+$css(translate(step, p[0]))+'}';
                 }).join("\n")+'}';
             }
             for(i=0;i<numpiec;i++)
@@ -878,12 +870,12 @@ function Imagik( el, options )
 
                 if ( is_obj(transition.current) )
                 {
-                    str = $css(translate(extend({}, transition.current, ['animation','steps','selector','reverse']), p2[i]));
+                    str = $css(translate(extend({}, transition.current, ['animation','selector','reverse']), p2[i]));
                     if ( str.length ) style += "\n" + '#'+p2[i].piece.id+'{'+str+'}';
                 }
                 if ( is_obj(transition.next) )
                 {
-                    str = $css(translate(extend({}, transition.next, ['animation','steps','selector','reverse']), p[i]));
+                    str = $css(translate(extend({}, transition.next, ['animation','selector','reverse']), p[i]));
                     if ( str.length ) style += "\n" + '#'+p[i].piece.id+'{'+str+'}';
                 }
 
@@ -901,47 +893,25 @@ function Imagik( el, options )
         max = 0;
         odd = false;
 
-        if ( (is_array(transition.steps) && 2<=transition.steps.length) || (is_array(transition.steps1) && 2<=transition.steps1.length && is_array(transition.steps2) && 2<=transition.steps2.length) )
+        if ( (is_array(transition.animation) && 2<=transition.animation.length) || (is_array(transition.animation1) && 2<=transition.animation1.length && is_array(transition.animation2) && 2<=transition.animation2.length) )
         {
-            if ( transition.steps1 && transition.steps2 )
+            if ( transition.animation1 && transition.animation2 )
             {
-                animations['animation-'+self.el.id+'-even'] = '@keyframes imagik-animation-'+self.el.id+'-even{'+transition.steps2.map(function(step, n){
-                    return String(100*n/(transition.steps2.length-1))+'%{'+$css(translate(step, p[0]))+'}';
+                animations['animation-'+self.el.id+'-even'] = '@keyframes imagik-animation-'+self.el.id+'-even{'+transition.animation2.map(function(step, n){
+                    return String(100*n/(transition.animation2.length-1))+'%{'+$css(translate(step, p[0]))+'}';
                 }).join("\n")+'}';
                 if ( 1<p.length )
                 {
-                    animations['animation-'+self.el.id+'-odd'] = '@keyframes imagik-animation-'+self.el.id+'-odd{'+transition.steps1.map(function(step, n){
-                        return String(100*n/(transition.steps1.length-1))+'%{'+$css(translate(step, p[1]))+'}';
+                    animations['animation-'+self.el.id+'-odd'] = '@keyframes imagik-animation-'+self.el.id+'-odd{'+transition.animation1.map(function(step, n){
+                        return String(100*n/(transition.animation1.length-1))+'%{'+$css(translate(step, p[1]))+'}';
                     }).join("\n")+'}';
                 }
             }
             else
             {
-                animations['animation-'+self.el.id] = '@keyframes imagik-animation-'+self.el.id+'{'+transition.steps.map(function(step, n){
-                    return String(100*n/(transition.steps.length-1))+'%{'+$css(translate(step, p[0]))+'}';
+                animations['animation-'+self.el.id] = '@keyframes imagik-animation-'+self.el.id+'{'+transition.animation.map(function(step, n){
+                    return String(100*n/(transition.animation.length-1))+'%{'+$css(translate(step, p[0]))+'}';
                 }).join("\n")+'}';
-            }
-        }
-        else if ( transition.end && (transition.start || (transition.start1 && transition.start2)) )
-        {
-            if ( transition.start1 && transition.start2 )
-            {
-                transition._start = translate(transition.start2, p[0]);
-                transition._end = translate(transition.end, p[0]);
-                animations['animation-'+self.el.id+'-even'] = '@keyframes imagik-animation-'+self.el.id+'-even{from{'+$css(transition._start)+'}to{'+$css(transition._end)+'}}';
-
-                if ( 1<p.length )
-                {
-                    transition._start = translate(transition.start1, p[1]);
-                    transition._end = translate(transition.end, p[1]);
-                    animations['animation-'+self.el.id+'-odd'] = '@keyframes imagik-animation-'+self.el.id+'-odd{from{'+$css(transition._start)+'}to{'+$css(transition._end)+'}}';
-                }
-            }
-            else
-            {
-                transition._start = translate(transition.start, p[0]);
-                transition._end = translate(transition.end, p[0]);
-                animations['animation-'+self.el.id] = '@keyframes imagik-animation-'+self.el.id+'{from{'+$css(transition._start)+'}to{'+$css(transition._end)+'}}';
             }
         }
 
@@ -953,23 +923,23 @@ function Imagik( el, options )
             $append(animationLayer, p[i].piece);
             if ( !evtCarrier || max<=del )
             {
-                if ( transition.next && (transition.next.animation || transition.next.steps) )
+                if ( transition.next && transition.next.animation )
                     evtCarrier = transition.next.selector ? ($$('#'+p[i].piece.childNodes[1].id+transition.next.selector, animationLayer)[0]||p[i].piece.childNodes[1]) : p[i].piece.childNodes[1];
-                else if ( transition.current && (transition.current.animation || transition.current.steps) )
+                else if ( transition.current && transition.current.animation )
                     evtCarrier = transition.current.selector ? ($$('#'+p[i].piece.childNodes[0].id+transition.current.selector, animationLayer)[0]||p[i].piece.childNodes[0]) : p[i].piece.childNodes[0];
                 else
                     evtCarrier = selector.length ? ($$('#'+p[i].piece.id+selector, animationLayer)[0]||p[i].piece) : p[i].piece;
                 max = del;
             }
-            if ( is_obj(transition.current) && (transition.current.animation || transition.current.steps) )
+            if ( transition.current && transition.current.animation )
             {
-                    style += "\n" + '#'+p[i].piece.childNodes[0].id+(transition.current.selector||'')+'{animation:imagik-animation-'+(transition.current.steps?(self.el.id+'-current'):transition.current.animation)+' '+d+'s '+ease+' '+del+'s 1 '+(transition.current.reverse?'reverse both':'normal both')+' running;}';
+                    style += "\n" + '#'+p[i].piece.childNodes[0].id+(transition.current.selector||'')+'{animation:imagik-animation-'+(is_array(transition.current.animation)?(self.el.id+'-current'):String(transition.current.animation))+' '+d+'s '+ease+' '+del+'s 1 '+(transition.current.reverse?'reverse both':'normal both')+' running;}';
             }
-            if ( is_obj(transition.next) && (transition.next.animation || transition.next.steps) )
+            if ( transition.next && transition.next.animation )
             {
-                    style += "\n" + '#'+p[i].piece.childNodes[1].id+(transition.next.selector||'')+'{animation:imagik-animation-'+(transition.next.steps?(self.el.id+'-next'):transition.next.animation)+' '+d+'s '+ease+' '+del+'s 1 '+(transition.next.reverse?'reverse both':'normal both')+' running;}';
+                    style += "\n" + '#'+p[i].piece.childNodes[1].id+(transition.next.selector||'')+'{animation:imagik-animation-'+(is_array(transition.next.animation)?(self.el.id+'-next'):String(transition.next.animation))+' '+d+'s '+ease+' '+del+'s 1 '+(transition.next.reverse?'reverse both':'normal both')+' running;}';
             }
-            if ( is_array(transition.steps1) && 2<=transition.steps1.length && is_array(transition.steps2) && 2<=transition.steps2.length )
+            if ( is_array(transition.animation1) && 2<=transition.animation1.length && is_array(transition.animation2) && 2<=transition.animation2.length )
             {
                 if ( odd )
                 {
@@ -980,27 +950,9 @@ function Imagik( el, options )
                     style += "\n" + '#'+p[i].piece.id+selector+'{animation:imagik-animation-'+self.el.id+'-even '+d+'s '+ease+' '+del+'s 1 normal both running;}';
                 }
             }
-            else if ( is_array(transition.steps) && 2<=transition.steps.length )
+            else if ( is_array(transition.animation) && 2<=transition.animation.length )
             {
                 style += "\n" + '#'+p[i].piece.id+selector+'{animation:imagik-animation-'+self.el.id+' '+d+'s '+ease+' '+del+'s 1 normal both running;}';
-            }
-            else if ( transition.end && (transition.start || (transition.start1 && transition.start2)) )
-            {
-                if ( transition.start1 && transition.start2 )
-                {
-                    if ( odd )
-                    {
-                        style += "\n" + '#'+p[i].piece.id+selector+'{animation:imagik-animation-'+self.el.id+'-odd '+d+'s '+ease+' '+del+'s 1 normal both running;}';
-                    }
-                    else
-                    {
-                        style += "\n" + '#'+p[i].piece.id+selector+'{animation:imagik-animation-'+self.el.id+'-even '+d+'s '+ease+' '+del+'s 1 normal both running;}';
-                    }
-                }
-                else
-                {
-                    style += "\n" + '#'+p[i].piece.id+selector+'{animation:imagik-animation-'+self.el.id+' '+d+'s '+ease+' '+del+'s 1 normal both running;}';
-                }
             }
             else if ( transition.animation || (transition.animation1 && transition.animation2) )
             {
@@ -1008,21 +960,22 @@ function Imagik( el, options )
                 {
                     if ( odd )
                     {
-                        style += "\n" + '#'+p[i].piece.id+selector+'{animation:imagik-animation-'+transition.animation1+' '+d+'s '+ease+' '+del+'s 1 '+(transition.reverse?'reverse both':'normal both')+' running;}';
+                        style += "\n" + '#'+p[i].piece.id+selector+'{animation:imagik-animation-'+String(transition.animation1)+' '+d+'s '+ease+' '+del+'s 1 '+(transition.reverse?'reverse both':'normal both')+' running;}';
                     }
                     else
                     {
-                        style += "\n" + '#'+p[i].piece.id+selector+'{animation:imagik-animation-'+transition.animation2+' '+d+'s '+ease+' '+del+'s 1 '+(transition.reverse?'reverse both':'normal both')+' running;}';
+                        style += "\n" + '#'+p[i].piece.id+selector+'{animation:imagik-animation-'+String(transition.animation2)+' '+d+'s '+ease+' '+del+'s 1 '+(transition.reverse?'reverse both':'normal both')+' running;}';
                     }
                 }
                 else
                 {
-                    style += "\n" + '#'+p[i].piece.id+selector+'{animation:imagik-animation-'+transition.animation+' '+d+'s '+ease+' '+del+'s 1 '+(transition.reverse?'reverse both':'normal both')+' running;}';
+                    style += "\n" + '#'+p[i].piece.id+selector+'{animation:imagik-animation-'+String(transition.animation)+' '+d+'s '+ease+' '+del+'s 1 '+(transition.reverse?'reverse both':'normal both')+' running;}';
                 }
             }
             odd = !odd;
         }
         $addClass(animationLayer, 'imagik-fx-'+lastfx.transition);
+        $addClass(animationLayer, 'imagik-fx');
         for(i in animations)
         {
             if ( HAS.call(animations, i) )
@@ -1078,13 +1031,292 @@ Imagik.VERSION = "1.0.0";
 Imagik.Static = {
 
     transitions: {
-        "fold-left":{
-            composite:true,
+        "cubes-left":{
+            columns:1,
+            current:{"transform-origin":"0 center",transform:"translate3d(0,0,0) rotateY(0deg)"},
+            next:{"transform-origin":"0 center",transform:"translate3d(100%,0,0) rotateY(90deg)"},
+            animation:[
+                {
+                    transform:"translate3d(0,0,0) rotateY(0deg)"
+                }
+                ,{
+                    transform:"translate3d(0,1.9%,$(-0.2875*X(W))px) rotateY(-4.5deg)"
+                }
+                ,{
+                    transform:"translate3d(0,3.6%,$(-0.55*X(W))px) rotateY(-9deg)"
+                }
+                ,{
+                    transform:"translate3d(0,5.1%,$(-0.7875*X(W))px) rotateY(-13.5deg)"
+                }
+                ,{
+                    transform:"translate3d(0,6.4%,$(-1*X(W))px) rotateY(-18deg)"
+                }
+                ,{
+                    transform:"translate3d(0,7.5%,$(-1.1875*X(W))px) rotateY(-22.5deg)"
+                }
+                ,{
+                    transform:"translate3d(0,8.4%,$(-1.35*X(W))px) rotateY(-27deg)"
+                }
+                ,{
+                    transform:"translate3d(0,9.1%,$(-1.4875*X(W))px) rotateY(-31.5deg)"
+                }
+                ,{
+                    transform:"translate3d(0,9.6%,$(-1.6*X(W))px) rotateY(-36deg)"
+                }
+                ,{
+                    transform:"translate3d(0,9.9%%,$(-1.6875*X(W))px) rotateY(-40.5deg)"
+                }
+                ,{
+                    transform:"translate3d(0,10%,$(-1.75*X(W))px) rotateY(-45deg)"
+                }
+                ,{
+                    transform:"translate3d(0,9.9%,$(-1.7875*X(W))px) rotateY(-49.5deg)"
+                }
+                ,{
+                    transform:"translate3d(0,9.6%,$(-1.8*X(W))px) rotateY(-54deg)"
+                }
+                ,{
+                    transform:"translate3d(0,9.1%,$(-1.7875*X(W))px) rotateY(-58.5deg)"
+                }
+                ,{
+                    transform:"translate3d(0,8.4%,$(-1.75*X(W))px) rotateY(-63deg)"
+                }
+                ,{
+                    transform:"translate3d(0,7.5%,$(-1.6875*X(W))px) rotateY(-67.5deg)"
+                }
+                ,{
+                    transform:"translate3d(0,6.4%,$(-1.6*X(W))px) rotateY(-72deg)"
+                }
+                ,{
+                    transform:"translate3d(0,5.1%,$(-1.4875*X(W))px) rotateY(-76.5deg)"
+                }
+                ,{
+                    transform:"translate3d(0,3.6%,$(-1.35*X(W))px) rotateY(-81deg)"
+                }
+                ,{
+                    transform:"translate3d(0,1.9%,$(-1.1875*X(W))px) rotateY(-85.5deg)"
+                }
+                ,{
+                    transform:"translate3d(0,0,-X(W)px) rotateY(-90deg)"
+                }
+            ]
+        }
+        ,"cubes-right":{
+            columns:1,
+            current:{"transform-origin":"0 center",transform:"translate3d(0,0,0) rotateY(0deg)"},
+            next:{"transform-origin":"100% center",transform:"translate3d(-100%,0,0) rotateY(-90deg)"},
+            animation:[
+                {
+                    transform:"translate3d(0,0,0) rotateY(0deg)"
+                }
+                ,{
+                    transform:"translate3d(0,1.9%,$(-0.2875*X(W))px) rotateY(4.5deg)"
+                }
+                ,{
+                    transform:"translate3d(0,3.6%,$(-0.55*X(W))px) rotateY(9deg)"
+                }
+                ,{
+                    transform:"translate3d(0,5.1%,$(-0.7875*X(W))px) rotateY(13.5deg)"
+                }
+                ,{
+                    transform:"translate3d(0,6.4%,$(-1*X(W))px) rotateY(18deg)"
+                }
+                ,{
+                    transform:"translate3d(0,7.5%,$(-1.1875*X(W))px) rotateY(22.5deg)"
+                }
+                ,{
+                    transform:"translate3d(0,8.4%,$(-1.35*X(W))px) rotateY(27deg)"
+                }
+                ,{
+                    transform:"translate3d(0,9.1%,$(-1.4875*X(W))px) rotateY(31.5deg)"
+                }
+                ,{
+                    transform:"translate3d(0,9.6%,$(-1.6*X(W))px) rotateY(36deg)"
+                }
+                ,{
+                    transform:"translate3d(0,9.9%%,$(-1.6875*X(W))px) rotateY(40.5deg)"
+                }
+                ,{
+                    transform:"translate3d(0,10%,$(-1.75*X(W))px) rotateY(45deg)"
+                }
+                ,{
+                    transform:"translate3d(0,9.9%,$(-1.7875*X(W))px) rotateY(49.5deg)"
+                }
+                ,{
+                    transform:"translate3d(0,9.6%,$(-1.8*X(W))px) rotateY(54deg)"
+                }
+                ,{
+                    transform:"translate3d(0,9.1%,$(-1.7875*X(W))px) rotateY(58.5deg)"
+                }
+                ,{
+                    transform:"translate3d(0,8.4%,$(-1.75*X(W))px) rotateY(63deg)"
+                }
+                ,{
+                    transform:"translate3d(0,7.5%,$(-1.6875*X(W))px) rotateY(67.5deg)"
+                }
+                ,{
+                    transform:"translate3d(0,6.4%,$(-1.6*X(W))px) rotateY(72deg)"
+                }
+                ,{
+                    transform:"translate3d(0,5.1%,$(-1.4875*X(W))px) rotateY(76.5deg)"
+                }
+                ,{
+                    transform:"translate3d(0,3.6%,$(-1.35*X(W))px) rotateY(81deg)"
+                }
+                ,{
+                    transform:"translate3d(0,1.9%,$(-1.1875*X(W))px) rotateY(85.5deg)"
+                }
+                ,{
+                    transform:"translate3d(0,0,-X(W)px) rotateY(90deg)"
+                }
+            ]
+        }
+        ,"cubes-up":{
+            rows:1,
+            current:{"transform-origin":"center 0",transform:"translate3d(0,0,0) rotateX(0deg)"},
+            next:{"transform-origin":"center 0",transform:"translate3d(0,100%,0) rotateX(-90deg)"},
+            animation:[
+                {
+                    transform:"translate3d(0,0,0) rotateX(0deg)"
+                }
+                ,{
+                    transform:"translate3d(1.9%,0,$(-0.28625*X(W))px) rotateX(4.5deg)"
+                }
+                ,{
+                    transform:"translate3d(3.6%,0,$(-0.545*X(W))px) rotateX(9deg)"
+                }
+                ,{
+                    transform:"translate3d(5.1%,0,$(-0.77625*X(W))px) rotateX(13.5deg)"
+                }
+                ,{
+                    transform:"translate3d(6.4%,0,$(-0.98*X(W))px) rotateX(18deg)"
+                }
+                ,{
+                    transform:"translate3d(7.5%,0,$(-1.15625*X(W))px) rotateX(22.5deg)"
+                }
+                ,{
+                    transform:"translate3d(8.4%,0,$(-1.305*X(W))px) rotateX(27deg)"
+                }
+                ,{
+                    transform:"translate3d(9.1%,0,$(-1.42625*X(W))px) rotateX(31.5deg)"
+                }
+                ,{
+                    transform:"translate3d(9.6%,0,$(-1.52*X(W))px) rotateX(36deg)"
+                }
+                ,{
+                    transform:"translate3d(9.9%%,0,$(-1.58625*X(W))px) rotateX(40.5deg)"
+                }
+                ,{
+                    transform:"translate3d(10%,0,$(-1.625*X(W))px) rotateX(45deg)"
+                }
+                ,{
+                    transform:"translate3d(9.9%,0,$(-1.63625*X(W))px) rotateX(49.5deg)"
+                }
+                ,{
+                    transform:"translate3d(9.6%,0,$(-1.62*X(W))px) rotateX(54deg)"
+                }
+                ,{
+                    transform:"translate3d(9.1%,0,$(-1.57625*X(W))px) rotateX(58.5deg)"
+                }
+                ,{
+                    transform:"translate3d(8.4%,0,$(-1.505*X(W))px) rotateX(63deg)"
+                }
+                ,{
+                    transform:"translate3d(7.5%,0,$(-1.40625*X(W))px) rotateX(67.5deg)"
+                }
+                ,{
+                    transform:"translate3d(6.4%,0,$(-1.28*X(W))px) rotateX(72deg)"
+                }
+                ,{
+                    transform:"translate3d(5.1%,0,$(-1.12625*X(W))px) rotateX(76.5deg)"
+                }
+                ,{
+                    transform:"translate3d(3.6%,0,$(-0.945*X(W))px) rotateX(81deg)"
+                }
+                ,{
+                    transform:"translate3d(1.9%,0,$(-0.73625*X(W))px) rotateX(85.5deg)"
+                }
+                ,{
+                    transform:"translate3d(0,0,$(-0.5*X(W))px) rotateX(90deg)"
+                }
+            ]
+        }
+        ,"cubes-down":{
+            rows:1,
+            current:{"transform-origin":"center 0",transform:"translate3d(0,0,0) rotateX(0deg)"},
+            next:{"transform-origin":"center 100%",transform:"translate3d(0,-100%,0) rotateX(90deg)"},
+            animation:[
+                {
+                    transform:"translate3d(0,0,0) rotateX(0deg)"
+                }
+                ,{
+                    transform:"translate3d(1.9%,0,$(-0.28625*X(W))px) rotateX(-4.5deg)"
+                }
+                ,{
+                    transform:"translate3d(3.6%,0,$(-0.545*X(W))px) rotateX(-9deg)"
+                }
+                ,{
+                    transform:"translate3d(5.1%,0,$(-0.77625*X(W))px) rotateX(-13.5deg)"
+                }
+                ,{
+                    transform:"translate3d(6.4%,0,$(-0.98*X(W))px) rotateX(-18deg)"
+                }
+                ,{
+                    transform:"translate3d(7.5%,0,$(-1.15625*X(W))px) rotateX(-22.5deg)"
+                }
+                ,{
+                    transform:"translate3d(8.4%,0,$(-1.305*X(W))px) rotateX(-27deg)"
+                }
+                ,{
+                    transform:"translate3d(9.1%,0,$(-1.42625*X(W))px) rotateX(-31.5deg)"
+                }
+                ,{
+                    transform:"translate3d(9.6%,0,$(-1.52*X(W))px) rotateX(-36deg)"
+                }
+                ,{
+                    transform:"translate3d(9.9%%,0,$(-1.58625*X(W))px) rotateX(-40.5deg)"
+                }
+                ,{
+                    transform:"translate3d(10%,0,$(-1.625*X(W))px) rotateX(-45deg)"
+                }
+                ,{
+                    transform:"translate3d(9.9%,0,$(-1.63625*X(W))px) rotateX(-49.5deg)"
+                }
+                ,{
+                    transform:"translate3d(9.6%,0,$(-1.62*X(W))px) rotateX(-54deg)"
+                }
+                ,{
+                    transform:"translate3d(9.1%,0,$(-1.57625*X(W))px) rotateX(-58.5deg)"
+                }
+                ,{
+                    transform:"translate3d(8.4%,0,$(-1.505*X(W))px) rotateX(-63deg)"
+                }
+                ,{
+                    transform:"translate3d(7.5%,0,$(-1.40625*X(W))px) rotateX(-67.5deg)"
+                }
+                ,{
+                    transform:"translate3d(6.4%,0,$(-1.28*X(W))px) rotateX(-72deg)"
+                }
+                ,{
+                    transform:"translate3d(5.1%,0,$(-1.12625*X(W))px) rotateX(-76.5deg)"
+                }
+                ,{
+                    transform:"translate3d(3.6%,0,$(-0.945*X(W))px) rotateX(-81deg)"
+                }
+                ,{
+                    transform:"translate3d(1.9%,0,$(-0.73625*X(W))px) rotateX(-85.5deg)"
+                }
+                ,{
+                    transform:"translate3d(0,0,$(-0.5*X(W))px) rotateX(-90deg)"
+                }
+            ]
+        }
+        ,"fold-left":{
             rows:1,
             columns:1,
             current:{"transform-origin":"0 center",transform:"translate3d(0,0,-X(W)px) rotateY(0deg)"},
             next:{"transform-origin":"100% center",transform:"translate3d(0,0,0) rotateY(-90deg)"},
-            steps:[
+            animation:[
                 {
                     transform:"translate3d(0,0,X(W)px) rotateY(0deg)"
                 }
@@ -1151,12 +1383,11 @@ Imagik.Static = {
             ]
         }
         ,"fold-right":{
-            composite:true,
             rows:1,
             columns:1,
             current:{"transform-origin":"0 center",transform:"translate3d(0,0,-X(W)px) rotateY(0deg)"},
             next:{"transform-origin":"0 center",transform:"translate3d(0,0,0) rotateY(90deg)"},
-            steps:[
+            animation:[
                 {
                     transform:"translate3d(0,0,X(W)px) rotateY(0deg)"
                 }
@@ -1223,10 +1454,9 @@ Imagik.Static = {
             ]
         }
         ,"shuffle-left":{
-            composite:true,
             rows:1,
             columns:1,
-            current:{steps:[
+            current:{animation:[
                 /* Bezier Through (x=25%,rotY=60deg) */
                 {
                     transform:"translate3d(0,0,0) rotateY(0deg)"
@@ -1292,7 +1522,7 @@ Imagik.Static = {
                     transform:"translate3d(0,0,$(-1.5*X(W))px) rotateY(0deg)"
                 }
             ]},
-            next:{steps:[
+            next:{animation:[
                 /* Bezier Through (x=25%,rotY=60deg) */
                 {
                     transform:"translate3d(0,0,$(-1.5*X(W))px) rotateY(0deg)"
@@ -1360,10 +1590,9 @@ Imagik.Static = {
             ]}
         }
         ,"shuffle-right":{
-            composite:true,
             rows:1,
             columns:1,
-            current:{steps:[
+            current:{animation:[
                 /* Bezier Through (x=25%,rotY=60deg) */
                 {
                     transform:"translate3d(0,0,0) rotateY(0deg)"
@@ -1429,7 +1658,7 @@ Imagik.Static = {
                     transform:"translate3d(0,0,$(-1.5*X(W))px) rotateY(0deg)"
                 }
             ]},
-            next:{steps:[
+            next:{animation:[
                 /* Bezier Through (x=25%,rotY=60deg) */
                 {
                     transform:"translate3d(0,0,$(-1.5*X(W))px) rotateY(0deg)"
@@ -1504,11 +1733,13 @@ Imagik.Static = {
             animation:"rotate"
         }
         ,"flip-horizontal":{
-            composite:true,
+            current:true,
+            next:true,
             animation:"flip-horizontal"
         }
         ,"flip-vertical":{
-            composite:true,
+            current:true,
+            next:true,
             animation:"flip-vertical"
         }
         ,"iris":{
@@ -1528,7 +1759,6 @@ Imagik.Static = {
             animation:"fade"
         }
         ,"fade-zoom":{
-            composite:true,
             rows:1,
             columns:1,
             current:{animation:"fade-zoom",selector:">.imagik-tile-inside"},
@@ -1665,49 +1895,57 @@ Imagik.Static = {
             animation:"fly-bottom"
         }
         ,"pan-top-left":{
-            composite:true,
+            current:true,
+            next:true,
             rows:1,
             columns:1,
             animation:"pan-top-left"
         }
         ,"pan-top-right":{
-            composite:true,
+            current:true,
+            next:true,
             rows:1,
             columns:1,
             animation:"pan-top-right"
         }
         ,"pan-bottom-right":{
-            composite:true,
+            current:true,
+            next:true,
             rows:1,
             columns:1,
             animation:"pan-bottom-right"
         }
         ,"pan-bottom-left":{
-            composite:true,
+            current:true,
+            next:true,
             rows:1,
             columns:1,
             animation:"pan-bottom-left"
         }
         ,"pan-left":{
-            composite:true,
+            current:true,
+            next:true,
             rows:1,
             columns:1,
             animation:"pan-left"
         }
         ,"pan-right":{
-            composite:true,
+            current:true,
+            next:true,
             rows:1,
             columns:1,
             animation:"pan-right"
         }
         ,"pan-top":{
-            composite:true,
+            current:true,
+            next:true,
             rows:1,
             columns:1,
             animation:"pan-top"
         }
         ,"pan-bottom":{
-            composite:true,
+            current:true,
+            next:true,
             rows:1,
             columns:1,
             animation:"pan-bottom"
@@ -1776,59 +2014,63 @@ Imagik.Static = {
     }
 
     ,randomTransitions: [
-         {transition:"flip-horizontal",ease:"ease-out-back",duration:1.5,overlap:0.9,rows:1,columns:1,order:"rows-first"}
-        ,{transition:"flip-horizontal",ease:"ease-out-back",duration:1.5,overlap:0.9,rows:1,columns:6,order:"random"}
-        ,{transition:"flip-horizontal",ease:"ease-out-back",duration:1.5,overlap:0.9,rows:6,columns:6,order:"spiral-top-left"}
-        ,{transition:"flip-horizontal",ease:"ease-out-back",duration:1.5,overlap:0.9,rows:6,columns:6,order:"diagonal-top-left"}
-        ,{transition:"flip-horizontal",ease:"ease-out-back",duration:1.5,overlap:0.9,rows:6,columns:6,order:"diagonal-bottom-right"}
-        ,{transition:"flip-horizontal",ease:"ease-out-back",duration:1.5,overlap:0.9,rows:6,columns:6,order:"random"}
-        ,{transition:"flip-vertical",ease:"ease-out-back",duration:1.5,overlap:0.9,rows:1,columns:1,order:"rows-first"}
-        ,{transition:"flip-vertical",ease:"ease-out-back",duration:1.5,overlap:0.9,rows:6,columns:1,order:"random"}
-        ,{transition:"flip-vertical",ease:"ease-out-back",duration:1.5,overlap:0.9,rows:6,columns:6,order:"spiral-top-left"}
-        ,{transition:"flip-vertical",ease:"ease-out-back",duration:1.5,overlap:0.9,rows:6,columns:6,order:"diagonal-top-left"}
-        ,{transition:"flip-vertical",ease:"ease-out-back",duration:1.5,overlap:0.9,rows:6,columns:6,order:"diagonal-bottom-right"}
-        ,{transition:"flip-vertical",ease:"ease-out-back",duration:1.5,overlap:0.9,rows:6,columns:6,order:"random"}
-        ,{transition:"shuffle-left",ease:"ease-in-out",duration:1.5,overlap:1,rows:1,columns:1,order:"rows-first"}
-        ,{transition:"shuffle-right",ease:"ease-in-out",duration:1.5,overlap:1,rows:1,columns:1,order:"rows-first"}
-        ,{transition:"fold-left",ease:"ease-in-out",duration:1.5,overlap:1,rows:1,columns:1,order:"rows-first"}
-        ,{transition:"fold-right",ease:"ease-in-out",duration:1.5,overlap:1,rows:1,columns:1,order:"rows-first"}
-        ,{transition:"rotate",ease:"ease-out",duration:1.5,overlap:1,rows:6,columns:6,order:"columns-first"}
-        ,{transition:"rotate-reverse",ease:"ease-out",duration:1.5,overlap:1,rows:6,columns:6,order:"columns-first"}
-        ,{transition:"iris",ease:"ease-out",duration:1.5,overlap:0.9,rows:1,columns:1,order:"rows-first"}
-        ,{transition:"iris-reverse",ease:"ease-out",duration:1.5,overlap:0.9,rows:1,columns:1,order:"rows-first"}
-        ,{transition:"fade-zoom",ease:"ease-out",duration:1.5,rows:1,columns:1,order:"rows-first"}
-        ,{transition:"fade",ease:"ease-in",duration:1.5,overlap:0.9,rows:1,columns:1,order:"rows-first"}
-        ,{transition:"fade",ease:"ease-in",duration:1.5,overlap:0.9,rows:6,columns:6,order:"diagonal-top-left"}
-        ,{transition:"fade",ease:"ease-in",duration:1.5,overlap:0.9,rows:6,columns:6,order:"diagonal-bottom-right"}
-        ,{transition:"fade",ease:"ease-in",duration:1.5,overlap:0.9,rows:6,columns:6,order:"random"}
-        ,{transition:"fade",ease:"ease-in",duration:1.5,overlap:0.9,rows:6,columns:6,order:"spiral-top-left"}
-        ,{transition:"fade",ease:"ease-in",duration:1.5,overlap:0.9,rows:6,columns:6,order:"spiral-bottom-right"}
-        ,{transition:"fade",ease:"ease-in",duration:1.5,overlap:0.9,rows:6,columns:6,order:"left-right"}
-        ,{transition:"fade",ease:"ease-in",duration:1.5,overlap:0.9,rows:6,columns:6,order:"up-down"}
-        ,{transition:"grow-horizontal",ease:"ease-out",duration:1.5,overlap:0.9,rows:1,columns:6,order:"random"}
-        ,{transition:"grow-vertical",ease:"ease-out",duration:1.5,overlap:0.9,rows:6,columns:1,order:"random"}
-        ,{transition:"fade-grow-horizontal",ease:"ease-out",duration:1.5,overlap:0.9,rows:1,columns:6,order:"random"}
-        ,{transition:"fade-grow-vertical",ease:"ease-out",duration:1.5,overlap:0.9,rows:6,columns:1,order:"random"}
-        ,{transition:"grow",ease:"ease-out",duration:1.5,overlap:0.9,rows:6,columns:6,order:"rows-first"}
-        ,{transition:"shrink",ease:"ease-out",duration:1.5,overlap:1,rows:6,columns:6,order:"columns-first"}
-        ,{transition:"fade-shrink",ease:"ease-out",duration:1.5,overlap:0.9,rows:6,columns:6,order:"left-right"}
-        ,{transition:"fade-shrink",ease:"ease-out",duration:1.5,overlap:0.9,rows:6,columns:6,order:"diagonal-bottom-right"}
-        ,{transition:"move-left-right",ease:"ease-out-back",duration:1.5,overlap:0.8,rows:6,columns:1,order:"columns-first"}
-        ,{transition:"move-right",ease:"ease-out-back",duration:1.5,overlap:0.8,rows:6,columns:1,order:"columns-first"}
-        ,{transition:"move-up-down",ease:"ease-out-back",duration:1.5,overlap:0.9,rows:1,columns:8,order:"columns-first"}
-        ,{transition:"move-up",ease:"ease-out-back",duration:1.5,overlap:0.9,rows:1,columns:6,order:"columns-first"}
-        ,{transition:"fly-top-left",ease:"ease-out-back",duration:1.5,overlap:0.9,rows:1,columns:1,order:"columns-first"}
-        ,{transition:"fly-bottom-right",ease:"ease-out-back",duration:1.5,overlap:0.9,rows:1,columns:1,order:"columns-first"}
-        ,{transition:"fly-left",ease:"ease-out-back",duration:1.5,overlap:0.9,rows:1,columns:1,order:"columns-first"}
-        ,{transition:"fly-right",ease:"ease-out-back",duration:1.5,overlap:0.9,rows:1,columns:1,order:"columns-first"}
-        ,{transition:"fly-top",ease:"ease-out-back",duration:1.5,overlap:0.9,rows:1,columns:1,order:"columns-first"}
-        ,{transition:"fly-bottom",ease:"ease-out-back",duration:1.5,overlap:0.9,rows:1,columns:1,order:"columns-first"}
-        ,{transition:"pan-top-left",ease:"ease-out-back",duration:1.5,overlap:0.9,rows:1,columns:1,order:"columns-first"}
-        ,{transition:"pan-bottom-right",ease:"ease-out-back",duration:1.5,overlap:0.9,rows:1,columns:1,order:"columns-first"}
-        ,{transition:"pan-left",ease:"ease-out-back",duration:1.5,overlap:0.9,rows:1,columns:1,order:"columns-first"}
-        ,{transition:"pan-right",ease:"ease-out-back",duration:1.5,overlap:0.9,rows:1,columns:1,order:"columns-first"}
-        ,{transition:"pan-top",ease:"ease-out-back",duration:1.5,overlap:0.9,rows:1,columns:1,order:"columns-first"}
-        ,{transition:"pan-bottom",ease:"ease-out-back",duration:1.5,overlap:0.9,rows:1,columns:1,order:"columns-first"}
+         {transition:"flip-horizontal",ease:"ease-out-back",duration:2,overlap:0.9,rows:1,columns:1,order:"rows-first"}
+        ,{transition:"flip-horizontal",ease:"ease-out-back",duration:2,overlap:0.9,rows:1,columns:6,order:"random"}
+        ,{transition:"flip-horizontal",ease:"ease-out-back",duration:2,overlap:0.9,rows:6,columns:6,order:"spiral-top-left"}
+        ,{transition:"flip-horizontal",ease:"ease-out-back",duration:2,overlap:0.9,rows:6,columns:6,order:"diagonal-top-left"}
+        ,{transition:"flip-horizontal",ease:"ease-out-back",duration:2,overlap:0.9,rows:6,columns:6,order:"diagonal-bottom-right"}
+        ,{transition:"flip-horizontal",ease:"ease-out-back",duration:2,overlap:0.9,rows:6,columns:6,order:"random"}
+        ,{transition:"flip-vertical",ease:"ease-out-back",duration:2,overlap:0.9,rows:1,columns:1,order:"rows-first"}
+        ,{transition:"flip-vertical",ease:"ease-out-back",duration:2,overlap:0.9,rows:6,columns:1,order:"random"}
+        ,{transition:"flip-vertical",ease:"ease-out-back",duration:2,overlap:0.9,rows:6,columns:6,order:"spiral-top-left"}
+        ,{transition:"flip-vertical",ease:"ease-out-back",duration:2,overlap:0.9,rows:6,columns:6,order:"diagonal-top-left"}
+        ,{transition:"flip-vertical",ease:"ease-out-back",duration:2,overlap:0.9,rows:6,columns:6,order:"diagonal-bottom-right"}
+        ,{transition:"flip-vertical",ease:"ease-out-back",duration:2,overlap:0.9,rows:6,columns:6,order:"random"}
+        ,{transition:"shuffle-left",ease:"ease-in-out",duration:2,overlap:1,rows:1,columns:1,order:"rows-first"}
+        ,{transition:"shuffle-right",ease:"ease-in-out",duration:2,overlap:1,rows:1,columns:1,order:"rows-first"}
+        ,{transition:"fold-left",ease:"ease-in-out",duration:2,overlap:1,rows:1,columns:1,order:"rows-first"}
+        ,{transition:"fold-right",ease:"ease-in-out",duration:2,overlap:1,rows:1,columns:1,order:"rows-first"}
+        ,{transition:"cubes-left",ease:"ease-in-out",duration:2,overlap:0.9,rows:4,columns:1,order:"rows-first"}
+        ,{transition:"cubes-right",ease:"ease-in-out",duration:2,overlap:0.9,rows:4,columns:1,order:"rows-first"}
+        ,{transition:"cubes-up",ease:"ease-in-out",duration:2,overlap:0.9,rows:1,columns:4,order:"rows-first"}
+        ,{transition:"cubes-down",ease:"ease-in-out",duration:2,overlap:0.9,rows:1,columns:4,order:"rows-first"}
+        ,{transition:"rotate",ease:"ease-out",duration:2,overlap:1,rows:6,columns:6,order:"columns-first"}
+        ,{transition:"rotate-reverse",ease:"ease-out",duration:2,overlap:1,rows:6,columns:6,order:"columns-first"}
+        ,{transition:"iris",ease:"ease-out",duration:2,overlap:0.9,rows:1,columns:1,order:"rows-first"}
+        ,{transition:"iris-reverse",ease:"ease-out",duration:2,overlap:0.9,rows:1,columns:1,order:"rows-first"}
+        ,{transition:"fade-zoom",ease:"ease-out",duration:2,rows:1,columns:1,order:"rows-first"}
+        ,{transition:"fade",ease:"ease-in",duration:2,overlap:0.9,rows:1,columns:1,order:"rows-first"}
+        ,{transition:"fade",ease:"ease-in",duration:2,overlap:0.9,rows:6,columns:6,order:"diagonal-top-left"}
+        ,{transition:"fade",ease:"ease-in",duration:2,overlap:0.9,rows:6,columns:6,order:"diagonal-bottom-right"}
+        ,{transition:"fade",ease:"ease-in",duration:2,overlap:0.9,rows:6,columns:6,order:"random"}
+        ,{transition:"fade",ease:"ease-in",duration:2,overlap:0.9,rows:6,columns:6,order:"spiral-top-left"}
+        ,{transition:"fade",ease:"ease-in",duration:2,overlap:0.9,rows:6,columns:6,order:"spiral-bottom-right"}
+        ,{transition:"fade",ease:"ease-in",duration:2,overlap:0.9,rows:6,columns:6,order:"left-right"}
+        ,{transition:"fade",ease:"ease-in",duration:2,overlap:0.9,rows:6,columns:6,order:"up-down"}
+        ,{transition:"grow-horizontal",ease:"ease-out",duration:2,overlap:0.9,rows:1,columns:6,order:"random"}
+        ,{transition:"grow-vertical",ease:"ease-out",duration:2,overlap:0.9,rows:6,columns:1,order:"random"}
+        ,{transition:"fade-grow-horizontal",ease:"ease-out",duration:2,overlap:0.9,rows:1,columns:6,order:"random"}
+        ,{transition:"fade-grow-vertical",ease:"ease-out",duration:2,overlap:0.9,rows:6,columns:1,order:"random"}
+        ,{transition:"grow",ease:"ease-out",duration:2,overlap:0.9,rows:6,columns:6,order:"rows-first"}
+        ,{transition:"shrink",ease:"ease-out",duration:2,overlap:1,rows:6,columns:6,order:"columns-first"}
+        ,{transition:"fade-shrink",ease:"ease-out",duration:2,overlap:0.9,rows:6,columns:6,order:"left-right"}
+        ,{transition:"fade-shrink",ease:"ease-out",duration:2,overlap:0.9,rows:6,columns:6,order:"diagonal-bottom-right"}
+        ,{transition:"move-left-right",ease:"ease-out-back",duration:2,overlap:0.8,rows:6,columns:1,order:"columns-first"}
+        ,{transition:"move-right",ease:"ease-out-back",duration:2,overlap:0.8,rows:6,columns:1,order:"columns-first"}
+        ,{transition:"move-up-down",ease:"ease-out-back",duration:2,overlap:0.9,rows:1,columns:8,order:"columns-first"}
+        ,{transition:"move-up",ease:"ease-out-back",duration:2,overlap:0.9,rows:1,columns:6,order:"columns-first"}
+        ,{transition:"fly-top-left",ease:"ease-out-back",duration:2,overlap:0.9,rows:1,columns:1,order:"columns-first"}
+        ,{transition:"fly-bottom-right",ease:"ease-out-back",duration:2,overlap:0.9,rows:1,columns:1,order:"columns-first"}
+        ,{transition:"fly-left",ease:"ease-out-back",duration:2,overlap:0.9,rows:1,columns:1,order:"columns-first"}
+        ,{transition:"fly-right",ease:"ease-out-back",duration:2,overlap:0.9,rows:1,columns:1,order:"columns-first"}
+        ,{transition:"fly-top",ease:"ease-out-back",duration:2,overlap:0.9,rows:1,columns:1,order:"columns-first"}
+        ,{transition:"fly-bottom",ease:"ease-out-back",duration:2,overlap:0.9,rows:1,columns:1,order:"columns-first"}
+        ,{transition:"pan-top-left",ease:"ease-out-back",duration:2,overlap:0.9,rows:1,columns:1,order:"columns-first"}
+        ,{transition:"pan-bottom-right",ease:"ease-out-back",duration:2,overlap:0.9,rows:1,columns:1,order:"columns-first"}
+        ,{transition:"pan-left",ease:"ease-out-back",duration:2,overlap:0.9,rows:1,columns:1,order:"columns-first"}
+        ,{transition:"pan-right",ease:"ease-out-back",duration:2,overlap:0.9,rows:1,columns:1,order:"columns-first"}
+        ,{transition:"pan-top",ease:"ease-out-back",duration:2,overlap:0.9,rows:1,columns:1,order:"columns-first"}
+        ,{transition:"pan-bottom",ease:"ease-out-back",duration:2,overlap:0.9,rows:1,columns:1,order:"columns-first"}
     ]
 
     // utils

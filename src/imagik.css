@@ -60,29 +60,30 @@
 .imagik-play-pause
 {
     position:absolute;
-    width:250px;
-    height:250px;
+    width:180px;
+    height:180px;
     display:block;
-    background:rgba(255,255,255,0.6) url("./play.png") no-repeat center center;
+    background:rgba(255,255,255,0.5) url("./play.png") no-repeat center center;
     background-size:cover;
     border-radius:50%;
     overflow:hidden;
     top:50%;
     left:50%;
-    margin-top:-125px;
-    margin-left:-125px;
+    margin-top:-90px;
+    margin-left:-90px;
     z-index:5;
     opacity:0;
     transform:scale(0);
-    transition:all 0.2s cubic-bezier(0.175, 0.885, 0.320, 1.275);
+    transition:all 0.4s cubic-bezier(0.600, -0.280, 0.735, 0.045);
     cursor:pointer;
+    pointer-events:none;
 }
 .paused .imagik-play-pause
 {
     background-image:url("./pause.png");
     opacity:1;
     transform:scale(1);
-    transition:all 0.2s cubic-bezier(0.175, 0.885, 0.320, 1.275);
+    transition:all 0.4s cubic-bezier(0.600, -0.280, 0.735, 0.045));
 }
 .imagik-caption
 {
@@ -100,6 +101,7 @@
     display:block;
     transform:translate3d(0, 100%, 0);
     transition:transform 0.2s ease-out;
+    pointer-events:none;
 }
 .imagik-caption.show
 {
@@ -111,7 +113,7 @@
 .imagik-holder
 {
     position:relative;
-    overflow:hidden;
+    overflow:hidden !important;
     margin:0 !important;
     padding:0 !important;
     border:0 !important;
@@ -137,7 +139,6 @@
     width:100%;
     height:100%;
     background:transparent none no-repeat 0 0;
-    pointer-events:none;
 }
 .imagik-animation-layer
 {
@@ -152,8 +153,8 @@
     width:100%;
     height:100%;
     background:none;
-    perspective:1024px !important;
-    perspective-origin:center !important;
+    perspective:2000px;
+    perspective-origin:center;
     transform-style:preserve-3d;
     pointer-events:none;
 }
@@ -170,8 +171,8 @@
     width:100%;
     height:100%;
     background:none;
-    overflow:visible !important;
-    backface-visibility:visible !important;
+    overflow:visible;
+    backface-visibility:visible;
     transform-style:preserve-3d;
     transform-origin:center center;
     transform:translate3d(0,0,0); /* enable hardware acceleration */
@@ -183,6 +184,8 @@
     padding:0 !important;
     border:0 !important;
     display:block;
+    overflow:hidden;
+    backface-visibility:hidden;
     box-sizing:border-box;
     top:0%;
     left:0%;
@@ -190,10 +193,11 @@
     height:100%;
     background:none;
     transform-origin:center center;
-    overflow:hidden !important;
-    backface-visibility:hidden;
-    transform-style:preserve-3d;
     transform:translate3d(0,0,0); /* enable hardware acceleration */
+}
+.imagik-webkit .imagik-tile
+{
+    backface-visibility:visible; /* needed to fix a bug in webkit (Chrome/Opera) that makes flip of 100% disappear and not render */
 }
 .imagik-tile-inside
 {
@@ -202,7 +206,6 @@
     padding:0 !important;
     border:0 !important;
     overflow:hidden !important;
-    backface-visibility:hidden;
     display:block;
     box-sizing:border-box;
     top:0%;
@@ -221,17 +224,57 @@
 {
     transform-origin:0 center;
 }
+.imagik-animation-layer.imagik-fx-cubes-left .imagik-tile-current
+{
+    transform-origin:0 center;
+    transform:translate3d(0,0,0) rotateY(0deg);
+}
+.imagik-animation-layer.imagik-fx-cubes-left .imagik-tile-next
+{
+    transform-origin:0 center;
+    transform:translate3d(100%,0,0) rotateY(90deg);
+}
 .imagik-animation-layer.imagik-fx-cubes-right .imagik-tile-wrapper
 {
     transform-origin:100% center;
+}
+.imagik-animation-layer.imagik-fx-cubes-right .imagik-tile-current
+{
+    transform-origin:0 center;
+    transform:translate3d(0,0,0) rotateY(0deg);
+}
+.imagik-animation-layer.imagik-fx-cubes-right .imagik-tile-next
+{
+    transform-origin:100% center;
+    transform:translate3d(-100%,0,0) rotateY(-90deg);
 }
 .imagik-animation-layer.imagik-fx-cubes-up .imagik-tile-wrapper
 {
     transform-origin:center 0 0;
 }
+.imagik-animation-layer.imagik-fx-cubes-up .imagik-tile-current
+{
+    transform-origin:center 0;
+    transform:translate3d(0,0,0) rotateX(0deg);
+}
+.imagik-animation-layer.imagik-fx-cubes-up .imagik-tile-next
+{
+    transform-origin:center 0;
+    transform:translate3d(0,100%,0) rotateX(-90deg);
+}
 .imagik-animation-layer.imagik-fx-cubes-down .imagik-tile-wrapper
 {
     transform-origin:center 100% 0;
+}
+.imagik-animation-layer.imagik-fx-cubes-down .imagik-tile-current
+{
+    transform-origin:center 0;
+    transform:translate3d(0,0,0) rotateX(0deg);
+}
+.imagik-animation-layer.imagik-fx-cubes-down .imagik-tile-next
+{
+    transform-origin:center 100%;
+    transform:translate3d(0,-100%,0) rotateX(90deg);
 }
 .imagik-animation-layer.imagik-fx-fold-left .imagik-tile-wrapper
 {
@@ -241,69 +284,93 @@
 {
     transform-origin:0 center;
 }
+.imagik-animation-layer.imagik-fx-flip-horizontal .imagik-tile-wrapper
+{
+    transform-origin:center center;
+}
+.imagik-animation-layer.imagik-fx-flip-horizontal .imagik-tile-current
+{
+    transform:rotateY(0deg);
+}
+.imagik-animation-layer.imagik-fx-flip-horizontal .imagik-tile-next
+{
+    transform:rotateY(-180deg);
+}
+.imagik-animation-layer.imagik-fx-flip-vertical .imagik-tile-wrapper
+{
+    transform-origin:center center;
+}
+.imagik-animation-layer.imagik-fx-flip-vertical .imagik-tile-current
+{
+    transform:rotateX(0deg);
+}
+.imagik-animation-layer.imagik-fx-flip-vertical .imagik-tile-next
+{
+    transform:rotateX(180deg);
+}
 .imagik-animation-layer.imagik-fx-pan-top-left .imagik-tile-current
 {
-    transform: translate3d(0,0,0);
+    transform:translate3d(0,0,0);
 }
 .imagik-animation-layer.imagik-fx-pan-top-left .imagik-tile-next
 {
-    transform: translate3d(100%,100%,0);
+    transform:translate3d(100%,100%,0);
 }
 .imagik-animation-layer.imagik-fx-pan-top-right .imagik-tile-current
 {
-    transform: translate3d(0,0,0);
+    transform:translate3d(0,0,0);
 }
 .imagik-animation-layer.imagik-fx-pan-top-right .imagik-tile-next
 {
-    transform: translate3d(-100%,100%,0);
+    transform:translate3d(-100%,100%,0);
 }
 .imagik-animation-layer.imagik-fx-pan-bottom-right .imagik-tile-current
 {
-    transform: translate3d(0,0,0);
+    transform:translate3d(0,0,0);
 }
 .imagik-animation-layer.imagik-fx-pan-bottom-right .imagik-tile-next
 {
-    transform: translate3d(-100%,-100%,0);
+    transform:translate3d(-100%,-100%,0);
 }
 .imagik-animation-layer.imagik-fx-pan-bottom-left .imagik-tile-current
 {
-    transform: translate3d(0,0,0);
+    transform:translate3d(0,0,0);
 }
 .imagik-animation-layer.imagik-fx-pan-bottom-left .imagik-tile-next
 {
-    transform: translate3d(100%,-100%,0);
+    transform:translate3d(100%,-100%,0);
 }
 .imagik-animation-layer.imagik-fx-pan-left .imagik-tile-current
 {
-    transform: translate3d(0,0,0);
+    transform:translate3d(0,0,0);
 }
 .imagik-animation-layer.imagik-fx-pan-left .imagik-tile-next
 {
-    transform: translate3d(100%,0,0);
+    transform:translate3d(100%,0,0);
 }
 .imagik-animation-layer.imagik-fx-pan-right .imagik-tile-current
 {
-    transform: translate3d(0,0,0);
+    transform:translate3d(0,0,0);
 }
 .imagik-animation-layer.imagik-fx-pan-right .imagik-tile-next
 {
-    transform: translate3d(-100%,0,0);
+    transform:translate3d(-100%,0,0);
 }
 .imagik-animation-layer.imagik-fx-pan-top .imagik-tile-current
 {
-    transform: translate3d(0,0,0);
+    transform:translate3d(0,0,0);
 }
 .imagik-animation-layer.imagik-fx-pan-top .imagik-tile-next
 {
-    transform: translate3d(0,100%,0);
+    transform:translate3d(0,100%,0);
 }
 .imagik-animation-layer.imagik-fx-pan-bottom .imagik-tile-current
 {
-    transform: translate3d(0,0,0);
+    transform:translate3d(0,0,0);
 }
 .imagik-animation-layer.imagik-fx-pan-bottom .imagik-tile-next
 {
-    transform: translate3d(0,-100%,0);
+    transform:translate3d(0,-100%,0);
 }
 @keyframes imagik-animation-iris {
     from{

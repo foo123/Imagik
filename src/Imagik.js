@@ -22,6 +22,10 @@ function ID( )
     if ( null == ID.N ) ID.N = 0;
     return ++ID.N;
 }
+function is_webkit( )
+{
+    return 'webkitRequestAnimationFrame' in window;
+}
 function is_string( x )
 {
     return (x instanceof String) || ('[object String]'===toString.call(x));
@@ -588,7 +592,7 @@ function Imagik( el, options )
     $append(document.head, self.style);
 
     // global vars
-    var holder, caption, controls, imageLayer, animationLayer, imgs = [], fx = [], captions = [], ind = [],
+    var holder, caption, controls, imageLayer, animationLayer, imgs = [], links = [], fx = [], captions = [], ind = [],
         current = -1, prevcurrent = -1, timer, dotimer = true, paused = false, p = null, p2 = null,
         numpiec = 0, style = '', lastfx = null, evtCarrier = null, W, H,
         randtrans = shuffle(Imagik.Static.randomTransitions.slice()), randindex = 0,
@@ -612,6 +616,7 @@ function Imagik( el, options )
 
         W = stdMath.round(self.el.clientWidth); H = stdMath.round(W/self.options.aspectRatio);
         holder = $el('<div class="imagik-holder"></div>');
+        if ( is_webkit() ) $addClass(holder, 'imagik-webkit');
         holder.style.width = String(W)+'px';
         holder.style.height = String(H)+'px';
 
@@ -646,6 +651,7 @@ function Imagik( el, options )
                 thisfx.delay = stdMath.max(0.0, parseFloat(thisfx.delay, 10));
             }
             imgs.push($attr($$('img', div)[0], 'src'));
+            links.push($attr($$('a', div)[0], 'href')||'#');
             fx.push(thisfx);
             captions.push($html($$('div', div)[0]).trim());
             $remove(div);
@@ -673,6 +679,7 @@ function Imagik( el, options )
                 thisfx.delay = stdMath.max(0.0, parseFloat(thisfx.delay, 10));
 
                 imgs.push(img.src);
+                links.push(img.href||'#');
                 fx.push(thisfx);
                 captions.push(img.caption!=null ? String(img.caption).trim() : '');
             });
@@ -680,7 +687,7 @@ function Imagik( el, options )
 
         $append(self.el, holder);
 
-        imageLayer = $el('<div class="imagik-image-layer"></div>');
+        imageLayer = $el('<a href="#" class="imagik-image-layer"></a>');
         imageLayer.style.zIndex = 2;
         imageLayer.style.backgroundSize = String(W)+'px auto';
         animationLayer = $el('<div class="imagik-animation-layer"></div>');
@@ -750,6 +757,7 @@ function Imagik( el, options )
 
         prevcurrent = 0; current = 0;
         imageLayer.style.backgroundImage = 'url("'+imgs[ind[current]]+'")';
+        imageLayer.href = links[ind[current]];
         /*if ( self.options.controls )
         {
             toggleActive();
@@ -803,6 +811,7 @@ function Imagik( el, options )
         if ( !imgs ) return;
         clearPrev();
         imageLayer.style.backgroundImage = 'url("'+imgs[ind[current]]+'")';
+        imageLayer.href = links[ind[current]];
         imageLayer.style.zIndex = 2;
         if ( self.options.caption && captions[ind[current]]!=null && captions[ind[current]]!="" )
             $addClass($html(caption, captions[ind[current]]), 'show');
@@ -1040,8 +1049,8 @@ Imagik.Static = {
     transitions: {
         "cubes-left":{
             columns:1,
-            current:{"transform-origin":"0 center",transform:"translate3d(0,0,0) rotateY(0deg)"},
-            next:{"transform-origin":"0 center",transform:"translate3d(100%,0,0) rotateY(90deg)"},
+            current:true,
+            next:true,
             animation:[
                 {
                     transform:"translate3d(0,0,0) rotateY(0deg)"
@@ -1110,8 +1119,8 @@ Imagik.Static = {
         }
         ,"cubes-right":{
             columns:1,
-            current:{"transform-origin":"0 center",transform:"translate3d(0,0,0) rotateY(0deg)"},
-            next:{"transform-origin":"100% center",transform:"translate3d(-100%,0,0) rotateY(-90deg)"},
+            current:true,
+            next:true,
             animation:[
                 {
                     transform:"translate3d(0,0,0) rotateY(0deg)"
@@ -1180,8 +1189,8 @@ Imagik.Static = {
         }
         ,"cubes-up":{
             rows:1,
-            current:{"transform-origin":"center 0",transform:"translate3d(0,0,0) rotateX(0deg)"},
-            next:{"transform-origin":"center 0",transform:"translate3d(0,100%,0) rotateX(-90deg)"},
+            current:true,
+            next:true,
             animation:[
                 {
                     transform:"translate3d(0,0,0) rotateX(0deg)"
@@ -1250,8 +1259,8 @@ Imagik.Static = {
         }
         ,"cubes-down":{
             rows:1,
-            current:{"transform-origin":"center 0",transform:"translate3d(0,0,0) rotateX(0deg)"},
-            next:{"transform-origin":"center 100%",transform:"translate3d(0,-100%,0) rotateX(90deg)"},
+            current:true,
+            next:true,
             animation:[
                 {
                     transform:"translate3d(0,0,0) rotateX(0deg)"
@@ -1469,61 +1478,61 @@ Imagik.Static = {
                     transform:"translate3d(0,0,0) rotateY(0deg)"
                 }
                 ,{
-                    transform:"translate3d(-4.75%,0,$(-0.05*1.5*X(W))px) rotateY(11.4deg)"
+                    transform:"translate3d(-6.65%,0,$(-0.05*1.5*X(W))px) rotateY(11.4deg)"
                 }
                 ,{
-                    transform:"translate3d(-9%,0,$(-0.10*1.5*X(W))px) rotateY(21.6deg)"
+                    transform:"translate3d(-12.6%,0,$(-0.10*1.5*X(W))px) rotateY(21.6deg)"
                 }
                 ,{
-                    transform:"translate3d(-12.75%,0,$(-0.15*1.5*X(W))px) rotateY(30.6deg)"
+                    transform:"translate3d(-17.85%,0,$(-0.15*1.5*X(W))px) rotateY(30.6deg)"
                 }
                 ,{
-                    transform:"translate3d(-16%,0,$(-0.20*1.5*X(W))px) rotateY(38.4deg)"
+                    transform:"translate3d(-22.4%,0,$(-0.20*1.5*X(W))px) rotateY(38.4deg)"
                 }
                 ,{
-                    transform:"translate3d(-18.75%,0,$(-0.25*1.5*X(W))px) rotateY(45deg)"
+                    transform:"translate3d(-26.25%,0,$(-0.25*1.5*X(W))px) rotateY(45deg)"
                 }
                 ,{
-                    transform:"translate3d(-21%,0,$(-0.30*1.5*X(W))px) rotateY(50.4deg)"
+                    transform:"translate3d(-29.4%,0,$(-0.30*1.5*X(W))px) rotateY(50.4deg)"
                 }
                 ,{
-                    transform:"translate3d(-22.75%,0,$(-0.35*1.5*X(W))px) rotateY(54.6deg)"
+                    transform:"translate3d(-31.85%,0,$(-0.35*1.5*X(W))px) rotateY(54.6deg)"
                 }
                 ,{
-                    transform:"translate3d(-24%,0,$(-0.40*1.5*X(W))px) rotateY(57.6deg)"
+                    transform:"translate3d(-33.6%,0,$(-0.40*1.5*X(W))px) rotateY(57.6deg)"
                 }
                 ,{
-                    transform:"translate3d(-24.75%,0,$(-0.45*1.5*X(W))px) rotateY(59.4deg)"
+                    transform:"translate3d(-34.65%,0,$(-0.45*1.5*X(W))px) rotateY(59.4deg)"
                 }
                 ,{
-                    transform:"translate3d(-25%,0,$(-0.50*1.5*X(W))px) rotateY(60deg)"
+                    transform:"translate3d(-35%,0,$(-0.50*1.5*X(W))px) rotateY(60deg)"
                 }
                 ,{
-                    transform:"translate3d(-24.75%,0,$(-0.55*1.5*X(W))px) rotateY(59.4deg)"
+                    transform:"translate3d(-34.65%,0,$(-0.55*1.5*X(W))px) rotateY(59.4deg)"
                 }
                 ,{
-                    transform:"translate3d(-24%,0,$(-0.60*1.5*X(W))px) rotateY(57.6deg)"
+                    transform:"translate3d(-33.6%,0,$(-0.60*1.5*X(W))px) rotateY(57.6deg)"
                 }
                 ,{
-                    transform:"translate3d(-22.75%,0,$(-0.65*1.5*X(W))px) rotateY(54.6deg)"
+                    transform:"translate3d(-31.85%,0,$(-0.65*1.5*X(W))px) rotateY(54.6deg)"
                 }
                 ,{
-                    transform:"translate3d(-21%,0,$(-0.70*1.5*X(W))px) rotateY(50.4deg)"
+                    transform:"translate3d(-29.4%,0,$(-0.70*1.5*X(W))px) rotateY(50.4deg)"
                 }
                 ,{
-                    transform:"translate3d(-18.75%,0,$(-0.75*1.5*X(W))px) rotateY(45deg)"
+                    transform:"translate3d(-26.25%,0,$(-0.75*1.5*X(W))px) rotateY(45deg)"
                 }
                 ,{
-                    transform:"translate3d(-16%,0,$(-0.80*1.5*X(W))px) rotateY(38.4deg)"
+                    transform:"translate3d(-22.4%,0,$(-0.80*1.5*X(W))px) rotateY(38.4deg)"
                 }
                 ,{
-                    transform:"translate3d(-12.75%,0,$(-0.85*1.5*X(W))px) rotateY(30.6deg)"
+                    transform:"translate3d(-17.85%,0,$(-0.85*1.5*X(W))px) rotateY(30.6deg)"
                 }
                 ,{
-                    transform:"translate3d(-9%,0,$(-0.90*1.5*X(W))px) rotateY(21.6deg)"
+                    transform:"translate3d(-12.6%,0,$(-0.90*1.5*X(W))px) rotateY(21.6deg)"
                 }
                 ,{
-                    transform:"translate3d(-4.75%,0,$(-0.95*1.5*X(W))px) rotateY(11.4deg)"
+                    transform:"translate3d(-6.65%,0,$(-0.95*1.5*X(W))px) rotateY(11.4deg)"
                 }
                 ,{
                     transform:"translate3d(0,0,$(-1.5*X(W))px) rotateY(0deg)"
@@ -1535,61 +1544,61 @@ Imagik.Static = {
                     transform:"translate3d(0,0,$(-1.5*X(W))px) rotateY(0deg)"
                 }
                 ,{
-                    transform:"translate3d(4.75%,0,$(-0.95*1.5*X(W))px) rotateY(-11.4deg)"
+                    transform:"translate3d(6.65%,0,$(-0.95*1.5*X(W))px) rotateY(-11.4deg)"
                 }
                 ,{
-                    transform:"translate3d(9%,0,$(-0.90*1.5*X(W))px) rotateY(-21.6deg)"
+                    transform:"translate3d(12.6%,0,$(-0.90*1.5*X(W))px) rotateY(-21.6deg)"
                 }
                 ,{
-                    transform:"translate3d(12.75%,0,$(-0.85*1.5*X(W))px) rotateY(-30.6deg)"
+                    transform:"translate3d(17.85%,0,$(-0.85*1.5*X(W))px) rotateY(-30.6deg)"
                 }
                 ,{
-                    transform:"translate3d(16%,0,$(-0.80*1.5*X(W))px) rotateY(-38.4deg)"
+                    transform:"translate3d(22.4%,0,$(-0.80*1.5*X(W))px) rotateY(-38.4deg)"
                 }
                 ,{
-                    transform:"translate3d(18.75%,0,$(-0.75*1.5*X(W))px) rotateY(-45deg)"
+                    transform:"translate3d(26.25%,0,$(-0.75*1.5*X(W))px) rotateY(-45deg)"
                 }
                 ,{
-                    transform:"translate3d(21%,0,$(-0.70*1.5*X(W))px) rotateY(-50.4deg)"
+                    transform:"translate3d(29.4%,0,$(-0.70*1.5*X(W))px) rotateY(-50.4deg)"
                 }
                 ,{
-                    transform:"translate3d(22.75%,0,$(-0.65*1.5*X(W))px) rotateY(-54.6deg)"
+                    transform:"translate3d(31.85%,0,$(-0.65*1.5*X(W))px) rotateY(-54.6deg)"
                 }
                 ,{
-                    transform:"translate3d(24%,0,$(-0.60*1.5*X(W))px) rotateY(-57.6deg)"
+                    transform:"translate3d(33.6%,0,$(-0.60*1.5*X(W))px) rotateY(-57.6deg)"
                 }
                 ,{
-                    transform:"translate3d(24.75%,0,$(-0.55*1.5*X(W))px) rotateY(-59.4deg)"
+                    transform:"translate3d(34.65%,0,$(-0.55*1.5*X(W))px) rotateY(-59.4deg)"
                 }
                 ,{
-                    transform:"translate3d(25%,0,$(-0.50*1.5*X(W))px) rotateY(-60deg)"
+                    transform:"translate3d(35%,0,$(-0.50*1.5*X(W))px) rotateY(-60deg)"
                 }
                 ,{
-                    transform:"translate3d(24.75%,0,$(-0.45*1.5*X(W))px) rotateY(-59.4deg)"
+                    transform:"translate3d(34.65%,0,$(-0.45*1.5*X(W))px) rotateY(-59.4deg)"
                 }
                 ,{
-                    transform:"translate3d(24%,0,$(-0.40*1.5*X(W))px) rotateY(-57.6deg)"
+                    transform:"translate3d(33.6%,0,$(-0.40*1.5*X(W))px) rotateY(-57.6deg)"
                 }
                 ,{
-                    transform:"translate3d(22.75%,0,$(-0.35*1.5*X(W))px) rotateY(-54.6deg)"
+                    transform:"translate3d(31.85%,0,$(-0.35*1.5*X(W))px) rotateY(-54.6deg)"
                 }
                 ,{
-                    transform:"translate3d(21%,0,$(-0.30*1.5*X(W))px) rotateY(-50.4deg)"
+                    transform:"translate3d(29.4%,0,$(-0.30*1.5*X(W))px) rotateY(-50.4deg)"
                 }
                 ,{
-                    transform:"translate3d(18.75%,0,$(-0.25*1.5*X(W))px) rotateY(-45deg)"
+                    transform:"translate3d(26.25%,0,$(-0.25*1.5*X(W))px) rotateY(-45deg)"
                 }
                 ,{
-                    transform:"translate3d(16%,0,$(-0.20*1.5*X(W))px) rotateY(-38.4deg)"
+                    transform:"translate3d(22.4%,0,$(-0.20*1.5*X(W))px) rotateY(-38.4deg)"
                 }
                 ,{
-                    transform:"translate3d(12.75%,0,$(-0.15*1.5*X(W))px) rotateY(-30.6deg)"
+                    transform:"translate3d(17.85%,0,$(-0.15*1.5*X(W))px) rotateY(-30.6deg)"
                 }
                 ,{
-                    transform:"translate3d(9%,0,$(-0.10*1.5*X(W))px) rotateY(-21.6deg)"
+                    transform:"translate3d(12.6%,0,$(-0.10*1.5*X(W))px) rotateY(-21.6deg)"
                 }
                 ,{
-                    transform:"translate3d(4.75%,0,$(-0.05*1.5*X(W))px) rotateY(-11.4deg)"
+                    transform:"translate3d(6.65%,0,$(-0.05*1.5*X(W))px) rotateY(-11.4deg)"
                 }
                 ,{
                     transform:"translate3d(0,0,0) rotateY(0deg)"
@@ -1605,61 +1614,61 @@ Imagik.Static = {
                     transform:"translate3d(0,0,0) rotateY(0deg)"
                 }
                 ,{
-                    transform:"translate3d(4.75%,0,$(-0.05*1.5*X(W))px) rotateY(-11.4deg)"
+                    transform:"translate3d(6.65%,0,$(-0.05*1.5*X(W))px) rotateY(-11.4deg)"
                 }
                 ,{
-                    transform:"translate3d(9%,0,$(-0.10*1.5*X(W))px) rotateY(-21.6deg)"
+                    transform:"translate3d(12.6%,0,$(-0.10*1.5*X(W))px) rotateY(-21.6deg)"
                 }
                 ,{
-                    transform:"translate3d(12.75%,0,$(-0.15*1.5*X(W))px) rotateY(-30.6deg)"
+                    transform:"translate3d(17.85%,0,$(-0.15*1.5*X(W))px) rotateY(-30.6deg)"
                 }
                 ,{
-                    transform:"translate3d(16%,0,$(-0.20*1.5*X(W))px) rotateY(-38.4deg)"
+                    transform:"translate3d(22.4%,0,$(-0.20*1.5*X(W))px) rotateY(-38.4deg)"
                 }
                 ,{
-                    transform:"translate3d(18.75%,0,$(-0.25*1.5*X(W))px) rotateY(-45deg)"
+                    transform:"translate3d(26.25%,0,$(-0.25*1.5*X(W))px) rotateY(-45deg)"
                 }
                 ,{
-                    transform:"translate3d(21%,0,$(-0.30*1.5*X(W))px) rotateY(-50.4deg)"
+                    transform:"translate3d(29.4%,0,$(-0.30*1.5*X(W))px) rotateY(-50.4deg)"
                 }
                 ,{
-                    transform:"translate3d(22.75%,0,$(-0.35*1.5*X(W))px) rotateY(-54.6deg)"
+                    transform:"translate3d(31.85%,0,$(-0.35*1.5*X(W))px) rotateY(-54.6deg)"
                 }
                 ,{
-                    transform:"translate3d(24%,0,$(-0.40*1.5*X(W))px) rotateY(-57.6deg)"
+                    transform:"translate3d(33.6%,0,$(-0.40*1.5*X(W))px) rotateY(-57.6deg)"
                 }
                 ,{
-                    transform:"translate3d(24.75%,0,$(-0.45*1.5*X(W))px) rotateY(-59.4deg)"
+                    transform:"translate3d(34.65%,0,$(-0.45*1.5*X(W))px) rotateY(-59.4deg)"
                 }
                 ,{
-                    transform:"translate3d(25%,0,$(-0.50*1.5*X(W))px) rotateY(-60deg)"
+                    transform:"translate3d(35%,0,$(-0.50*1.5*X(W))px) rotateY(-60deg)"
                 }
                 ,{
-                    transform:"translate3d(24.75%,0,$(-0.55*1.5*X(W))px) rotateY(-59.4deg)"
+                    transform:"translate3d(34.65%,0,$(-0.55*1.5*X(W))px) rotateY(-59.4deg)"
                 }
                 ,{
-                    transform:"translate3d(24%,0,$(-0.60*1.5*X(W))px) rotateY(-57.6deg)"
+                    transform:"translate3d(33.6%,0,$(-0.60*1.5*X(W))px) rotateY(-57.6deg)"
                 }
                 ,{
-                    transform:"translate3d(22.75%,0,$(-0.65*1.5*X(W))px) rotateY(-54.6deg)"
+                    transform:"translate3d(31.85%,0,$(-0.65*1.5*X(W))px) rotateY(-54.6deg)"
                 }
                 ,{
-                    transform:"translate3d(21%,0,$(-0.70*1.5*X(W))px) rotateY(-50.4deg)"
+                    transform:"translate3d(29.4%,0,$(-0.70*1.5*X(W))px) rotateY(-50.4deg)"
                 }
                 ,{
-                    transform:"translate3d(18.75%,0,$(-0.75*1.5*X(W))px) rotateY(-45deg)"
+                    transform:"translate3d(26.25%,0,$(-0.75*1.5*X(W))px) rotateY(-45deg)"
                 }
                 ,{
-                    transform:"translate3d(16%,0,$(-0.80*1.5*X(W))px) rotateY(-38.4deg)"
+                    transform:"translate3d(22.4%,0,$(-0.80*1.5*X(W))px) rotateY(-38.4deg)"
                 }
                 ,{
-                    transform:"translate3d(12.75%,0,$(-0.85*1.5*X(W))px) rotateY(-30.6deg)"
+                    transform:"translate3d(17.85%,0,$(-0.85*1.5*X(W))px) rotateY(-30.6deg)"
                 }
                 ,{
-                    transform:"translate3d(9%,0,$(-0.90*1.5*X(W))px) rotateY(-21.6deg)"
+                    transform:"translate3d(12.6%,0,$(-0.90*1.5*X(W))px) rotateY(-21.6deg)"
                 }
                 ,{
-                    transform:"translate3d(4.75%,0,$(-0.95*1.5*X(W))px) rotateY(-11.4deg)"
+                    transform:"translate3d(6.65%,0,$(-0.95*1.5*X(W))px) rotateY(-11.4deg)"
                 }
                 ,{
                     transform:"translate3d(0,0,$(-1.5*X(W))px) rotateY(0deg)"
@@ -1671,61 +1680,61 @@ Imagik.Static = {
                     transform:"translate3d(0,0,$(-1.5*X(W))px) rotateY(0deg)"
                 }
                 ,{
-                    transform:"translate3d(-4.75%,0,$(-0.95*1.5*X(W))px) rotateY(11.4deg)"
+                    transform:"translate3d(-6.65%,0,$(-0.95*1.5*X(W))px) rotateY(11.4deg)"
                 }
                 ,{
-                    transform:"translate3d(-9%,0,$(-0.90*1.5*X(W))px) rotateY(21.6deg)"
+                    transform:"translate3d(-12.6%,0,$(-0.90*1.5*X(W))px) rotateY(21.6deg)"
                 }
                 ,{
-                    transform:"translate3d(-12.75%,0,$(-0.85*1.5*X(W))px) rotateY(30.6deg)"
+                    transform:"translate3d(-17.85%,0,$(-0.85*1.5*X(W))px) rotateY(30.6deg)"
                 }
                 ,{
-                    transform:"translate3d(-16%,0,$(-0.80*1.5*X(W))px) rotateY(38.4deg)"
+                    transform:"translate3d(-22.4%,0,$(-0.80*1.5*X(W))px) rotateY(38.4deg)"
                 }
                 ,{
-                    transform:"translate3d(-18.75%,0,$(-0.75*1.5*X(W))px) rotateY(45deg)"
+                    transform:"translate3d(-26.25%,0,$(-0.75*1.5*X(W))px) rotateY(45deg)"
                 }
                 ,{
-                    transform:"translate3d(-21%,0,$(-0.70*1.5*X(W))px) rotateY(50.4deg)"
+                    transform:"translate3d(-29.4%,0,$(-0.70*1.5*X(W))px) rotateY(50.4deg)"
                 }
                 ,{
-                    transform:"translate3d(-22.75%,0,$(-0.65*1.5*X(W))px) rotateY(54.6deg)"
+                    transform:"translate3d(-31.85%,0,$(-0.65*1.5*X(W))px) rotateY(54.6deg)"
                 }
                 ,{
-                    transform:"translate3d(-24%,0,$(-0.60*1.5*X(W))px) rotateY(57.6deg)"
+                    transform:"translate3d(-33.6%,0,$(-0.60*1.5*X(W))px) rotateY(57.6deg)"
                 }
                 ,{
-                    transform:"translate3d(-24.75%,0,$(-0.55*1.5*X(W))px) rotateY(59.4deg)"
+                    transform:"translate3d(-34.65%,0,$(-0.55*1.5*X(W))px) rotateY(59.4deg)"
                 }
                 ,{
-                    transform:"translate3d(-25%,0,$(-0.50*1.5*X(W))px) rotateY(60deg)"
+                    transform:"translate3d(-35%,0,$(-0.50*1.5*X(W))px) rotateY(60deg)"
                 }
                 ,{
-                    transform:"translate3d(-24.75%,0,$(-0.45*1.5*X(W))px) rotateY(59.4deg)"
+                    transform:"translate3d(-34.65%,0,$(-0.45*1.5*X(W))px) rotateY(59.4deg)"
                 }
                 ,{
-                    transform:"translate3d(-24%,0,$(-0.40*1.5*X(W))px) rotateY(54.6deg)"
+                    transform:"translate3d(-33.6%,0,$(-0.40*1.5*X(W))px) rotateY(54.6deg)"
                 }
                 ,{
-                    transform:"translate3d(-22.75%,0,$(-0.35*1.5*X(W))px) rotateY(54.6deg)"
+                    transform:"translate3d(-31.85%,0,$(-0.35*1.5*X(W))px) rotateY(54.6deg)"
                 }
                 ,{
-                    transform:"translate3d(-21%,0,$(-0.30*1.5*X(W))px) rotateY(50.4deg)"
+                    transform:"translate3d(-29.4%,0,$(-0.30*1.5*X(W))px) rotateY(50.4deg)"
                 }
                 ,{
-                    transform:"translate3d(-18.75%,0,$(-0.25*1.5*X(W))px) rotateY(45deg)"
+                    transform:"translate3d(-26.25%,0,$(-0.25*1.5*X(W))px) rotateY(45deg)"
                 }
                 ,{
-                    transform:"translate3d(-16%,0,$(-0.20*1.5*X(W))px) rotateY(38.4deg)"
+                    transform:"translate3d(-22.4%,0,$(-0.20*1.5*X(W))px) rotateY(38.4deg)"
                 }
                 ,{
-                    transform:"translate3d(-12.75%,0,$(-0.15*1.5*X(W))px) rotateY(30.6deg)"
+                    transform:"translate3d(-17.85%,0,$(-0.15*1.5*X(W))px) rotateY(30.6deg)"
                 }
                 ,{
-                    transform:"translate3d(-9%,0,$(-0.10*1.5*X(W))px) rotateY(21.6deg)"
+                    transform:"translate3d(-12.6%,0,$(-0.10*1.5*X(W))px) rotateY(21.6deg)"
                 }
                 ,{
-                    transform:"translate3d(-4.75%,0,$(-0.05*1.5*X(W))px) rotateY(11.4deg)"
+                    transform:"translate3d(-6.65%,0,$(-0.05*1.5*X(W))px) rotateY(11.4deg)"
                 }
                 ,{
                     transform:"translate3d(0,0,0) rotateY(0deg)"
@@ -1733,13 +1742,13 @@ Imagik.Static = {
             ]}
         }
         ,"flip-horizontal":{
-            current:{transform:"rotateY(0deg)"},
-            next:{transform:"rotateY(-180deg)"},
+            current:true,
+            next:true,
             animation:"flip-horizontal"
         }
         ,"flip-vertical":{
-            current:{transform:"rotateX(0deg)"},
-            next:{transform:"rotateX(180deg)"},
+            current:true,
+            next:true,
             animation:"flip-vertical"
         }
         ,"rotate":{
@@ -2037,10 +2046,10 @@ Imagik.Static = {
         ,{transition:"shuffle-right",ease:"ease-in-out",duration:2,overlap:1,rows:1,columns:1,order:"rows-first"}
         ,{transition:"fold-left",ease:"ease-in-out",duration:2,overlap:1,rows:1,columns:1,order:"rows-first"}
         ,{transition:"fold-right",ease:"ease-in-out",duration:2,overlap:1,rows:1,columns:1,order:"rows-first"}
-        ,{transition:"cubes-left",ease:"ease-in-out",duration:2,overlap:0.9,rows:4,columns:1,order:"rows-first"}
-        ,{transition:"cubes-right",ease:"ease-in-out",duration:2,overlap:0.9,rows:4,columns:1,order:"rows-first"}
-        ,{transition:"cubes-up",ease:"ease-in-out",duration:2,overlap:0.9,rows:1,columns:4,order:"rows-first"}
-        ,{transition:"cubes-down",ease:"ease-in-out",duration:2,overlap:0.9,rows:1,columns:4,order:"rows-first"}
+        ,{transition:"cubes-left",ease:"ease-in-out",duration:2,overlap:0.9,rows:4,columns:1,order:"random"}
+        ,{transition:"cubes-right",ease:"ease-in-out",duration:2,overlap:0.9,rows:4,columns:1,order:"random"}
+        ,{transition:"cubes-up",ease:"ease-in-out",duration:2,overlap:0.9,rows:1,columns:4,order:"random"}
+        ,{transition:"cubes-down",ease:"ease-in-out",duration:2,overlap:0.9,rows:1,columns:4,order:"random"}
         ,{transition:"rotate",ease:"ease-out",duration:2,overlap:1,rows:6,columns:6,order:"columns-first"}
         ,{transition:"rotate-reverse",ease:"ease-out",duration:2,overlap:1,rows:6,columns:6,order:"columns-first"}
         ,{transition:"iris",ease:"ease-out",duration:2,overlap:0.9,rows:1,columns:1,order:"rows-first"}

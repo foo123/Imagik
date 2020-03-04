@@ -79,7 +79,23 @@ function $ev( el, evt, handler, add )
 }
 function $$( sel, el )
 {
-    return slice.call((el || document).querySelectorAll(sel));
+    return slice.call((el||document).querySelectorAll(sel));
+}
+function $children( sel, el )
+{
+    var children, id, guid;
+    if ( sel )
+    {
+        //children = children.filter(function(child){return (child.matches||child.msMatchesSelector||child.webkitMatchesSelector)(sel);});
+        if ( null == $children.count ) $children.count = 0;
+        id = el.id;
+        guid = el.id = id || ('query_children_' + (++$children.count));
+        sel = '#' + guid + ' > ' + sel.replace(/,/g, ',#' + guid + ' > ');
+        children = $$(sel, el);
+        if ( !id ) el.removeAttribute('id');
+        return children;
+    }
+    return slice.call(el.children);
 }
 function $attr( el, key, value )
 {
@@ -606,7 +622,6 @@ function Imagik( el, options )
             holder.style.width = String(W)+'px';
             holder.style.height = String(H)+'px';
             imageLayer.style.backgroundSize = String(W)+'px auto';
-            //animationLayer.style.perspective = String(stdMath.round(1.5*stdMath.max(W, H)))+'px';
         }
         return self;
     };
@@ -624,9 +639,8 @@ function Imagik( el, options )
         hook(self.id, function(evt){self.autoResize();});
 
         // parse dom data
-        slice.call(self.el.children).forEach(function( div ) {
-            if ( !div.tagName || 'DIV' !== div.tagName ) return;
-            var klass, thisfx = {}, i, data, kv;
+        $children('div', self.el).forEach(function( div ) {
+            var klass, thisfx = {}, i, link, data, kv;
             thisfx.transition = self.options.transition;
             thisfx.delay = self.options.delay;
             thisfx.ease = self.options.ease;
@@ -636,7 +650,7 @@ function Imagik( el, options )
             thisfx.overlap = self.options.overlap;
             thisfx.duration = self.options.duration;
             klass = $attr(div, 'class');
-            if (klass!="" && klass!=null)
+            if ( klass!="" && klass!=null )
             {
                 data = klass.split(" ");
                 for(i=0;i<data.length;i++)
@@ -650,8 +664,9 @@ function Imagik( el, options )
                 thisfx.duration = stdMath.max(0.0, parseFloat(thisfx.duration, 10));
                 thisfx.delay = stdMath.max(0.0, parseFloat(thisfx.delay, 10));
             }
-            imgs.push($attr($$('img', div)[0], 'src'));
-            links.push($attr($$('a', div)[0], 'href')||'#');
+            link = $children('a', div)[0];
+            imgs.push($children('img', link||div)[0]);
+            links.push($attr(link, 'href')||'#');
             fx.push(thisfx);
             captions.push($html($$('div', div)[0]).trim());
             $remove(div);
@@ -678,7 +693,7 @@ function Imagik( el, options )
                 thisfx.duration = stdMath.max(0.0, parseFloat(thisfx.duration, 10));
                 thisfx.delay = stdMath.max(0.0, parseFloat(thisfx.delay, 10));
 
-                imgs.push(img.src);
+                imgs.push(img);
                 links.push(img.href||'#');
                 fx.push(thisfx);
                 captions.push(img.caption!=null ? String(img.caption).trim() : '');
@@ -692,7 +707,6 @@ function Imagik( el, options )
         imageLayer.style.backgroundSize = String(W)+'px auto';
         animationLayer = $el('<div class="imagik-animation-layer"></div>');
         animationLayer.style.zIndex = 1;
-        //animationLayer.style.perspective = String(stdMath.round(1.5*stdMath.max(W, H)))+'px';
         $append(holder, imageLayer);
         $append(holder, animationLayer);
 
@@ -756,7 +770,7 @@ function Imagik( el, options )
         if ( self.options.randomOrder ) shuffle(ind);
 
         prevcurrent = 0; current = 0;
-        imageLayer.style.backgroundImage = 'url("'+imgs[ind[current]]+'")';
+        imageLayer.style.backgroundImage = 'url("'+(imgs[ind[current]].currentSrc||imgs[ind[current]].src)+'")'; // enable responsive images (eg through srcset attr)
         imageLayer.href = links[ind[current]];
         /*if ( self.options.controls )
         {
@@ -810,7 +824,7 @@ function Imagik( el, options )
     endTransition = function( ) {
         if ( !imgs ) return;
         clearPrev();
-        imageLayer.style.backgroundImage = 'url("'+imgs[ind[current]]+'")';
+        imageLayer.style.backgroundImage = 'url("'+(imgs[ind[current]].currentSrc||imgs[ind[current]].src)+'")'; // enable responsive images (eg through srcset attr)
         imageLayer.href = links[ind[current]];
         imageLayer.style.zIndex = 2;
         if ( self.options.caption && captions[ind[current]]!=null && captions[ind[current]]!="" )
@@ -838,7 +852,7 @@ function Imagik( el, options )
         fxi = fx[ind[current]]; if ( "random"===fxi.transition ) fxi = getRandomTransition();
         if ( !fxi )
         {
-            imageLayer.style.backgroundImage = 'url("'+imgs[ind[current]]+'")';
+            imageLayer.style.backgroundImage = 'url("'+(imgs[ind[current]].currentSrc||imgs[ind[current]].src)+'")';
             return self;
         }
         transition = extend({}, Imagik.Static.transitions[fxi.transition]);
@@ -851,19 +865,19 @@ function Imagik( el, options )
 
         if ( transition.reverse )
         {
-            p = tiles(imgs[ind[prevcurrent]], r, c, W, H);
-            imageLayer.style.backgroundImage = 'url("'+imgs[ind[current]]+'")';
+            p = tiles((imgs[ind[prevcurrent]].currentSrc||imgs[ind[prevcurrent]].src), r, c, W, H);
+            imageLayer.style.backgroundImage = 'url("'+(imgs[ind[current]].currentSrc||imgs[ind[current]].src)+'")'; // enable responsive images (eg through srcset attr)
         }
         else
         {
-            p = tiles(imgs[ind[current]], r, c, W, H);
+            p = tiles((imgs[ind[current]].currentSrc||imgs[ind[current]].src), r, c, W, H); // enable responsive images (eg through srcset attr)
         }
 
         numpiec = p.length;
         if ( transition.current || transition.next )
         {
             imageLayer.style.backgroundImage = 'none';
-            p2 = tiles(imgs[ind[prevcurrent]], r, c, W, H);
+            p2 = tiles((imgs[ind[prevcurrent]].currentSrc||imgs[ind[prevcurrent]].src), r, c, W, H);
             if ( is_obj(transition.current) && is_array(transition.current.animation) && 2<=transition.current.animation.length )
             {
                 animations['animation-'+self.el.id+'-current'] = '@keyframes imagik-animation-'+self.el.id+'-current{'+transition.current.animation.map(function(step, n){
@@ -990,8 +1004,8 @@ function Imagik( el, options )
             }
             odd = !odd;
         }
-        $addClass(animationLayer, 'imagik-fx-'+lastfx.transition);
         $addClass(animationLayer, 'imagik-fx');
+        $addClass(animationLayer, 'imagik-fx-'+lastfx.transition);
         for(i in animations)
         {
             if ( HAS.call(animations, i) )

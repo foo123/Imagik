@@ -1,7 +1,7 @@
 /**
 *
 *    Imagik Responsive CSS3 Slideshow
-*    version 1.0.0
+*    version 1.1.0
 *    https://github.com/foo123/Imagik
 *
 **/
@@ -593,8 +593,8 @@ function Imagik( el, options )
 
     options = extend(defaults, options||{});
     if ( !options.aspectRatio ) options.aspectRatio = 1.0;
-    options.rows = stdMath.max(1, options.rows);
-    options.columns = stdMath.max(1, options.columns);
+    options.rows = stdMath.max(1, stdMath.min(100, options.rows));
+    options.columns = stdMath.max(1, stdMath.min(100, options.columns));
     options.overlap = stdMath.max(0.0, stdMath.min(1.0, options.overlap));
     options.duration = stdMath.max(0.0, options.duration);
     options.delay = stdMath.max(0.0, options.delay);
@@ -658,8 +658,8 @@ function Imagik( el, options )
                     kv = data[i].trim().split("=");
                     if ( 2 <= kv.length ) thisfx[kv[0].trim()] = kv[1].trim();
                 }
-                thisfx.rows = stdMath.max(1, parseInt(thisfx.rows, 10));
-                thisfx.columns = stdMath.max(1, parseInt(thisfx.columns, 10));
+                thisfx.rows = stdMath.max(1, stdMath.min(100, parseInt(thisfx.rows, 10)));
+                thisfx.columns = stdMath.max(1, stdMath.min(100, parseInt(thisfx.columns, 10)));
                 thisfx.overlap = stdMath.max(0.0, stdMath.min(1.0, parseFloat(thisfx.overlap, 10)));
                 thisfx.duration = stdMath.max(0.0, parseFloat(thisfx.duration, 10));
                 thisfx.delay = stdMath.max(0.0, parseFloat(thisfx.delay, 10));
@@ -687,8 +687,8 @@ function Imagik( el, options )
                 thisfx.duration = img.duration!=null ? img.duration : self.options.duration;
                 thisfx.delay = img.delay!=null ? img.delay : self.options.delay;
 
-                thisfx.rows = stdMath.max(1, parseInt(thisfx.rows, 10));
-                thisfx.columns = stdMath.max(1, parseInt(thisfx.columns, 10));
+                thisfx.rows = stdMath.max(1, stdMath.min(100, parseInt(thisfx.rows, 10)));
+                thisfx.columns = stdMath.max(1, stdMath.min(100, parseInt(thisfx.columns, 10)));
                 thisfx.overlap = stdMath.max(0.0, stdMath.min(1.0, parseFloat(thisfx.overlap, 10)));
                 thisfx.duration = stdMath.max(0.0, parseFloat(thisfx.duration, 10));
                 thisfx.delay = stdMath.max(0.0, parseFloat(thisfx.delay, 10));
@@ -1057,11 +1057,23 @@ function Imagik( el, options )
     // go
     self.init();
 }
-Imagik.VERSION = "1.0.0";
+Imagik.VERSION = "1.1.0";
 Imagik.Static = {
 
     transitions: {
-        "cubes-left":{
+        "brightness":{
+            rows:1,
+            columns:1,
+            current:{animation:"brightness"},
+            next:{animation:"brightness",reverse:true}
+        }
+        /*,"blur":{
+            rows:1,
+            columns:1,
+            current:{animation:"blur"},
+            next:{animation:"blur",reverse:true}
+        }*/
+        ,"cubes-left":{
             columns:1,
             current:true,
             next:true,
@@ -2068,6 +2080,7 @@ Imagik.Static = {
         ,{transition:"rotate-reverse",ease:"ease-out",duration:2,overlap:1,rows:6,columns:6,order:"columns-first"}
         ,{transition:"iris",ease:"ease-out",duration:2,overlap:0.9,rows:1,columns:1,order:"rows-first"}
         ,{transition:"iris-reverse",ease:"ease-out",duration:2,overlap:0.9,rows:1,columns:1,order:"rows-first"}
+        ,{transition:"brightness",ease:"linear",duration:2,rows:1,columns:1,order:"rows-first"}
         ,{transition:"fade-zoom",ease:"ease-out",duration:2,rows:1,columns:1,order:"rows-first"}
         ,{transition:"fade",ease:"ease-in",duration:2,overlap:0.9,rows:1,columns:1,order:"rows-first"}
         ,{transition:"fade",ease:"ease-in",duration:2,overlap:0.9,rows:6,columns:6,order:"diagonal-top-left"}

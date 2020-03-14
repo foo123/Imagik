@@ -83,7 +83,7 @@
     background-image:url("./pause.png");
     opacity:1;
     transform:scale(1);
-    transition:all 0.4s cubic-bezier(0.600, -0.280, 0.735, 0.045));
+    transition:all 0.4s cubic-bezier(0.175, 0.885, 0.320, 1.275);
 }
 .imagik-caption
 {
@@ -408,6 +408,28 @@
         background-size:120%;
     }
 }
+@keyframes imagik-animation-brightness {
+    0%{
+        filter:brightness(100%) opacity(100%);
+    }
+    50%{
+        filter:brightness(800%) opacity(100%);
+    }
+    100%{
+        filter:brightness(800%) opacity(0%);
+    }
+}
+/*@keyframes imagik-animation-blur {
+    0%{
+        filter:blur(0px) opacity(100%);
+    }
+    50%{
+        filter:blur(1000px) opacity(100%);
+    }
+    100%{
+        filter:blur(1000px) opacity(0%);
+    }
+}*/
 @keyframes imagik-animation-move-down {
     from{
         transform:translate3d(0,-100%,0);

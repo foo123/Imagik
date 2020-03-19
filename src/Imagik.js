@@ -12,7 +12,8 @@ else root.Imagik = factory();
 }('undefined' !== typeof self ? self : this, function( ){
 "use strict";
 
-var stdMath = Math, prop_re = /(?:X\()(\w+)(?:\))/g, expr_re = /(?:\$\()([^\(\)]+)(?:\))/g,
+var stdMath = Math, toRad = stdMath.PI/180,
+    prop_re = /(?:X\()(\w+)(?:\))/g, expr_re = /(?:\$\()([^\(\)]+)(?:\))/g,
     toString = Object.prototype.toString,
     HAS = Object.prototype.hasOwnProperty,
     slice = Array.prototype.slice;
@@ -492,7 +493,53 @@ function tiles( img, rows, columns, W, H )
         {
             x = w/columns*i*100/w; y = h/rows*j*100/h;
             bx = -W/columns*i; by = -H/rows*j;
-            pieces[i*rows+j] = {piece:tile=$el('<div class="imagik-tile"><div class="imagik-tile-inside"></div></div>'), r:rows, c:columns, i:i, j:j, x:x, y:y, bx:bx, by:by, w:w, h:h, W:W, H:H, img:img};
+            pieces[i*rows+j] = {piece:tile=$el('<div class="imagik-tile"><div class="imagik-tile-inside"></div></div>'), r:rows, c:columns, i:i, j:j, x:x, y:y, bx:bx, by:by, w:w, h:h, u:'%', W:W, H:H, img:img};
+            tile.firstChild.style.backgroundImage = 'url("'+String(img)+'")';
+            tile.firstChild.style.backgroundPosition = String(bx)+'px '+String(by)+'px';
+            tile.firstChild.style.backgroundSize = String(W)+'px auto';
+        }
+    }
+    return pieces;
+}
+function slices( img, rows, columns, W, H, angle )
+{
+    angle = angle || 0;
+    var i, j, x, y, bx, by, w = 1===columns ? W : (W/columns), h = 1===rows ? H : (H/rows),
+            pieces = new Array(rows*columns), tile, ww, s, m1, m2, clipPath;
+	if ( angle<0 ) angle = -angle;
+	while( angle>90 ) angle -= 90;
+	if ( 90===angle )
+	{
+		m1 = 1.0;
+		m2 = 0.0;
+	}
+	else if ( 0===angle )
+	{
+		m1 = 0.0;
+		m2 = 1.0;
+	}
+	else
+	{
+		m1 = 1.0;
+		m2 = 1.0/stdMath.tan(angle*toRad);
+	}
+    s = m2*H/columns;
+	ww = m1*w + s;
+    for(i=0;i<=columns; i++)
+    {
+        for(j=0; j<rows; j++)
+        {
+            x = w*(i-1); y = h*j;
+            bx = -x; by = -y;
+            if ( 0===angle )
+            {
+                clipPath = [[0, 0], [w, 0], [w, h], [0, h]];
+            }
+            else
+            {
+                clipPath = [[0, 0], [s, h], [w+s, h], [w, 0]];
+            }
+            pieces[i*rows+j] = {piece:tile=$el('<div class="imagik-tile" style="-webkit-clip-path:border-box polygon('+clipPath.map(function(pt){return String(pt[0])+'px '+String(pt[1])+'px';}).join(',')+'); clip-path:border-box polygon('+clipPath.map(function(pt){return String(pt[0])+'px '+String(pt[1])+'px';}).join(',')+'); overflow:hidden;"><div class="imagik-tile-inside"></div></div>'), r:rows, c:columns, i:i, j:j, x:x, y:y, bx:bx, by:by, w:ww, h:h, u:'px', W:W, H:H, slope:s, img:img, angle:angle};
             tile.firstChild.style.backgroundImage = 'url("'+String(img)+'")';
             tile.firstChild.style.backgroundPosition = String(bx)+'px '+String(by)+'px';
             tile.firstChild.style.backgroundSize = String(W)+'px auto';
@@ -833,7 +880,7 @@ function Imagik( el, options )
     };
 
     self.doTransition = function( dir ) {
-        var i, dd, fxi, transition, order, ease, r, c, ordobj, ngroups, d, sd, del, max, odd, animations = {}, str, selector;
+        var i, dd, fxi, transition, order, ease, r, c, ordobj, ngroups, d, sd, del, max, odd, animations = {}, str, selector, sliceFunc = tiles, angle = null;
 
         clearTimeout(timer);
         clearPrev();
@@ -860,24 +907,29 @@ function Imagik( el, options )
         ease = fxi.ease || 'linear'; if ( HAS.call(Imagik.Static.ease, ease) ) ease = Imagik.Static.ease[ease];
         r = null!=transition.rows ? transition.rows : fxi.rows;
         c = null!=transition.columns ? transition.columns : fxi.columns;
-        selector = is_string(transition.selector) ? transition.selector : '';
+        selector = is_string(transition.selector)&&transition.selector.length ? transition.selector : '';
+        if ( ('move-diagonal' === fxi.transition) || ('move-diagonal-reverse' === fxi.transition) )
+        {
+            sliceFunc = slices;
+            angle = +transition.angle;
+        }
         lastfx = fxi;
 
         if ( transition.reverse )
         {
-            p = tiles((imgs[ind[prevcurrent]].currentSrc||imgs[ind[prevcurrent]].src), r, c, W, H);
+            p = sliceFunc((imgs[ind[prevcurrent]].currentSrc||imgs[ind[prevcurrent]].src), r, c, W, H, angle);
             imageLayer.style.backgroundImage = 'url("'+(imgs[ind[current]].currentSrc||imgs[ind[current]].src)+'")'; // enable responsive images (eg through srcset attr)
         }
         else
         {
-            p = tiles((imgs[ind[current]].currentSrc||imgs[ind[current]].src), r, c, W, H); // enable responsive images (eg through srcset attr)
+            p = sliceFunc((imgs[ind[current]].currentSrc||imgs[ind[current]].src), r, c, W, H, angle); // enable responsive images (eg through srcset attr)
         }
 
         numpiec = p.length;
         if ( transition.current || transition.next )
         {
             imageLayer.style.backgroundImage = 'none';
-            p2 = tiles((imgs[ind[prevcurrent]].currentSrc||imgs[ind[prevcurrent]].src), r, c, W, H);
+            p2 = sliceFunc((imgs[ind[prevcurrent]].currentSrc||imgs[ind[prevcurrent]].src), r, c, W, H, angle);
             if ( is_obj(transition.current) && is_array(transition.current.animation) && 2<=transition.current.animation.length )
             {
                 animations['animation-'+self.el.id+'-current'] = '@keyframes imagik-animation-'+self.el.id+'-current{'+transition.current.animation.map(function(step, n){
@@ -949,7 +1001,7 @@ function Imagik( el, options )
         {
             del = ordobj.delays[i]*sd;
             p[i].piece.id = self.el.id+'-tile-'+p[i].i+'-'+p[i].j;
-            style += "\n" + '#'+p[i].piece.id+'{left:'+p[i].x+'%;top:'+p[i].y+'%;width:'+p[i].w+'%;height:'+p[i].h+'%;}';
+            style += "\n" + '#'+p[i].piece.id+'{left:'+p[i].x+p[i].u+';top:'+p[i].y+p[i].u+';width:'+p[i].w+p[i].u+';height:'+p[i].h+p[i].u+';}';
             $append(animationLayer, p[i].piece);
             if ( !evtCarrier || max<=del )
             {
@@ -1061,19 +1113,7 @@ Imagik.VERSION = "1.1.0";
 Imagik.Static = {
 
     transitions: {
-        "brightness":{
-            rows:1,
-            columns:1,
-            current:{animation:"brightness"},
-            next:{animation:"brightness",reverse:true}
-        }
-        /*,"blur":{
-            rows:1,
-            columns:1,
-            current:{animation:"blur"},
-            next:{animation:"blur",reverse:true}
-        }*/
-        ,"cubes-left":{
+        "cubes-left":{
             columns:1,
             current:true,
             next:true,
@@ -1797,6 +1837,12 @@ Imagik.Static = {
             animation:"iris",
             selector:">.imagik-tile-inside"
         }
+        ,"brightness":{
+            rows:1,
+            columns:1,
+            current:{animation:"brightness"},
+            next:{animation:"brightness",reverse:true}
+        }
         ,"fade":{
             animation:"fade"
         }
@@ -1805,6 +1851,47 @@ Imagik.Static = {
             columns:1,
             current:{animation:"fade-zoom",selector:">.imagik-tile-inside"},
             next:{animation:"fade-zoom",reverse:true,selector:">.imagik-tile-inside"}
+        }
+        ,"move-diagonal":{
+            rows:1,
+            angle:30,
+            animation1:[
+                {
+                    transform:"translate3d(X(slope)px,100%,0)"
+                }
+                ,{
+                    transform:"translate3d(0,0,0)"
+                }
+            ]
+            ,animation2:[
+                {
+                    transform:"translate3d(-X(slope)px,-100%,0)"
+                }
+                ,{
+                    transform:"translate3d(0,0,0)"
+                }
+            ]
+        }
+        ,"move-diagonal-reverse":{
+            rows:1,
+            angle:30,
+            reverse:true,
+            animation1:[
+                {
+                    transform:"translate3d(0,0,0)"
+                }
+                ,{
+                    transform:"translate3d(X(slope)px,100%,0)"
+                }
+            ]
+            ,animation2:[
+                {
+                    transform:"translate3d(0,0,0)"
+                }
+                ,{
+                    transform:"translate3d(-X(slope)px,-100%,0)"
+                }
+            ]
         }
         ,"move-down":{
             animation:"move-down"
@@ -2098,6 +2185,8 @@ Imagik.Static = {
         ,{transition:"shrink",ease:"ease-out",duration:2,overlap:1,rows:6,columns:6,order:"columns-first"}
         ,{transition:"fade-shrink",ease:"ease-out",duration:2,overlap:0.9,rows:6,columns:6,order:"left-right"}
         ,{transition:"fade-shrink",ease:"ease-out",duration:2,overlap:0.9,rows:6,columns:6,order:"diagonal-bottom-right"}
+        ,{transition:"move-diagonal",ease:"ease-out-back",duration:2,overlap:0.9,rows:1,columns:6,order:"random"}
+        ,{transition:"move-diagonal-reverse",ease:"ease-in-back",duration:2,overlap:0.9,rows:1,columns:6,order:"random"}
         ,{transition:"move-left-right",ease:"ease-out-back",duration:2,overlap:0.8,rows:6,columns:1,order:"columns-first"}
         ,{transition:"move-right",ease:"ease-out-back",duration:2,overlap:0.8,rows:6,columns:1,order:"columns-first"}
         ,{transition:"move-up-down",ease:"ease-out-back",duration:2,overlap:0.9,rows:1,columns:8,order:"columns-first"}

@@ -1,7 +1,7 @@
 /**
 *
 *    Imagik Responsive CSS3 Slideshow
-*    version 1.0.0
+*    version 1.1.0
 *    https://github.com/foo123/Imagik
 *
 **/
@@ -413,23 +413,12 @@
         filter:brightness(100%) opacity(100%);
     }
     50%{
-        filter:brightness(800%) opacity(100%);
+        filter:brightness(1000%) opacity(100%);
     }
     100%{
-        filter:brightness(800%) opacity(0%);
+        filter:brightness(1000%) opacity(0%);
     }
 }
-/*@keyframes imagik-animation-blur {
-    0%{
-        filter:blur(0px) opacity(100%);
-    }
-    50%{
-        filter:blur(1000px) opacity(100%);
-    }
-    100%{
-        filter:blur(1000px) opacity(0%);
-    }
-}*/
 @keyframes imagik-animation-move-down {
     from{
         transform:translate3d(0,-100%,0);

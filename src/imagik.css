@@ -1,7 +1,7 @@
 /**
 *
 *    Imagik Responsive CSS3 Slideshow
-*    version 1.1.0
+*    version 1.0.0
 *    https://github.com/foo123/Imagik
 *
 **/
@@ -40,12 +40,14 @@
     cursor:pointer;
     transition:all 0.2s ease-out;
 }
+.imagik-holder:focus .imagik-prev,
 .imagik-holder:active .imagik-prev,
 .imagik-holder:hover .imagik-prev
 {
     left:0;
     transition:all 0.2s ease-out;
 }
+.imagik-holder:focus .imagik-next,
 .imagik-holder:active .imagik-next,
 .imagik-holder:hover .imagik-next
 {
@@ -195,10 +197,6 @@
     transform-origin:center center;
     transform:translate3d(0,0,0); /* enable hardware acceleration */
 }
-.imagik-webkit .imagik-tile
-{
-    backface-visibility:visible; /* needed to fix a bug in webkit (Chrome/Opera) that makes flip of 100% disappear and not render */
-}
 .imagik-tile-inside
 {
     position:absolute !important;
@@ -220,6 +218,11 @@
 }
 
 /* fx */
+.imagik-webkit .imagik-animation-layer.imagik-fx-flip-horizontal .imagik-tile,
+.imagik-webkit .imagik-animation-layer.imagik-fx-flip-vertical .imagik-tile
+{
+    backface-visibility:visible; /* needed to fix a bug in webkit (Chrome/Opera) that makes flip of 100% disappear and not render */
+}
 .imagik-animation-layer.imagik-fx-cubes-left .imagik-tile-wrapper
 {
     transform-origin:0 center;
@@ -372,6 +375,11 @@
 {
     transform:translate3d(0,-100%,0);
 }
+.imagik-animation-layer.imagik-fx-fade-zoom .imagik-tile-current,
+.imagik-animation-layer.imagik-fx-fade-zoom .imagik-tile-next
+{
+    transform-origin:0 0;
+}
 @keyframes imagik-animation-iris {
     from{
         background-position:center center;
@@ -399,13 +407,11 @@
 @keyframes imagik-animation-fade-zoom {
     from{
         opacity:1;
-        background-position:0 0;
-        background-size:100%;
+        transform:scale(1);
     }
     to{
         opacity:0;
-        background-position:0 0;
-        background-size:120%;
+        transform:scale(1.2);
     }
 }
 @keyframes imagik-animation-brightness {

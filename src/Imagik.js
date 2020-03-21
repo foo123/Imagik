@@ -2172,16 +2172,28 @@ Imagik.Static = {
 
     ,randomTransitions: [
          {transition:"flip-horizontal",ease:"ease-out-back",duration:2,overlap:0.9,rows:1,columns:1,order:"rows-first"}
+        ,{transition:"flip-horizontal",ease:"ease-out-back",duration:2,overlap:0.9,rows:1,columns:1,order:"columns-first"}
         ,{transition:"flip-horizontal",ease:"ease-out-back",duration:2,overlap:0.9,rows:1,columns:6,order:"random"}
         ,{transition:"flip-horizontal",ease:"ease-out-back",duration:2,overlap:0.9,rows:6,columns:6,order:"spiral-top-left"}
+        ,{transition:"flip-horizontal",ease:"ease-out-back",duration:2,overlap:0.9,rows:6,columns:6,order:"spiral-top-left-reverse"}
+        ,{transition:"flip-horizontal",ease:"ease-out-back",duration:2,overlap:0.9,rows:6,columns:6,order:"spiral-bottom-right"}
+        ,{transition:"flip-horizontal",ease:"ease-out-back",duration:2,overlap:0.9,rows:6,columns:6,order:"spiral-bottom-right-reverse"}
         ,{transition:"flip-horizontal",ease:"ease-out-back",duration:2,overlap:0.9,rows:6,columns:6,order:"diagonal-top-left"}
+        ,{transition:"flip-horizontal",ease:"ease-out-back",duration:2,overlap:0.9,rows:6,columns:6,order:"diagonal-top-right"}
         ,{transition:"flip-horizontal",ease:"ease-out-back",duration:2,overlap:0.9,rows:6,columns:6,order:"diagonal-bottom-right"}
+        ,{transition:"flip-horizontal",ease:"ease-out-back",duration:2,overlap:0.9,rows:6,columns:6,order:"diagonal-bottom-left"}
         ,{transition:"flip-horizontal",ease:"ease-out-back",duration:2,overlap:0.9,rows:6,columns:6,order:"random"}
         ,{transition:"flip-vertical",ease:"ease-out-back",duration:2,overlap:0.9,rows:1,columns:1,order:"rows-first"}
-        ,{transition:"flip-vertical",ease:"ease-out-back",duration:2,overlap:0.9,rows:6,columns:1,order:"random"}
+        ,{transition:"flip-vertical",ease:"ease-out-back",duration:2,overlap:0.9,rows:1,columns:1,order:"columns-first"}
+        ,{transition:"flip-vertical",ease:"ease-out-back",duration:2,overlap:0.9,rows:1,columns:6,order:"random"}
         ,{transition:"flip-vertical",ease:"ease-out-back",duration:2,overlap:0.9,rows:6,columns:6,order:"spiral-top-left"}
+        ,{transition:"flip-vertical",ease:"ease-out-back",duration:2,overlap:0.9,rows:6,columns:6,order:"spiral-top-left-reverse"}
+        ,{transition:"flip-vertical",ease:"ease-out-back",duration:2,overlap:0.9,rows:6,columns:6,order:"spiral-bottom-right"}
+        ,{transition:"flip-vertical",ease:"ease-out-back",duration:2,overlap:0.9,rows:6,columns:6,order:"spiral-bottom-right-reverse"}
         ,{transition:"flip-vertical",ease:"ease-out-back",duration:2,overlap:0.9,rows:6,columns:6,order:"diagonal-top-left"}
+        ,{transition:"flip-vertical",ease:"ease-out-back",duration:2,overlap:0.9,rows:6,columns:6,order:"diagonal-top-right"}
         ,{transition:"flip-vertical",ease:"ease-out-back",duration:2,overlap:0.9,rows:6,columns:6,order:"diagonal-bottom-right"}
+        ,{transition:"flip-vertical",ease:"ease-out-back",duration:2,overlap:0.9,rows:6,columns:6,order:"diagonal-bottom-left"}
         ,{transition:"flip-vertical",ease:"ease-out-back",duration:2,overlap:0.9,rows:6,columns:6,order:"random"}
         ,{transition:"shuffle-left",ease:"ease-in-out",duration:2,overlap:1,rows:1,columns:1,order:"rows-first"}
         ,{transition:"shuffle-right",ease:"ease-in-out",duration:2,overlap:1,rows:1,columns:1,order:"rows-first"}
@@ -2198,11 +2210,16 @@ Imagik.Static = {
         ,{transition:"brightness",ease:"linear",duration:2,rows:1,columns:1,order:"rows-first"}
         ,{transition:"fade-zoom",ease:"ease-out",duration:2,rows:1,columns:1,order:"rows-first"}
         ,{transition:"fade",ease:"ease-in",duration:2,overlap:0.9,rows:1,columns:1,order:"rows-first"}
+        ,{transition:"fade",ease:"ease-in",duration:2,overlap:0.9,rows:1,columns:1,order:"columns-first"}
         ,{transition:"fade",ease:"ease-in",duration:2,overlap:0.9,rows:6,columns:6,order:"diagonal-top-left"}
+        ,{transition:"fade",ease:"ease-in",duration:2,overlap:0.9,rows:6,columns:6,order:"diagonal-top-right"}
         ,{transition:"fade",ease:"ease-in",duration:2,overlap:0.9,rows:6,columns:6,order:"diagonal-bottom-right"}
+        ,{transition:"fade",ease:"ease-in",duration:2,overlap:0.9,rows:6,columns:6,order:"diagonal-bottom-left"}
         ,{transition:"fade",ease:"ease-in",duration:2,overlap:0.9,rows:6,columns:6,order:"random"}
         ,{transition:"fade",ease:"ease-in",duration:2,overlap:0.9,rows:6,columns:6,order:"spiral-top-left"}
+        ,{transition:"fade",ease:"ease-in",duration:2,overlap:0.9,rows:6,columns:6,order:"spiral-top-left-reverse"}
         ,{transition:"fade",ease:"ease-in",duration:2,overlap:0.9,rows:6,columns:6,order:"spiral-bottom-right"}
+        ,{transition:"fade",ease:"ease-in",duration:2,overlap:0.9,rows:6,columns:6,order:"spiral-bottom-right-reverse"}
         ,{transition:"fade",ease:"ease-in",duration:2,overlap:0.9,rows:6,columns:6,order:"left-right"}
         ,{transition:"fade",ease:"ease-in",duration:2,overlap:0.9,rows:6,columns:6,order:"up-down"}
         ,{transition:"grow-horizontal",ease:"ease-out",duration:2,overlap:0.9,rows:1,columns:6,order:"random"}
@@ -2212,6 +2229,13 @@ Imagik.Static = {
         ,{transition:"grow",ease:"ease-out",duration:2,overlap:0.9,rows:6,columns:6,order:"rows-first"}
         ,{transition:"shrink",ease:"ease-out",duration:2,overlap:1,rows:6,columns:6,order:"columns-first"}
         ,{transition:"fade-shrink",ease:"ease-out",duration:2,overlap:0.9,rows:6,columns:6,order:"left-right"}
+        ,{transition:"fade-shrink",ease:"ease-out",duration:2,overlap:0.9,rows:6,columns:6,order:"up-down"}
+        ,{transition:"fade-shrink",ease:"ease-out",duration:2,overlap:0.9,rows:6,columns:6,order:"random"}
+        ,{transition:"fade-shrink",ease:"ease-out",duration:2,overlap:0.9,rows:6,columns:6,order:"spiral-top-left"}
+        ,{transition:"fade-shrink",ease:"ease-out",duration:2,overlap:0.9,rows:6,columns:6,order:"spiral-top-left-reverse"}
+        ,{transition:"fade-shrink",ease:"ease-out",duration:2,overlap:0.9,rows:6,columns:6,order:"spiral-bottom-right"}
+        ,{transition:"fade-shrink",ease:"ease-out",duration:2,overlap:0.9,rows:6,columns:6,order:"spiral-bottom-right-reverse"}
+        ,{transition:"fade-shrink",ease:"ease-out",duration:2,overlap:0.9,rows:6,columns:6,order:"diagonal-top-left"}
         ,{transition:"fade-shrink",ease:"ease-out",duration:2,overlap:0.9,rows:6,columns:6,order:"diagonal-bottom-right"}
         ,{transition:"move-diagonal",ease:"ease-out-back",duration:2,overlap:0.9,rows:1,columns:6,order:"random"}
         ,{transition:"move-diagonal-reverse",ease:"ease-in-back",duration:2,overlap:0.9,rows:1,columns:6,order:"random"}

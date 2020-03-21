@@ -418,7 +418,7 @@
     0%{
         filter:brightness(100%) opacity(100%);
     }
-    50%{
+    75%{
         filter:brightness(1000%) opacity(100%);
     }
     100%{

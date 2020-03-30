@@ -1,7 +1,7 @@
 /**
 *
 *    Imagik Responsive CSS3 Slideshow
-*    version 1.0.0
+*    version 1.1.1
 *    https://github.com/foo123/Imagik
 *
 **/
@@ -380,6 +380,40 @@
 {
     transform-origin:0 0;
 }
+.imagik-animation-layer.imagik-fx-tv .imagik-tile-current,
+.imagik-animation-layer.imagik-fx-tv .imagik-tile-next
+{
+    transform-origin:center center;
+}
+.imagik-animation-layer.imagik-fx-pixelate .imagik-tile-current,
+.imagik-animation-layer.imagik-fx-pixelate .imagik-tile-next
+{
+    transform-origin:center center;
+}
+.imagik-animation-layer.imagik-fx-pixelate .imagik-tile-current img,
+.imagik-animation-layer.imagik-fx-pixelate .imagik-tile-next img
+{
+    filter: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='pixelate' x='0' y='0'%3E%3CfeFlood x='4' y='4' height='2' width='2'/%3E%3CfeComposite width='10' height='10'/%3E%3CfeTile result='a'/%3E%3CfeComposite in='SourceGraphic' in2='a' operator='in'/%3E%3CfeMorphology operator='dilate' radius='5'/%3E%3C/filter%3E%3C/svg%3E#pixelate");
+/*
+<svg>
+    <filter id="pixelate" x="0" y="0">
+        <feFlood x="4" y="4" height="2" width="2"/>
+        <feComposite width="10" height="10"/>
+        <feTile result="a"/>
+        <feComposite in="SourceGraphic" in2="a" operator="in"/>
+        <feMorphology operator="dilate" radius="5"/>
+    </filter>
+</svg>
+*/
+    image-rendering:pixelated;
+    image-rendering:-moz-crisp-edges;
+    image-rendering:crisp-edges;
+}
+.imagik-animation-layer.imagik-fx-iris .imagik-tile-inside,
+.imagik-animation-layer.imagik-fx-iris-reverse .imagik-tile-inside
+{
+    background-position:center center;
+}
 @keyframes imagik-animation-iris {
     from{
         background-position:center center;
@@ -394,6 +428,42 @@
         height:100%;
         top:0%;
         left:0%;
+    }
+}
+@keyframes imagik-animation-tv {
+    0%{
+        transform:scale(1,1);
+        opacity:1;
+    }
+    40%{
+        transform:scale(1,0.01);
+        opacity:1;
+    }
+    50%{
+        transform:scale(0.5,0.01);
+        opacity:1;
+    }
+    60%{
+        transform:scale(0.5,0.01);
+        opacity:0;
+    }
+    100%{
+        transform:scale(0.5,0.01);
+        opacity:0;
+    }
+}
+@keyframes imagik-animation-pixelate {
+    0%{
+        transform:scale(1);
+        opacity:1;
+    }
+    50%{
+        transform:scale(10);
+        opacity:1;
+    }
+    100%{
+        transform:scale(10);
+        opacity:0;
     }
 }
 @keyframes imagik-animation-fade {
@@ -416,13 +486,24 @@
 }
 @keyframes imagik-animation-brightness {
     0%{
-        filter:brightness(100%) opacity(100%);
+        filter:saturate(100%) brightness(100%) opacity(100%);
     }
-    75%{
-        filter:brightness(1000%) opacity(100%);
+    50%{
+        filter:saturate(200%) brightness(1000%) opacity(100%);
     }
     100%{
-        filter:brightness(1000%) opacity(0%);
+        filter:saturate(200%) brightness(1000%) opacity(0%);
+    }
+}
+@keyframes imagik-animation-darkness {
+    0%{
+        filter:saturate(100%) brightness(100%) opacity(100%);
+    }
+    50%{
+        filter:saturate(0%) brightness(0%) opacity(100%);
+    }
+    100%{
+        filter:saturate(0%) brightness(0%) opacity(0%);
     }
 }
 @keyframes imagik-animation-move-down {

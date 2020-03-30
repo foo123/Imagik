@@ -1,7 +1,7 @@
 /**
 *
 *    Imagik Responsive CSS3 Slideshow
-*    version 1.1.0
+*    version 1.1.1
 *    https://github.com/foo123/Imagik
 *
 **/
@@ -483,7 +483,7 @@ function checkerBoard( pieces, rows, columns )
     }
     return {pieces:pieces, delays:delays, groups:2};
 }
-function tiles( img, rows, columns, W, H, angle )
+function tiles( img, rows, columns, W, H, angle, asImg )
 {
     var i, j, x, y, bx, by, w, h, pieces, tile, ww, s, m1, m2, imax, clipPath;
     if ( null != angle )
@@ -530,10 +530,20 @@ function tiles( img, rows, columns, W, H, angle )
                     clipPath = [[0, 0], [s, h], [w+s, h], [w, 0]];
                 }
                 clipPath = 'border-box polygon('+clipPath.map(function(pt){return String(pt[0])+'px '+String(pt[1])+'px';}).join(',')+')';
-                pieces[i*rows+j] = {piece:tile=$el('<div class="imagik-tile" style="-webkit-clip-path:'+clipPath+';clip-path:'+clipPath+';"><div class="imagik-tile-inside"></div></div>'), r:rows, c:columns, i:i, j:j, x:x, y:y, bx:bx, by:by, w:ww, h:h, u:'px', W:W, H:H, slope:s, angle:angle, img:img};
-                tile.firstChild.style.backgroundImage = 'url("'+String(img)+'")';
-                tile.firstChild.style.backgroundPosition = String(bx)+'px '+String(by)+'px';
-                tile.firstChild.style.backgroundSize = String(W)+'px auto';
+                if ( asImg )
+                {
+                    pieces[i*rows+j] = {piece:tile=$el('<div class="imagik-tile" style="-webkit-clip-path:'+clipPath+';clip-path:'+clipPath+';"><img class="imagik-tile-inside" /></div>'), r:rows, c:columns, i:i, j:j, x:x, y:y, bx:bx, by:by, w:ww, h:h, u:'px', W:W, H:H, slope:s, angle:angle, img:img};
+                    tile.firstChild.src = String(img);
+                    tile.firstChild.style.width = '100%';//String(W)+'px';
+                    tile.firstChild.style.height = 'auto';
+                }
+                else
+                {
+                    pieces[i*rows+j] = {piece:tile=$el('<div class="imagik-tile" style="-webkit-clip-path:'+clipPath+';clip-path:'+clipPath+';"><div class="imagik-tile-inside"></div></div>'), r:rows, c:columns, i:i, j:j, x:x, y:y, bx:bx, by:by, w:ww, h:h, u:'px', W:W, H:H, slope:s, angle:angle, img:img};
+                    tile.firstChild.style.backgroundImage = 'url("'+String(img)+'")';
+                    tile.firstChild.style.backgroundPosition = String(bx)+'px '+String(by)+'px';
+                    tile.firstChild.style.backgroundSize = String(W)+'px auto';
+                }
             }
         }
     }
@@ -548,10 +558,20 @@ function tiles( img, rows, columns, W, H, angle )
             {
                 x = w/columns*i*100/w; y = h/rows*j*100/h;
                 bx = -W/columns*i; by = -H/rows*j;
-                pieces[i*rows+j] = {piece:tile=$el('<div class="imagik-tile"><div class="imagik-tile-inside"></div></div>'), r:rows, c:columns, i:i, j:j, x:x, y:y, bx:bx, by:by, w:w, h:h, u:'%', W:W, H:H, img:img};
-                tile.firstChild.style.backgroundImage = 'url("'+String(img)+'")';
-                tile.firstChild.style.backgroundPosition = String(bx)+'px '+String(by)+'px';
-                tile.firstChild.style.backgroundSize = String(W)+'px auto';
+                if ( asImg )
+                {
+                    pieces[i*rows+j] = {piece:tile=$el('<div class="imagik-tile"><img class="imagik-tile-inside" /></div>'), r:rows, c:columns, i:i, j:j, x:x, y:y, bx:bx, by:by, w:ww, h:h, u:'%', W:W, H:H, img:img};
+                    tile.firstChild.src = String(img);
+                    tile.firstChild.style.width = '100%';//String(W)+'px';
+                    tile.firstChild.style.height = 'auto';
+                }
+                else
+                {
+                    pieces[i*rows+j] = {piece:tile=$el('<div class="imagik-tile"><div class="imagik-tile-inside"></div></div>'), r:rows, c:columns, i:i, j:j, x:x, y:y, bx:bx, by:by, w:w, h:h, u:'%', W:W, H:H, img:img};
+                    tile.firstChild.style.backgroundImage = 'url("'+String(img)+'")';
+                    tile.firstChild.style.backgroundPosition = String(bx)+'px '+String(by)+'px';
+                    tile.firstChild.style.backgroundSize = String(W)+'px auto';
+                }
             }
         }
     }
@@ -893,7 +913,7 @@ function Imagik( el, options )
     };
 
     self.doTransition = function( dir ) {
-        var i, dd, fxi, transition, order, ease, r, c, ordobj, ngroups, d, sd, del, max, odd, animations = {}, str, selector, angle;
+        var i, dd, fxi, transition, order, ease, r, c, ordobj, ngroups, d, sd, del, max, odd, animations = {}, str, selector, angle, img = false;
 
         clearTimeout(timer);
         clearPrev();
@@ -925,24 +945,25 @@ function Imagik( el, options )
         r = null!=transition.rows ? transition.rows : fxi.rows;
         c = null!=transition.columns ? transition.columns : fxi.columns;
         angle = null!=transition.angle ? +transition.angle : null;
+        img = !!transition.img;
         selector = is_string(transition.selector)&&transition.selector.length ? transition.selector : '';
         lastfx = fxi;
 
         if ( transition.reverse )
         {
-            p = tiles((imgs[ind[prevcurrent]].currentSrc||imgs[ind[prevcurrent]].src), r, c, W, H, angle);
+            p = tiles((imgs[ind[prevcurrent]].currentSrc||imgs[ind[prevcurrent]].src), r, c, W, H, angle, img);
             imageLayer.style.backgroundImage = 'url("'+(imgs[ind[current]].currentSrc||imgs[ind[current]].src)+'")'; // enable responsive images (eg through srcset attr)
         }
         else
         {
-            p = tiles((imgs[ind[current]].currentSrc||imgs[ind[current]].src), r, c, W, H, angle); // enable responsive images (eg through srcset attr)
+            p = tiles((imgs[ind[current]].currentSrc||imgs[ind[current]].src), r, c, W, H, angle, img); // enable responsive images (eg through srcset attr)
         }
 
         numpiec = p.length;
         if ( transition.current || transition.next )
         {
             imageLayer.style.backgroundImage = 'none';
-            p2 = tiles((imgs[ind[prevcurrent]].currentSrc||imgs[ind[prevcurrent]].src), r, c, W, H, angle);
+            p2 = tiles((imgs[ind[prevcurrent]].currentSrc||imgs[ind[prevcurrent]].src), r, c, W, H, angle, img);
             if ( is_obj(transition.current) && is_array(transition.current.animation) && 2<=transition.current.animation.length )
             {
                 animations['animation-'+self.el.id+'-current'] = '@keyframes imagik-animation-'+self.el.id+'-current{'+transition.current.animation.map(function(step, n){
@@ -1122,7 +1143,7 @@ function Imagik( el, options )
     // go
     self.init();
 }
-Imagik.VERSION = "1.1.0";
+Imagik.VERSION = "1.1.1";
 Imagik.Static = {
 
     transitions: {
@@ -1850,11 +1871,30 @@ Imagik.Static = {
             animation:"iris",
             selector:">.imagik-tile-inside"
         }
+        ,"tv":{
+            rows:1,
+            columns:1,
+            current:{animation:"tv"},
+            next:{animation:"tv",reverse:true}
+        }
+        ,"pixelate":{
+            rows:1,
+            columns:1,
+            img:true,
+            current:{animation:"pixelate"},
+            next:{animation:"pixelate",reverse:true}
+        }
         ,"brightness":{
             rows:1,
             columns:1,
             current:{animation:"brightness"},
             next:{animation:"brightness",reverse:true}
+        }
+        ,"darkness":{
+            rows:1,
+            columns:1,
+            current:{animation:"darkness"},
+            next:{animation:"darkness",reverse:true}
         }
         ,"fade":{
             animation:"fade"
@@ -2218,9 +2258,12 @@ Imagik.Static = {
         ,{transition:"cubes-down",ease:"ease-in-out",duration:2,overlap:0.9,rows:1,columns:4,order:"random"}
         ,{transition:"rotate",ease:"ease-out",duration:2,overlap:1,rows:6,columns:6,order:"columns-first"}
         ,{transition:"rotate-reverse",ease:"ease-out",duration:2,overlap:1,rows:6,columns:6,order:"columns-first"}
-        ,{transition:"iris",ease:"ease-out",duration:2,overlap:0.9,rows:1,columns:1,order:"rows-first"}
-        ,{transition:"iris-reverse",ease:"ease-out",duration:2,overlap:0.9,rows:1,columns:1,order:"rows-first"}
+        ,{transition:"iris",ease:"ease-out",duration:2,rows:1,columns:1,order:"rows-first"}
+        ,{transition:"iris-reverse",ease:"ease-out",duration:2,rows:1,columns:1,order:"rows-first"}
+        ,{transition:"pixelate",ease:"linear",duration:2,rows:1,columns:1,order:"rows-first"}
+        ,{transition:"tv",ease:"ease",duration:2,rows:1,columns:1,order:"rows-first"}
         ,{transition:"brightness",ease:"linear",duration:2,rows:1,columns:1,order:"rows-first"}
+        ,{transition:"darkness",ease:"linear",duration:2,rows:1,columns:1,order:"rows-first"}
         ,{transition:"fade-zoom",ease:"ease-out",duration:2,rows:1,columns:1,order:"rows-first"}
         ,{transition:"fade",ease:"ease-in",duration:2,overlap:0.9,rows:1,columns:1,order:"rows-first"}
         ,{transition:"fade",ease:"ease-in",duration:2,overlap:0.9,rows:6,columns:6,order:"rows-first"}

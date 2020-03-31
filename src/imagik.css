@@ -216,6 +216,16 @@
     background-position:0 0;
     background-size:100% auto;
 }
+.imagik-tile.imagik-diagonal
+{
+    transform-origin:center center;
+    transform:rotate(-45deg);
+}
+.imagik-tile.imagik-diagonal .imagik-tile-inside
+{
+    transform-origin:center center;
+    transform:rotate(45deg);
+}
 
 /* fx */
 .imagik-webkit .imagik-animation-layer.imagik-fx-flip-horizontal .imagik-tile,
@@ -414,25 +424,6 @@
 {
     transform-origin:center center;
 }
-.imagik-animation-layer.imagik-fx-pixelate .imagik-tile-current img,
-.imagik-animation-layer.imagik-fx-pixelate .imagik-tile-next img
-{
-    filter: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='pixelate' x='0' y='0'%3E%3CfeFlood x='4' y='4' height='2' width='2'/%3E%3CfeComposite width='10' height='10'/%3E%3CfeTile result='a'/%3E%3CfeComposite in='SourceGraphic' in2='a' operator='in'/%3E%3CfeMorphology operator='dilate' radius='5'/%3E%3C/filter%3E%3C/svg%3E#pixelate");
-/*
-<svg>
-    <filter id="pixelate" x="0" y="0">
-        <feFlood x="4" y="4" height="2" width="2"/>
-        <feComposite width="10" height="10"/>
-        <feTile result="a"/>
-        <feComposite in="SourceGraphic" in2="a" operator="in"/>
-        <feMorphology operator="dilate" radius="5"/>
-    </filter>
-</svg>
-*/
-    image-rendering:pixelated;
-    image-rendering:-moz-crisp-edges;
-    image-rendering:crisp-edges;
-}
 .imagik-animation-layer.imagik-fx-iris .imagik-tile-inside,
 .imagik-animation-layer.imagik-fx-iris-reverse .imagik-tile-inside
 {
@@ -552,20 +543,6 @@
     transform:translate(-100%, 0) scale(1, 1);
   }
 }*/
-@keyframes imagik-animation-pixelate {
-    0%{
-        transform:scale(1);
-        opacity:1;
-    }
-    50%{
-        transform:scale(10);
-        opacity:1;
-    }
-    100%{
-        transform:scale(10);
-        opacity:0;
-    }
-}
 @keyframes imagik-animation-fade {
     from{
         opacity: 0;

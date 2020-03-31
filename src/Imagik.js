@@ -530,16 +530,17 @@ function tiles( img, rows, columns, W, H, angle, asImg )
                     clipPath = [[0, 0], [s, h], [w+s, h], [w, 0]];
                 }
                 clipPath = 'border-box polygon('+clipPath.map(function(pt){return String(pt[0])+'px '+String(pt[1])+'px';}).join(',')+')';
+                //clipPath = 'url("data:image/svg+xml,%3Csvg xmlns=\\"http://www.w3.org/2000/svg\\"%3E%3CclipPath id=\\"clipPath-'+i+'-'+j+'\\" clipPathUnits=\\"objectBoundingBox\\"%3E%3Cpolygon points=\\"'+clipPath.map(function(pt){return String(pt[0])+','+String(pt[1])+'';}).join(' ')+'\\" /%3E%3C/clipPath%3E%3C/svg%3E%0A#clipPath-'+i+'-'+j+'")';
                 if ( asImg )
                 {
-                    pieces[i*rows+j] = {piece:tile=$el('<div class="imagik-tile" style="-webkit-clip-path:'+clipPath+';clip-path:'+clipPath+';"><img class="imagik-tile-inside" /></div>'), r:rows, c:columns, i:i, j:j, x:x, y:y, bx:bx, by:by, w:ww, h:h, u:'px', W:W, H:H, slope:s, angle:angle, img:img};
+                    pieces[i*rows+j] = {piece:tile=$el('<div class="imagik-tile" style=\'clip-path:'+clipPath+';\'><img class="imagik-tile-inside" /></div>'), r:rows, c:columns, i:i, j:j, x:x, y:y, bx:bx, by:by, w:ww, h:h, u:'px', W:W, H:H, slope:s, angle:angle, img:img};
                     tile.firstChild.src = String(img);
                     tile.firstChild.style.width = '100%';//String(W)+'px';
                     tile.firstChild.style.height = 'auto';
                 }
                 else
                 {
-                    pieces[i*rows+j] = {piece:tile=$el('<div class="imagik-tile" style="-webkit-clip-path:'+clipPath+';clip-path:'+clipPath+';"><div class="imagik-tile-inside"></div></div>'), r:rows, c:columns, i:i, j:j, x:x, y:y, bx:bx, by:by, w:ww, h:h, u:'px', W:W, H:H, slope:s, angle:angle, img:img};
+                    pieces[i*rows+j] = {piece:tile=$el('<div class="imagik-tile" style=\'clip-path:'+clipPath+';\'><div class="imagik-tile-inside"></div></div>'), r:rows, c:columns, i:i, j:j, x:x, y:y, bx:bx, by:by, w:ww, h:h, u:'px', W:W, H:H, slope:s, angle:angle, img:img};
                     tile.firstChild.style.backgroundImage = 'url("'+String(img)+'")';
                     tile.firstChild.style.backgroundPosition = String(bx)+'px '+String(by)+'px';
                     tile.firstChild.style.backgroundSize = String(W)+'px auto';
@@ -849,6 +850,7 @@ function Imagik( el, options )
         prevcurrent = 0; current = 0;
         imageLayer.style.backgroundImage = 'url("'+(imgs[ind[current]].currentSrc||imgs[ind[current]].src)+'")'; // enable responsive images (eg through srcset attr)
         imageLayer.href = links[ind[current]];
+        $addClass(holder, 'imagik-show-image');
         /*if ( self.options.controls )
         {
             toggleActive();
@@ -887,6 +889,7 @@ function Imagik( el, options )
         if ( p2!=null ) p2 = destroy(p2);
         if ( p!=null ) p = destroy(p);
         evtCarrier = null;
+        $addClass(holder, 'imagik-show-image');
     };
 
     endHandler = function( ) {
@@ -899,8 +902,8 @@ function Imagik( el, options )
     };
 
     endTransition = function( ) {
-        if ( !imgs ) return;
         clearPrev();
+        if ( !imgs ) return;
         imageLayer.style.backgroundImage = 'url("'+(imgs[ind[current]].currentSrc||imgs[ind[current]].src)+'")'; // enable responsive images (eg through srcset attr)
         imageLayer.href = links[ind[current]];
         imageLayer.style.zIndex = 2;
@@ -1092,6 +1095,7 @@ function Imagik( el, options )
         }
         $addClass(animationLayer, 'imagik-fx');
         $addClass(animationLayer, 'imagik-fx-'+lastfx.transition);
+        $removeClass(holder, 'imagik-show-image');
         for(i in animations)
         {
             if ( HAS.call(animations, i) )
@@ -1877,6 +1881,13 @@ Imagik.Static = {
             current:{animation:"tv"},
             next:{animation:"tv",reverse:true}
         }
+        /*,"motion-blur":{
+            current:true,
+            next:true,
+            rows:1,
+            columns:1,
+            animation:"motion-blur"
+        }*/
         ,"pixelate":{
             rows:1,
             columns:1,
@@ -2062,6 +2073,14 @@ Imagik.Static = {
             animation:"fade-grow-vertical",
             selector:">.imagik-tile-inside"
         }
+        ,"blinds-horizontal":{
+            current:{animation:"blinds-horizontal-current"},
+            next:{animation:"blinds-horizontal-next"}
+        }
+        ,"blinds-vertical":{
+            current:{animation:"blinds-vertical-current"},
+            next:{animation:"blinds-vertical-next"}
+        }
         ,"fly-top-left":{
             rows:1,
             columns:1,
@@ -2157,6 +2176,20 @@ Imagik.Static = {
             rows:1,
             columns:1,
             animation:"pan-bottom"
+        }
+        ,"pan-left-right":{
+            current:true,
+            next:true,
+            columns:1,
+            animation1:"pan-right",
+            animation2:"pan-left"
+        }
+        ,"pan-up-down":{
+            current:true,
+            next:true,
+            rows:1,
+            animation1:"pan-top",
+            animation2:"pan-bottom"
         }
     }
 
@@ -2298,13 +2331,15 @@ Imagik.Static = {
         ,{transition:"fade-shrink",ease:"ease-out",duration:2,overlap:0.9,rows:6,columns:6,order:"diagonal-bottom-right"}
         ,{transition:"move-diagonal",ease:"ease-out-back",duration:2,overlap:0.9,rows:1,columns:6,order:"random"}
         ,{transition:"move-diagonal-reverse",ease:"ease-in-back",duration:2,overlap:0.9,rows:1,columns:6,order:"random"}
-        ,{transition:"move-left-right",ease:"ease-out-back",duration:2,overlap:0.8,rows:6,columns:1,order:"columns-first"}
-        ,{transition:"move-left-right-reverse",ease:"ease-in-back",duration:2,overlap:0.8,rows:6,columns:1,order:"columns-first"}
-        ,{transition:"move-right",ease:"ease-out-back",duration:2,overlap:0.8,rows:6,columns:1,order:"columns-first"}
-        ,{transition:"move-right-reverse",ease:"ease-in-back",duration:2,overlap:0.8,rows:6,columns:1,order:"columns-first"}
-        ,{transition:"move-left",ease:"ease-out-back",duration:2,overlap:0.8,rows:6,columns:1,order:"columns-first"}
-        ,{transition:"move-left-reverse",ease:"ease-in-back",duration:2,overlap:0.8,rows:6,columns:1,order:"columns-first"}
+        ,{transition:"move-left-right",ease:"ease-out-back",duration:2,overlap:0.8,rows:6,columns:1,order:"rows-first"}
+        ,{transition:"move-left-right",ease:"ease",duration:2,overlap:1,rows:2,columns:1,order:"rows-first"}
+        ,{transition:"move-left-right-reverse",ease:"ease-in-back",duration:2,overlap:0.8,rows:6,columns:1,order:"rows-first"}
+        ,{transition:"move-right",ease:"ease-out-back",duration:2,overlap:0.8,rows:6,columns:1,order:"rows-first"}
+        ,{transition:"move-right-reverse",ease:"ease-in-back",duration:2,overlap:0.8,rows:6,columns:1,order:"rows-first"}
+        ,{transition:"move-left",ease:"ease-out-back",duration:2,overlap:0.8,rows:6,columns:1,order:"rows-first"}
+        ,{transition:"move-left-reverse",ease:"ease-in-back",duration:2,overlap:0.8,rows:6,columns:1,order:"rows-first"}
         ,{transition:"move-up-down",ease:"ease-out-back",duration:2,overlap:0.9,rows:1,columns:8,order:"columns-first"}
+        ,{transition:"move-up-down",ease:"ease",duration:2,overlap:1,rows:1,columns:2,order:"columns-first"}
         ,{transition:"move-up-down-reverse",ease:"ease-in-back",duration:2,overlap:0.9,rows:1,columns:8,order:"columns-first"}
         ,{transition:"move-up",ease:"ease-out-back",duration:2,overlap:0.9,rows:1,columns:6,order:"columns-first"}
         ,{transition:"move-up-reverse",ease:"ease-in-back",duration:2,overlap:0.9,rows:1,columns:6,order:"columns-first"}
@@ -2322,6 +2357,14 @@ Imagik.Static = {
         ,{transition:"pan-right",ease:"ease-out-back",duration:2,overlap:0.9,rows:1,columns:1,order:"columns-first"}
         ,{transition:"pan-top",ease:"ease-out-back",duration:2,overlap:0.9,rows:1,columns:1,order:"columns-first"}
         ,{transition:"pan-bottom",ease:"ease-out-back",duration:2,overlap:0.9,rows:1,columns:1,order:"columns-first"}
+        ,{transition:"pan-left-right",ease:"ease",duration:2,overlap:1,rows:2,columns:1,order:"rows-first"}
+        ,{transition:"pan-left-right",ease:"ease",duration:2,overlap:1,rows:3,columns:1,order:"rows-first"}
+        ,{transition:"pan-up-down",ease:"ease",duration:2,overlap:1,rows:1,columns:2,order:"columns-first"}
+        ,{transition:"pan-up-down",ease:"ease",duration:2,overlap:1,rows:1,columns:3,order:"columns-first"}
+        ,{transition:"blinds-horizontal",ease:"ease",duration:2,overlap:0.5,rows:5,columns:5,order:"checkerboard"}
+        ,{transition:"blinds-horizontal",ease:"ease",duration:2,overlap:1,rows:1,columns:5,order:"random"}
+        ,{transition:"blinds-vertical",ease:"ease",duration:2,overlap:0.5,rows:5,columns:5,order:"checkerboard"}
+        ,{transition:"blinds-vertical",ease:"ease",duration:2,overlap:1,rows:5,columns:1,order:"random"}
     ]
 
     // utils

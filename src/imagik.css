@@ -375,6 +375,30 @@
 {
     transform:translate3d(0,-100%,0);
 }
+.imagik-animation-layer.imagik-fx-pan-left-right .imagik-tile-current
+{
+    transform:translate3d(0,0,0);
+}
+.imagik-animation-layer.imagik-fx-pan-left-right .imagik-tile-wrapper:nth-child(odd) .imagik-tile-next
+{
+    transform:translate3d(100%,0,0);
+}
+.imagik-animation-layer.imagik-fx-pan-left-right .imagik-tile-wrapper:nth-child(even) .imagik-tile-next
+{
+    transform:translate3d(-100%,0,0);
+}
+.imagik-animation-layer.imagik-fx-pan-up-down .imagik-tile-current
+{
+    transform:translate3d(0,0,0);
+}
+.imagik-animation-layer.imagik-fx-pan-up-down .imagik-tile-wrapper:nth-child(odd) .imagik-tile-next
+{
+    transform:translate3d(0,-100%,0);
+}
+.imagik-animation-layer.imagik-fx-pan-up-down .imagik-tile-wrapper:nth-child(even) .imagik-tile-next
+{
+    transform:translate3d(0,100%,0);
+}
 .imagik-animation-layer.imagik-fx-fade-zoom .imagik-tile-current,
 .imagik-animation-layer.imagik-fx-fade-zoom .imagik-tile-next
 {
@@ -414,6 +438,14 @@
 {
     background-position:center center;
 }
+.imagik-animation-layer.imagik-fx-motion-blur .imagik-tile-current
+{
+    transform:translate3d(0,0,0);
+}
+.imagik-animation-layer.imagik-fx-motion-blur .imagik-tile-next
+{
+    transform:translate3d(100%,0,0);
+}
 @keyframes imagik-animation-iris {
     from{
         background-position:center center;
@@ -452,6 +484,74 @@
         opacity:0;
     }
 }
+/*@keyframes imagik-animation-motion-blur {
+/*<svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<defs>
+    <filter id="blur0">
+        <feGaussianBlur in="SourceGraphic" stdDeviation="0 0" />
+    </filter>
+    <filter id="blur1">
+        <feGaussianBlur in="SourceGraphic" stdDeviation="5 0" />
+    </filter>
+    <filter id="blur2">
+        <feGaussianBlur in="SourceGraphic" stdDeviation="12 0" />
+    </filter>
+    <filter id="blur3">
+        <feGaussianBlur in="SourceGraphic" stdDeviation="20 0" />
+    </filter>
+    <filter id="blur4">
+        <feGaussianBlur in="SourceGraphic" stdDeviation="35 1" />
+    </filter>
+    <filter id="blur5">
+        <feGaussianBlur in="SourceGraphic" stdDeviation="50 1" />
+    </filter>
+</defs>
+</svg>* /
+  0% {
+    filter:url("data:image/svg+xml,%3Csvg version='1.1' xmlns='http://www.w3.org/2000/svg' xmlns:xlink='http://www.w3.org/1999/xlink'%3E%3Cdefs%3E%3Cfilter id='blur0'%3E%3CfeGaussianBlur in='SourceGraphic' stdDeviation='0 0' /%3E%3C/filter%3E%3Cfilter id='blur1'%3E%3CfeGaussianBlur in='SourceGraphic' stdDeviation='5 0' /%3E%3C/filter%3E%3Cfilter id='blur2'%3E%3CfeGaussianBlur in='SourceGraphic' stdDeviation='12 0' /%3E%3C/filter%3E%3Cfilter id='blur3'%3E%3CfeGaussianBlur in='SourceGraphic' stdDeviation='20 0' /%3E%3C/filter%3E%3Cfilter id='blur4'%3E%3CfeGaussianBlur in='SourceGraphic' stdDeviation='35 1' /%3E%3C/filter%3E%3Cfilter id='blur5'%3E%3CfeGaussianBlur in='SourceGraphic' stdDeviation='50 1' /%3E%3C/filter%3E%3C/defs%3E%3C/svg%3E#blur0");
+    transform:translate(0, 0) scale(1, 1);
+  }
+  10% {
+    filter:url("data:image/svg+xml,%3Csvg version='1.1' xmlns='http://www.w3.org/2000/svg' xmlns:xlink='http://www.w3.org/1999/xlink'%3E%3Cdefs%3E%3Cfilter id='blur0'%3E%3CfeGaussianBlur in='SourceGraphic' stdDeviation='0 0' /%3E%3C/filter%3E%3Cfilter id='blur1'%3E%3CfeGaussianBlur in='SourceGraphic' stdDeviation='5 0' /%3E%3C/filter%3E%3Cfilter id='blur2'%3E%3CfeGaussianBlur in='SourceGraphic' stdDeviation='12 0' /%3E%3C/filter%3E%3Cfilter id='blur3'%3E%3CfeGaussianBlur in='SourceGraphic' stdDeviation='20 0' /%3E%3C/filter%3E%3Cfilter id='blur4'%3E%3CfeGaussianBlur in='SourceGraphic' stdDeviation='35 1' /%3E%3C/filter%3E%3Cfilter id='blur5'%3E%3CfeGaussianBlur in='SourceGraphic' stdDeviation='50 1' /%3E%3C/filter%3E%3C/defs%3E%3C/svg%3E#blur1");
+    transform:translate(-10%, 0) scale(1.1, 0.9);
+  }
+  20% {
+    filter: url("data:image/svg+xml,%3Csvg version='1.1' xmlns='http://www.w3.org/2000/svg' xmlns:xlink='http://www.w3.org/1999/xlink'%3E%3Cdefs%3E%3Cfilter id='blur0'%3E%3CfeGaussianBlur in='SourceGraphic' stdDeviation='0 0' /%3E%3C/filter%3E%3Cfilter id='blur1'%3E%3CfeGaussianBlur in='SourceGraphic' stdDeviation='5 0' /%3E%3C/filter%3E%3Cfilter id='blur2'%3E%3CfeGaussianBlur in='SourceGraphic' stdDeviation='12 0' /%3E%3C/filter%3E%3Cfilter id='blur3'%3E%3CfeGaussianBlur in='SourceGraphic' stdDeviation='20 0' /%3E%3C/filter%3E%3Cfilter id='blur4'%3E%3CfeGaussianBlur in='SourceGraphic' stdDeviation='35 1' /%3E%3C/filter%3E%3Cfilter id='blur5'%3E%3CfeGaussianBlur in='SourceGraphic' stdDeviation='50 1' /%3E%3C/filter%3E%3C/defs%3E%3C/svg%3E#blur2");
+    transform:translate(-20%, 0) scale(1.2, 0.8);
+  }
+  30% {
+    filter:url("data:image/svg+xml,%3Csvg version='1.1' xmlns='http://www.w3.org/2000/svg' xmlns:xlink='http://www.w3.org/1999/xlink'%3E%3Cdefs%3E%3Cfilter id='blur0'%3E%3CfeGaussianBlur in='SourceGraphic' stdDeviation='0 0' /%3E%3C/filter%3E%3Cfilter id='blur1'%3E%3CfeGaussianBlur in='SourceGraphic' stdDeviation='5 0' /%3E%3C/filter%3E%3Cfilter id='blur2'%3E%3CfeGaussianBlur in='SourceGraphic' stdDeviation='12 0' /%3E%3C/filter%3E%3Cfilter id='blur3'%3E%3CfeGaussianBlur in='SourceGraphic' stdDeviation='20 0' /%3E%3C/filter%3E%3Cfilter id='blur4'%3E%3CfeGaussianBlur in='SourceGraphic' stdDeviation='35 1' /%3E%3C/filter%3E%3Cfilter id='blur5'%3E%3CfeGaussianBlur in='SourceGraphic' stdDeviation='50 1' /%3E%3C/filter%3E%3C/defs%3E%3C/svg%3E#blur3");
+    transform:translate(-30%, 0) scale(1.3, 0.7);
+  }
+  40% {
+    filter:url("data:image/svg+xml,%3Csvg version='1.1' xmlns='http://www.w3.org/2000/svg' xmlns:xlink='http://www.w3.org/1999/xlink'%3E%3Cdefs%3E%3Cfilter id='blur0'%3E%3CfeGaussianBlur in='SourceGraphic' stdDeviation='0 0' /%3E%3C/filter%3E%3Cfilter id='blur1'%3E%3CfeGaussianBlur in='SourceGraphic' stdDeviation='5 0' /%3E%3C/filter%3E%3Cfilter id='blur2'%3E%3CfeGaussianBlur in='SourceGraphic' stdDeviation='12 0' /%3E%3C/filter%3E%3Cfilter id='blur3'%3E%3CfeGaussianBlur in='SourceGraphic' stdDeviation='20 0' /%3E%3C/filter%3E%3Cfilter id='blur4'%3E%3CfeGaussianBlur in='SourceGraphic' stdDeviation='35 1' /%3E%3C/filter%3E%3Cfilter id='blur5'%3E%3CfeGaussianBlur in='SourceGraphic' stdDeviation='50 1' /%3E%3C/filter%3E%3C/defs%3E%3C/svg%3E#blur4");
+    transform:translate(-40%, 0) scale(1.4, 0.06);
+  }
+  50% {
+    filter:url("data:image/svg+xml,%3Csvg version='1.1' xmlns='http://www.w3.org/2000/svg' xmlns:xlink='http://www.w3.org/1999/xlink'%3E%3Cdefs%3E%3Cfilter id='blur0'%3E%3CfeGaussianBlur in='SourceGraphic' stdDeviation='0 0' /%3E%3C/filter%3E%3Cfilter id='blur1'%3E%3CfeGaussianBlur in='SourceGraphic' stdDeviation='5 0' /%3E%3C/filter%3E%3Cfilter id='blur2'%3E%3CfeGaussianBlur in='SourceGraphic' stdDeviation='12 0' /%3E%3C/filter%3E%3Cfilter id='blur3'%3E%3CfeGaussianBlur in='SourceGraphic' stdDeviation='20 0' /%3E%3C/filter%3E%3Cfilter id='blur4'%3E%3CfeGaussianBlur in='SourceGraphic' stdDeviation='35 1' /%3E%3C/filter%3E%3Cfilter id='blur5'%3E%3CfeGaussianBlur in='SourceGraphic' stdDeviation='50 1' /%3E%3C/filter%3E%3C/defs%3E%3C/svg%3E#blur5");
+    transform:translate(-50%, 0) scale(1.5, 0.5);
+  }
+  60% {
+    filter:url("data:image/svg+xml,%3Csvg version='1.1' xmlns='http://www.w3.org/2000/svg' xmlns:xlink='http://www.w3.org/1999/xlink'%3E%3Cdefs%3E%3Cfilter id='blur0'%3E%3CfeGaussianBlur in='SourceGraphic' stdDeviation='0 0' /%3E%3C/filter%3E%3Cfilter id='blur1'%3E%3CfeGaussianBlur in='SourceGraphic' stdDeviation='5 0' /%3E%3C/filter%3E%3Cfilter id='blur2'%3E%3CfeGaussianBlur in='SourceGraphic' stdDeviation='12 0' /%3E%3C/filter%3E%3Cfilter id='blur3'%3E%3CfeGaussianBlur in='SourceGraphic' stdDeviation='20 0' /%3E%3C/filter%3E%3Cfilter id='blur4'%3E%3CfeGaussianBlur in='SourceGraphic' stdDeviation='35 1' /%3E%3C/filter%3E%3Cfilter id='blur5'%3E%3CfeGaussianBlur in='SourceGraphic' stdDeviation='50 1' /%3E%3C/filter%3E%3C/defs%3E%3C/svg%3E#blur4");
+    transform:translate(-60%, 0) scale(1.4, 0.6);
+  }
+  70% {
+    filter:url("data:image/svg+xml,%3Csvg version='1.1' xmlns='http://www.w3.org/2000/svg' xmlns:xlink='http://www.w3.org/1999/xlink'%3E%3Cdefs%3E%3Cfilter id='blur0'%3E%3CfeGaussianBlur in='SourceGraphic' stdDeviation='0 0' /%3E%3C/filter%3E%3Cfilter id='blur1'%3E%3CfeGaussianBlur in='SourceGraphic' stdDeviation='5 0' /%3E%3C/filter%3E%3Cfilter id='blur2'%3E%3CfeGaussianBlur in='SourceGraphic' stdDeviation='12 0' /%3E%3C/filter%3E%3Cfilter id='blur3'%3E%3CfeGaussianBlur in='SourceGraphic' stdDeviation='20 0' /%3E%3C/filter%3E%3Cfilter id='blur4'%3E%3CfeGaussianBlur in='SourceGraphic' stdDeviation='35 1' /%3E%3C/filter%3E%3Cfilter id='blur5'%3E%3CfeGaussianBlur in='SourceGraphic' stdDeviation='50 1' /%3E%3C/filter%3E%3C/defs%3E%3C/svg%3E#blur3");
+    transform:translate(-70%, 0) scale(1.3, 0.7);
+  }
+  80% {
+    filter:url("data:image/svg+xml,%3Csvg version='1.1' xmlns='http://www.w3.org/2000/svg' xmlns:xlink='http://www.w3.org/1999/xlink'%3E%3Cdefs%3E%3Cfilter id='blur0'%3E%3CfeGaussianBlur in='SourceGraphic' stdDeviation='0 0' /%3E%3C/filter%3E%3Cfilter id='blur1'%3E%3CfeGaussianBlur in='SourceGraphic' stdDeviation='5 0' /%3E%3C/filter%3E%3Cfilter id='blur2'%3E%3CfeGaussianBlur in='SourceGraphic' stdDeviation='12 0' /%3E%3C/filter%3E%3Cfilter id='blur3'%3E%3CfeGaussianBlur in='SourceGraphic' stdDeviation='20 0' /%3E%3C/filter%3E%3Cfilter id='blur4'%3E%3CfeGaussianBlur in='SourceGraphic' stdDeviation='35 1' /%3E%3C/filter%3E%3Cfilter id='blur5'%3E%3CfeGaussianBlur in='SourceGraphic' stdDeviation='50 1' /%3E%3C/filter%3E%3C/defs%3E%3C/svg%3E#blur2");
+    transform:translate(-80%, 0) scale(1.2, 0.8);
+  }
+  90% {
+    filter:url("data:image/svg+xml,%3Csvg version='1.1' xmlns='http://www.w3.org/2000/svg' xmlns:xlink='http://www.w3.org/1999/xlink'%3E%3Cdefs%3E%3Cfilter id='blur0'%3E%3CfeGaussianBlur in='SourceGraphic' stdDeviation='0 0' /%3E%3C/filter%3E%3Cfilter id='blur1'%3E%3CfeGaussianBlur in='SourceGraphic' stdDeviation='5 0' /%3E%3C/filter%3E%3Cfilter id='blur2'%3E%3CfeGaussianBlur in='SourceGraphic' stdDeviation='12 0' /%3E%3C/filter%3E%3Cfilter id='blur3'%3E%3CfeGaussianBlur in='SourceGraphic' stdDeviation='20 0' /%3E%3C/filter%3E%3Cfilter id='blur4'%3E%3CfeGaussianBlur in='SourceGraphic' stdDeviation='35 1' /%3E%3C/filter%3E%3Cfilter id='blur5'%3E%3CfeGaussianBlur in='SourceGraphic' stdDeviation='50 1' /%3E%3C/filter%3E%3C/defs%3E%3C/svg%3E#blur1");
+    transform:translate(-90%, 0) scale(1.1, 0.9);
+  }
+  100% {
+    filter:url("data:image/svg+xml,%3Csvg version='1.1' xmlns='http://www.w3.org/2000/svg' xmlns:xlink='http://www.w3.org/1999/xlink'%3E%3Cdefs%3E%3Cfilter id='blur0'%3E%3CfeGaussianBlur in='SourceGraphic' stdDeviation='0 0' /%3E%3C/filter%3E%3Cfilter id='blur1'%3E%3CfeGaussianBlur in='SourceGraphic' stdDeviation='5 0' /%3E%3C/filter%3E%3Cfilter id='blur2'%3E%3CfeGaussianBlur in='SourceGraphic' stdDeviation='12 0' /%3E%3C/filter%3E%3Cfilter id='blur3'%3E%3CfeGaussianBlur in='SourceGraphic' stdDeviation='20 0' /%3E%3C/filter%3E%3Cfilter id='blur4'%3E%3CfeGaussianBlur in='SourceGraphic' stdDeviation='35 1' /%3E%3C/filter%3E%3Cfilter id='blur5'%3E%3CfeGaussianBlur in='SourceGraphic' stdDeviation='50 1' /%3E%3C/filter%3E%3C/defs%3E%3C/svg%3E#blur0");
+    transform:translate(-100%, 0) scale(1, 1);
+  }
+}*/
 @keyframes imagik-animation-pixelate {
     0%{
         transform:scale(1);
@@ -584,6 +684,74 @@
     }
     to{
         transform:scale(1);
+    }
+}
+@keyframes imagik-animation-blinds-horizontal-current {
+    0%{
+        left:0%;
+        width:100%;
+        /*opacity:1;*/
+    }
+    48%{
+        left:0%;
+        width:0%;
+        /*opacity:0.9;*/
+   }
+    100%{
+        left:0%;
+        width:0%;
+        /*opacity:0.9;*/
+    }
+}
+@keyframes imagik-animation-blinds-horizontal-next {
+    0%{
+        right:0%;
+        width:0%;
+        /*opacity:0.9;*/
+    }
+    52%{
+        right:0%;
+        width:0%;
+        /*opacity:0.9;*/
+    }
+    100%{
+        right:0%;
+        width:100%;
+        /*opacity:1;*/
+    }
+}
+@keyframes imagik-animation-blinds-vertical-current {
+    0%{
+        bottom:0%;
+        height:100%;
+        /*opacity:1;*/
+    }
+    48%{
+        bottom:0%;
+        height:0%;
+        /*opacity:0.9;*/
+   }
+    100%{
+        bottom:0%;
+        height:0%;
+        /*opacity:0.9;*/
+    }
+}
+@keyframes imagik-animation-blinds-vertical-next {
+    0%{
+        top:0%;
+        height:0%;
+        /*opacity:0.9;*/
+    }
+    52%{
+        top:0%;
+        height:0%;
+        /*opacity:0.9;*/
+    }
+    100%{
+        top:0%;
+        height:100%;
+        /*opacity:1;*/
     }
 }
 @keyframes imagik-animation-grow-horizontal {

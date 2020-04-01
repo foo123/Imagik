@@ -1,7 +1,7 @@
 /**
 *
 *    Imagik Responsive CSS3 Slideshow
-*    version 1.1.1
+*    version 1.1.2
 *    https://github.com/foo123/Imagik
 *
 **/
@@ -210,6 +210,7 @@
     left:0%;
     width:100%;
     height:100%;
+    transform-origin:center center;
     background-color:transparent;
     background-image:none;
     background-repeat:no-repeat;
@@ -218,13 +219,11 @@
 }
 .imagik-tile.imagik-diagonal
 {
-    transform-origin:center center;
-    transform:rotate(-45deg);
+    transform:translate3d(0,0,0) rotateZ(-45deg);
 }
 .imagik-tile.imagik-diagonal .imagik-tile-inside
 {
-    transform-origin:center center;
-    transform:rotate(45deg);
+    transform:translate3d(0,0,0) rotateZ(45deg);
 }
 
 /* fx */
@@ -416,11 +415,6 @@
 }
 .imagik-animation-layer.imagik-fx-tv .imagik-tile-current,
 .imagik-animation-layer.imagik-fx-tv .imagik-tile-next
-{
-    transform-origin:center center;
-}
-.imagik-animation-layer.imagik-fx-pixelate .imagik-tile-current,
-.imagik-animation-layer.imagik-fx-pixelate .imagik-tile-next
 {
     transform-origin:center center;
 }
@@ -667,68 +661,74 @@
     0%{
         left:0%;
         width:100%;
-        /*opacity:1;*/
+        opacity:1;
     }
     48%{
         left:0%;
         width:0%;
-        /*opacity:0.9;*/
+        opacity:0.5;
    }
     100%{
         left:0%;
         width:0%;
-        /*opacity:0.9;*/
+        opacity:0.5;
     }
 }
 @keyframes imagik-animation-blinds-horizontal-next {
     0%{
+        left:auto;
         right:0%;
         width:0%;
-        /*opacity:0.9;*/
+        opacity:0.5;
     }
     52%{
+        left:auto;
         right:0%;
         width:0%;
-        /*opacity:0.9;*/
+        opacity:0.5;
     }
     100%{
+        left:auto;
         right:0%;
         width:100%;
-        /*opacity:1;*/
+        opacity:1;
     }
 }
 @keyframes imagik-animation-blinds-vertical-current {
     0%{
+        top:auto;
         bottom:0%;
         height:100%;
-        /*opacity:1;*/
+        opacity:1;
     }
     48%{
+        top:auto;
         bottom:0%;
         height:0%;
-        /*opacity:0.9;*/
+        opacity:0.5;
    }
     100%{
+        top:auto;
         bottom:0%;
         height:0%;
-        /*opacity:0.9;*/
+        opacity:0.5;
     }
 }
 @keyframes imagik-animation-blinds-vertical-next {
     0%{
         top:0%;
         height:0%;
-        /*opacity:0.9;*/
+        opacity:0.5;
     }
     52%{
         top:0%;
         height:0%;
-        /*opacity:0.9;*/
+        opacity:0.5;
     }
     100%{
         top:0%;
         height:100%;
-        /*opacity:1;*/
+        opacity:1;
     }
 }
 @keyframes imagik-animation-grow-horizontal {
@@ -911,6 +911,16 @@
     }
     to{
         transform:rotate(0deg) scale(1);
+    }
+}
+@keyframes imagik-animation-scale {
+    0%{
+        transform:scale(1);
+        opacity:1;
+    }
+    100%{
+        transform:scale(0);
+        opacity:0;
     }
 }
 @keyframes imagik-animation-flip-horizontal {

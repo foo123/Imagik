@@ -1,7 +1,7 @@
 /**
 *
 *    Imagik Responsive CSS3 Slideshow
-*    version 1.1.1
+*    version 1.1.2
 *    https://github.com/foo123/Imagik
 *
 **/
@@ -483,14 +483,34 @@ function checkerBoard( pieces, rows, columns )
     }
     return {pieces:pieces, delays:delays, groups:2};
 }
-function tiles( img, rows, columns, W, H, angle, diagonal, asImg )
+function tiles( img, rows, columns, W, H, angle )
 {
     var i, j, x, y, bx, by, w, h, pieces, tile, ww, s, m1, m2, imax, clipPath, side, margin, margin2, offset;
-    if ( null != angle )
+    if ( true===angle )
+    {
+        side = stdMath.min(W, H)/stdMath.max(rows, columns); w = stdMath.round(side*sqrt2);
+        columns = 2*stdMath.ceil(W/w)+1; rows = 2*stdMath.ceil(H/w)+1;
+        margin = w/2; margin2 = margin/2; offset = 0;
+        pieces = new Array(rows*columns);
+        for(i=0;i<columns; i++)
+        {
+            for(j=0; j<rows; j++)
+            {
+                x = margin*i-margin; y = w*j-margin+offset;
+                bx = -x+margin2; by = -y+margin2;
+                pieces[i*rows+j] = {piece:tile=$el('<div class="imagik-tile imagik-diagonal"><div class="imagik-tile-inside" style="width:'+(side+margin)+'px;height:'+(side+margin)+'px;left:'+(-margin2)+'px;top:'+(-margin2)+'px;"></div></div>'), r:rows, c:columns, i:i, j:j, x:x, y:y, bx:bx, by:by, w:side, h:side, u:'px', W:W, H:H, img:img};
+                tile.firstChild.style.backgroundImage = 'url("'+String(img)+'")';
+                tile.firstChild.style.backgroundPosition = String(bx)+'px '+String(by)+'px';
+                tile.firstChild.style.backgroundSize = String(W)+'px auto';
+            }
+            offset = 0===offset ? -margin : 0;
+        }
+    }
+    else if ( null != angle )
     {
         angle = angle || 0;
         if ( angle<0 ) angle = -angle;
-        while( angle>90 ) angle -= 90;
+        if( angle>90 ) angle = angle % 90;
         if ( 0===angle ) { s = rows; rows = columns; columns = s; }
         if ( 90===angle )
         {
@@ -510,6 +530,7 @@ function tiles( img, rows, columns, W, H, angle, diagonal, asImg )
             m2 = 1.0/stdMath.tan(angle*toRad);
             imax = 1;
         }
+        columns -= imax;
         w = 1===columns ? W : (W/columns);
         h = 1===rows ? H : (H/rows);
         pieces = new Array(rows*(columns+imax))
@@ -531,41 +552,11 @@ function tiles( img, rows, columns, W, H, angle, diagonal, asImg )
                 }
                 clipPath = 'border-box polygon('+clipPath.map(function(pt){return String(pt[0])+'px '+String(pt[1])+'px';}).join(',')+')';
                 //clipPath = 'url("data:image/svg+xml,%3Csvg xmlns=\\"http://www.w3.org/2000/svg\\"%3E%3CclipPath id=\\"clipPath-'+i+'-'+j+'\\" clipPathUnits=\\"objectBoundingBox\\"%3E%3Cpolygon points=\\"'+clipPath.map(function(pt){return String(pt[0])+','+String(pt[1])+'';}).join(' ')+'\\" /%3E%3C/clipPath%3E%3C/svg%3E%0A#clipPath-'+i+'-'+j+'")';
-                if ( asImg )
-                {
-                    pieces[i*rows+j] = {piece:tile=$el('<div class="imagik-tile" style=\'clip-path:'+clipPath+';\'><img class="imagik-tile-inside" /></div>'), r:rows, c:columns, i:i, j:j, x:x, y:y, bx:bx, by:by, w:ww, h:h, u:'px', W:W, H:H, slope:s, angle:angle, img:img};
-                    tile.firstChild.src = String(img);
-                    tile.firstChild.style.width = '100%';//String(W)+'px';
-                    tile.firstChild.style.height = 'auto';
-                }
-                else
-                {
-                    pieces[i*rows+j] = {piece:tile=$el('<div class="imagik-tile" style=\'clip-path:'+clipPath+';\'><div class="imagik-tile-inside"></div></div>'), r:rows, c:columns, i:i, j:j, x:x, y:y, bx:bx, by:by, w:ww, h:h, u:'px', W:W, H:H, slope:s, angle:angle, img:img};
-                    tile.firstChild.style.backgroundImage = 'url("'+String(img)+'")';
-                    tile.firstChild.style.backgroundPosition = String(bx)+'px '+String(by)+'px';
-                    tile.firstChild.style.backgroundSize = String(W)+'px auto';
-                }
-            }
-        }
-    }
-    else if ( diagonal )
-    {
-        side = stdMath.min(W, H)/stdMath.max(rows, columns); w = stdMath.round(side*sqrt2);
-        columns = 2*stdMath.ceil(W/w)+2; rows = 2*stdMath.ceil(H/w)+2;
-        margin = w/2; margin2 = margin/2; offset = 0;
-        pieces = new Array(rows*columns);
-        for(i=0;i<columns; i++)
-        {
-            for(j=0; j<rows; j++)
-            {
-                x = margin*i-margin; y = w*j-margin+offset;
-                bx = -x+margin2; by = -y+margin2;
-                pieces[i*rows+j] = {piece:tile=$el('<div class="imagik-tile imagik-diagonal"><div class="imagik-tile-inside" style="width:'+(side+margin)+'px;height:'+(side+margin)+'px;left:'+(-margin2)+'px;top:'+(-margin2)+'px;"></div></div>'), r:rows, c:columns, i:i, j:j, x:x, y:y, bx:bx, by:by, w:side, h:side, u:'px', W:W, H:H, img:img};
+                pieces[i*rows+j] = {piece:tile=$el('<div class="imagik-tile" style="-webkit-clip-path:'+clipPath+';clip-path:'+clipPath+';"><div class="imagik-tile-inside"></div></div>'), r:rows, c:columns, i:i, j:j, x:x, y:y, bx:bx, by:by, w:ww, h:h, u:'px', W:W, H:H, slope:s, angle:angle, img:img};
                 tile.firstChild.style.backgroundImage = 'url("'+String(img)+'")';
                 tile.firstChild.style.backgroundPosition = String(bx)+'px '+String(by)+'px';
                 tile.firstChild.style.backgroundSize = String(W)+'px auto';
             }
-            offset = 0===offset ? -margin : 0;
         }
     }
     else
@@ -579,20 +570,10 @@ function tiles( img, rows, columns, W, H, angle, diagonal, asImg )
             {
                 x = w/columns*i*100/w; y = h/rows*j*100/h;
                 bx = -W/columns*i; by = -H/rows*j;
-                if ( asImg )
-                {
-                    pieces[i*rows+j] = {piece:tile=$el('<div class="imagik-tile"><img class="imagik-tile-inside" /></div>'), r:rows, c:columns, i:i, j:j, x:x, y:y, bx:bx, by:by, w:ww, h:h, u:'%', W:W, H:H, img:img};
-                    tile.firstChild.src = String(img);
-                    tile.firstChild.style.width = '100%';//String(W)+'px';
-                    tile.firstChild.style.height = 'auto';
-                }
-                else
-                {
-                    pieces[i*rows+j] = {piece:tile=$el('<div class="imagik-tile"><div class="imagik-tile-inside"></div></div>'), r:rows, c:columns, i:i, j:j, x:x, y:y, bx:bx, by:by, w:w, h:h, u:'%', W:W, H:H, img:img};
-                    tile.firstChild.style.backgroundImage = 'url("'+String(img)+'")';
-                    tile.firstChild.style.backgroundPosition = String(bx)+'px '+String(by)+'px';
-                    tile.firstChild.style.backgroundSize = String(W)+'px auto';
-                }
+                pieces[i*rows+j] = {piece:tile=$el('<div class="imagik-tile"><div class="imagik-tile-inside"></div></div>'), r:rows, c:columns, i:i, j:j, x:x, y:y, bx:bx, by:by, w:w, h:h, u:'%', W:W, H:H, img:img};
+                tile.firstChild.style.backgroundImage = 'url("'+String(img)+'")';
+                tile.firstChild.style.backgroundPosition = String(bx)+'px '+String(by)+'px';
+                tile.firstChild.style.backgroundSize = String(W)+'px auto';
             }
         }
     }
@@ -755,14 +736,8 @@ function Imagik( el, options )
     self.init = function( ) {
         if ( !self.el || $$('.imagik-holder', self.el).length ) return self;
 
-        W = stdMath.round(self.el.clientWidth); H = stdMath.round(W/self.options.aspectRatio);
         holder = $el('<div class="imagik-holder"></div>');
         if ( is_webkit() ) $addClass(holder, 'imagik-webkit');
-        holder.style.width = String(W)+'px';
-        holder.style.height = String(H)+'px';
-
-        // resize handler
-        hook(self.id, function(evt){self.autoResize();});
 
         // parse dom data
         $children('div', self.el).forEach(function( div ) {
@@ -830,7 +805,6 @@ function Imagik( el, options )
 
         imageLayer = $el('<a href="#" class="imagik-image-layer"></a>');
         imageLayer.style.zIndex = 2;
-        imageLayer.style.backgroundSize = String(W)+'px auto';
         animationLayer = $el('<div class="imagik-animation-layer"></div>');
         animationLayer.style.zIndex = 1;
         $append(holder, imageLayer);
@@ -908,6 +882,11 @@ function Imagik( el, options )
             $html(caption, captions[ind[current]]);
             $addClass(caption, 'show');
         }
+
+        // resize handler
+        hook(self.id, function(evt){self.autoResize();});
+        self.autoResize();
+
         prepareTransition();
         return self;
     };
@@ -964,7 +943,7 @@ function Imagik( el, options )
     };
 
     self.doTransition = function( dir ) {
-        var i, dd, fxi, transition, order, ease, r, c, ordobj, ngroups, d, sd, del, max, odd, animations = {}, str, selector, angle, diagonal = false, img = false;
+        var i, dd, fxi, transition, order, ease, r, c, overlap, ordobj, ngroups, d, sd, del, max, odd, animations = {}, str, selector, angle = null;
 
         clearTimeout(timer);
         clearPrev();
@@ -985,7 +964,7 @@ function Imagik( el, options )
 
         $style(self.style, style='');
         fxi = fx[ind[current]]; if ( "random"===fxi.transition ) fxi = getRandomTransition();
-        if ( !fxi )
+        if ( !fxi || !fxi.transition || !HAS.call(Imagik.Static.transitions, fxi.transition) )
         {
             imageLayer.style.backgroundImage = 'url("'+(imgs[ind[current]].currentSrc||imgs[ind[current]].src)+'")';
             return self;
@@ -995,27 +974,26 @@ function Imagik( el, options )
         ease = fxi.ease || 'linear'; if ( HAS.call(Imagik.Static.ease, ease) ) ease = Imagik.Static.ease[ease];
         r = null!=transition.rows ? transition.rows : fxi.rows;
         c = null!=transition.columns ? transition.columns : fxi.columns;
-        angle = null!=transition.angle ? +transition.angle : null;
-        diagonal = !!transition.diagonal;
-        img = !!transition.img;
+        overlap = null!=transition.overlap ? transition.overlap : fxi.overlap;
+        angle = null!=transition.angle ? transition.angle : null;
         selector = is_string(transition.selector)&&transition.selector.length ? transition.selector : '';
         lastfx = fxi;
 
         if ( transition.reverse )
         {
-            p = tiles((imgs[ind[prevcurrent]].currentSrc||imgs[ind[prevcurrent]].src), r, c, W, H, angle, diagonal, img);
+            p = tiles((imgs[ind[prevcurrent]].currentSrc||imgs[ind[prevcurrent]].src), r, c, W, H, angle);
             imageLayer.style.backgroundImage = 'url("'+(imgs[ind[current]].currentSrc||imgs[ind[current]].src)+'")'; // enable responsive images (eg through srcset attr)
         }
         else
         {
-            p = tiles((imgs[ind[current]].currentSrc||imgs[ind[current]].src), r, c, W, H, angle, diagonal, img); // enable responsive images (eg through srcset attr)
+            p = tiles((imgs[ind[current]].currentSrc||imgs[ind[current]].src), r, c, W, H, angle); // enable responsive images (eg through srcset attr)
         }
 
         numpiec = p.length;
         if ( transition.current || transition.next )
         {
             imageLayer.style.backgroundImage = 'none';
-            p2 = tiles((imgs[ind[prevcurrent]].currentSrc||imgs[ind[prevcurrent]].src), r, c, W, H, angle, diagonal, img);
+            p2 = tiles((imgs[ind[prevcurrent]].currentSrc||imgs[ind[prevcurrent]].src), r, c, W, H, angle);
             if ( is_obj(transition.current) && is_array(transition.current.animation) && 2<=transition.current.animation.length )
             {
                 animations['animation-'+self.el.id+'-current'] = '@keyframes imagik-animation-'+self.el.id+'-current{'+transition.current.animation.map(function(step, n){
@@ -1052,12 +1030,13 @@ function Imagik( el, options )
             }
         }
 
+        r = p[0].r; c = p[0].c; // re-compute rows/columns if needed
         ordobj = Imagik.Static.order[order](p,r,c);
         p = ordobj.pieces;
         imageLayer.style.zIndex = 0;
         ngroups = ordobj.groups;
-        d = fxi.duration/(ngroups-(ngroups-1)*fxi.overlap);
-        sd = d*(1-fxi.overlap);
+        d = fxi.duration/(ngroups-(ngroups-1)*overlap);
+        sd = d*(1-overlap);
         max = 0;
         odd = false;
 
@@ -1196,7 +1175,7 @@ function Imagik( el, options )
     // go
     self.init();
 }
-Imagik.VERSION = "1.1.1";
+Imagik.VERSION = "1.1.2";
 Imagik.Static = {
 
     transitions: {
@@ -1911,6 +1890,10 @@ Imagik.Static = {
             reverse:true,
             animation:"rotate"
         }
+        ,"scale":{
+            current:{animation:"scale"},
+            next:{animation:"scale",reverse:true}
+        }
         ,"iris":{
             rows:1,
             columns:1,
@@ -1952,8 +1935,8 @@ Imagik.Static = {
         ,"fade":{
             animation:"fade"
         }
-        ,"fade-diagonal":{
-            diagonal:true,
+        ,"fade-rhombus":{
+            angle:true,
             animation:"fade"
         }
         ,"fade-zoom":{
@@ -2120,12 +2103,12 @@ Imagik.Static = {
             selector:">.imagik-tile-inside"
         }
         ,"blinds-horizontal":{
-            current:{animation:"blinds-horizontal-current"},
-            next:{animation:"blinds-horizontal-next"}
+            current:{animation:"blinds-horizontal-current",selector:">.imagik-tile-inside"},
+            next:{animation:"blinds-horizontal-next",selector:">.imagik-tile-inside"}
         }
         ,"blinds-vertical":{
-            current:{animation:"blinds-vertical-current"},
-            next:{animation:"blinds-vertical-next"}
+            current:{animation:"blinds-vertical-current",selector:">.imagik-tile-inside"},
+            next:{animation:"blinds-vertical-next",selector:">.imagik-tile-inside"}
         }
         ,"fly-top-left":{
             rows:1,
@@ -2324,31 +2307,31 @@ Imagik.Static = {
 
     ,randomTransitions: [
          {transition:"flip-horizontal",ease:"ease-out-back",duration:2,overlap:0.9,rows:1,columns:1,order:"rows-first"}
-        ,{transition:"flip-horizontal",ease:"ease-out-back",duration:2,overlap:0.9,rows:6,columns:6,order:"rows-first"}
-        ,{transition:"flip-horizontal",ease:"ease-out-back",duration:2,overlap:0.9,rows:6,columns:6,order:"columns-first"}
-        ,{transition:"flip-horizontal",ease:"ease-out-back",duration:2,overlap:0.9,rows:1,columns:6,order:"random"}
-        ,{transition:"flip-horizontal",ease:"ease-out-back",duration:2,overlap:0.9,rows:6,columns:6,order:"spiral-top-left"}
-        ,{transition:"flip-horizontal",ease:"ease-out-back",duration:2,overlap:0.9,rows:6,columns:6,order:"spiral-top-left-reverse"}
-        ,{transition:"flip-horizontal",ease:"ease-out-back",duration:2,overlap:0.9,rows:6,columns:6,order:"spiral-bottom-right"}
-        ,{transition:"flip-horizontal",ease:"ease-out-back",duration:2,overlap:0.9,rows:6,columns:6,order:"spiral-bottom-right-reverse"}
-        ,{transition:"flip-horizontal",ease:"ease-out-back",duration:2,overlap:0.9,rows:6,columns:6,order:"diagonal-top-left"}
-        ,{transition:"flip-horizontal",ease:"ease-out-back",duration:2,overlap:0.9,rows:6,columns:6,order:"diagonal-top-right"}
-        ,{transition:"flip-horizontal",ease:"ease-out-back",duration:2,overlap:0.9,rows:6,columns:6,order:"diagonal-bottom-right"}
-        ,{transition:"flip-horizontal",ease:"ease-out-back",duration:2,overlap:0.9,rows:6,columns:6,order:"diagonal-bottom-left"}
-        ,{transition:"flip-horizontal",ease:"ease-out-back",duration:2,overlap:0.9,rows:6,columns:6,order:"random"}
+        ,{transition:"flip-horizontal",ease:"ease-out-back",duration:2,overlap:0.9,rows:5,columns:5,order:"rows-first"}
+        ,{transition:"flip-horizontal",ease:"ease-out-back",duration:2,overlap:0.9,rows:5,columns:5,order:"columns-first"}
+        ,{transition:"flip-horizontal",ease:"ease-out-back",duration:2,overlap:0.9,rows:1,columns:5,order:"random"}
+        ,{transition:"flip-horizontal",ease:"ease-out-back",duration:2,overlap:0.9,rows:5,columns:5,order:"spiral-top-left"}
+        ,{transition:"flip-horizontal",ease:"ease-out-back",duration:2,overlap:0.9,rows:5,columns:5,order:"spiral-top-left-reverse"}
+        ,{transition:"flip-horizontal",ease:"ease-out-back",duration:2,overlap:0.9,rows:5,columns:5,order:"spiral-bottom-right"}
+        ,{transition:"flip-horizontal",ease:"ease-out-back",duration:2,overlap:0.9,rows:5,columns:5,order:"spiral-bottom-right-reverse"}
+        ,{transition:"flip-horizontal",ease:"ease-out-back",duration:2,overlap:0.9,rows:5,columns:5,order:"diagonal-top-left"}
+        ,{transition:"flip-horizontal",ease:"ease-out-back",duration:2,overlap:0.9,rows:5,columns:5,order:"diagonal-top-right"}
+        ,{transition:"flip-horizontal",ease:"ease-out-back",duration:2,overlap:0.9,rows:5,columns:5,order:"diagonal-bottom-right"}
+        ,{transition:"flip-horizontal",ease:"ease-out-back",duration:2,overlap:0.9,rows:5,columns:5,order:"diagonal-bottom-left"}
+        ,{transition:"flip-horizontal",ease:"ease-out-back",duration:2,overlap:0.9,rows:5,columns:5,order:"random"}
         ,{transition:"flip-vertical",ease:"ease-out-back",duration:2,overlap:0.9,rows:1,columns:1,order:"rows-first"}
-        ,{transition:"flip-vertical",ease:"ease-out-back",duration:2,overlap:0.9,rows:6,columns:6,order:"rows-first"}
-        ,{transition:"flip-vertical",ease:"ease-out-back",duration:2,overlap:0.9,rows:6,columns:6,order:"columns-first"}
-        ,{transition:"flip-vertical",ease:"ease-out-back",duration:2,overlap:0.9,rows:6,columns:1,order:"random"}
-        ,{transition:"flip-vertical",ease:"ease-out-back",duration:2,overlap:0.9,rows:6,columns:6,order:"spiral-top-left"}
-        ,{transition:"flip-vertical",ease:"ease-out-back",duration:2,overlap:0.9,rows:6,columns:6,order:"spiral-top-left-reverse"}
-        ,{transition:"flip-vertical",ease:"ease-out-back",duration:2,overlap:0.9,rows:6,columns:6,order:"spiral-bottom-right"}
-        ,{transition:"flip-vertical",ease:"ease-out-back",duration:2,overlap:0.9,rows:6,columns:6,order:"spiral-bottom-right-reverse"}
-        ,{transition:"flip-vertical",ease:"ease-out-back",duration:2,overlap:0.9,rows:6,columns:6,order:"diagonal-top-left"}
-        ,{transition:"flip-vertical",ease:"ease-out-back",duration:2,overlap:0.9,rows:6,columns:6,order:"diagonal-top-right"}
-        ,{transition:"flip-vertical",ease:"ease-out-back",duration:2,overlap:0.9,rows:6,columns:6,order:"diagonal-bottom-right"}
-        ,{transition:"flip-vertical",ease:"ease-out-back",duration:2,overlap:0.9,rows:6,columns:6,order:"diagonal-bottom-left"}
-        ,{transition:"flip-vertical",ease:"ease-out-back",duration:2,overlap:0.9,rows:6,columns:6,order:"random"}
+        ,{transition:"flip-vertical",ease:"ease-out-back",duration:2,overlap:0.9,rows:5,columns:5,order:"rows-first"}
+        ,{transition:"flip-vertical",ease:"ease-out-back",duration:2,overlap:0.9,rows:5,columns:5,order:"columns-first"}
+        ,{transition:"flip-vertical",ease:"ease-out-back",duration:2,overlap:0.9,rows:5,columns:1,order:"random"}
+        ,{transition:"flip-vertical",ease:"ease-out-back",duration:2,overlap:0.9,rows:5,columns:5,order:"spiral-top-left"}
+        ,{transition:"flip-vertical",ease:"ease-out-back",duration:2,overlap:0.9,rows:5,columns:5,order:"spiral-top-left-reverse"}
+        ,{transition:"flip-vertical",ease:"ease-out-back",duration:2,overlap:0.9,rows:5,columns:5,order:"spiral-bottom-right"}
+        ,{transition:"flip-vertical",ease:"ease-out-back",duration:2,overlap:0.9,rows:5,columns:5,order:"spiral-bottom-right-reverse"}
+        ,{transition:"flip-vertical",ease:"ease-out-back",duration:2,overlap:0.9,rows:5,columns:5,order:"diagonal-top-left"}
+        ,{transition:"flip-vertical",ease:"ease-out-back",duration:2,overlap:0.9,rows:5,columns:5,order:"diagonal-top-right"}
+        ,{transition:"flip-vertical",ease:"ease-out-back",duration:2,overlap:0.9,rows:5,columns:5,order:"diagonal-bottom-right"}
+        ,{transition:"flip-vertical",ease:"ease-out-back",duration:2,overlap:0.9,rows:5,columns:5,order:"diagonal-bottom-left"}
+        ,{transition:"flip-vertical",ease:"ease-out-back",duration:2,overlap:0.9,rows:5,columns:5,order:"random"}
         ,{transition:"shuffle-left",ease:"ease-in-out",duration:2,overlap:1,rows:1,columns:1,order:"rows-first"}
         ,{transition:"shuffle-right",ease:"ease-in-out",duration:2,overlap:1,rows:1,columns:1,order:"rows-first"}
         ,{transition:"fold-left",ease:"ease-in-out",duration:2,overlap:1,rows:1,columns:1,order:"rows-first"}
@@ -2357,8 +2340,9 @@ Imagik.Static = {
         ,{transition:"cubes-right",ease:"ease-in-out",duration:2,overlap:0.9,rows:4,columns:1,order:"random"}
         ,{transition:"cubes-up",ease:"ease-in-out",duration:2,overlap:0.9,rows:1,columns:4,order:"random"}
         ,{transition:"cubes-down",ease:"ease-in-out",duration:2,overlap:0.9,rows:1,columns:4,order:"random"}
-        ,{transition:"rotate",ease:"ease-out",duration:2,overlap:1,rows:6,columns:6,order:"columns-first"}
-        ,{transition:"rotate-reverse",ease:"ease-out",duration:2,overlap:1,rows:6,columns:6,order:"columns-first"}
+        ,{transition:"rotate",ease:"ease-out",duration:2,overlap:1,rows:4,columns:4,order:"columns-first"}
+        ,{transition:"rotate-reverse",ease:"ease-out",duration:2,overlap:1,rows:4,columns:4,order:"columns-first"}
+        ,{transition:"scale",ease:"ease-in-out-quint",duration:2,overlap:1,rows:3,columns:3,order:"columns-first"}
         ,{transition:"iris",ease:"ease-out",duration:2,rows:1,columns:1,order:"rows-first"}
         ,{transition:"iris-reverse",ease:"ease-out",duration:2,rows:1,columns:1,order:"rows-first"}
         ,{transition:"tv",ease:"ease",duration:2,rows:1,columns:1,order:"rows-first"}
@@ -2366,52 +2350,53 @@ Imagik.Static = {
         ,{transition:"darkness",ease:"linear",duration:2,rows:1,columns:1,order:"rows-first"}
         ,{transition:"fade-zoom",ease:"ease-out",duration:2,rows:1,columns:1,order:"rows-first"}
         ,{transition:"fade",ease:"ease-in",duration:2,overlap:0.9,rows:1,columns:1,order:"rows-first"}
-        ,{transition:"fade",ease:"ease-in",duration:2,overlap:0.9,rows:6,columns:6,order:"rows-first"}
-        ,{transition:"fade",ease:"ease-in",duration:2,overlap:0.9,rows:6,columns:6,order:"columns-first"}
-        ,{transition:"fade",ease:"ease-in",duration:2,overlap:0.9,rows:6,columns:6,order:"diagonal-top-left"}
-        ,{transition:"fade",ease:"ease-in",duration:2,overlap:0.9,rows:6,columns:6,order:"diagonal-top-right"}
-        ,{transition:"fade",ease:"ease-in",duration:2,overlap:0.9,rows:6,columns:6,order:"diagonal-bottom-right"}
-        ,{transition:"fade",ease:"ease-in",duration:2,overlap:0.9,rows:6,columns:6,order:"diagonal-bottom-left"}
-        ,{transition:"fade",ease:"ease-in",duration:2,overlap:0.9,rows:1,columns:6,order:"random"}
-        ,{transition:"fade",ease:"ease-in",duration:2,overlap:0.9,rows:6,columns:1,order:"random"}
-        ,{transition:"fade",ease:"ease-in",duration:2,overlap:0.9,rows:6,columns:6,order:"random"}
-        ,{transition:"fade",ease:"ease-in",duration:2,overlap:0.9,rows:6,columns:6,order:"spiral-top-left"}
-        ,{transition:"fade",ease:"ease-in",duration:2,overlap:0.9,rows:6,columns:6,order:"spiral-top-left-reverse"}
-        ,{transition:"fade",ease:"ease-in",duration:2,overlap:0.9,rows:6,columns:6,order:"spiral-bottom-right"}
-        ,{transition:"fade",ease:"ease-in",duration:2,overlap:0.9,rows:6,columns:6,order:"spiral-bottom-right-reverse"}
-        ,{transition:"fade",ease:"ease-in",duration:2,overlap:0.9,rows:6,columns:6,order:"left-right"}
-        ,{transition:"fade",ease:"ease-in",duration:2,overlap:0.9,rows:6,columns:6,order:"up-down"}
-        ,{transition:"grow-horizontal",ease:"ease-out",duration:2,overlap:0.9,rows:1,columns:6,order:"random"}
-        ,{transition:"grow-vertical",ease:"ease-out",duration:2,overlap:0.9,rows:6,columns:1,order:"random"}
-        ,{transition:"fade-grow-horizontal",ease:"ease-out",duration:2,overlap:0.9,rows:1,columns:6,order:"random"}
-        ,{transition:"fade-grow-vertical",ease:"ease-out",duration:2,overlap:0.9,rows:6,columns:1,order:"random"}
-        ,{transition:"grow",ease:"ease-out",duration:2,overlap:0.9,rows:6,columns:6,order:"rows-first"}
-        ,{transition:"shrink",ease:"ease-out",duration:2,overlap:1,rows:6,columns:6,order:"columns-first"}
-        ,{transition:"fade-shrink",ease:"ease-out",duration:2,overlap:0.9,rows:6,columns:6,order:"left-right"}
-        ,{transition:"fade-shrink",ease:"ease-out",duration:2,overlap:0.9,rows:6,columns:6,order:"up-down"}
-        ,{transition:"fade-shrink",ease:"ease-out",duration:2,overlap:0.9,rows:6,columns:6,order:"random"}
-        ,{transition:"fade-shrink",ease:"ease-out",duration:2,overlap:0.9,rows:6,columns:6,order:"spiral-top-left"}
-        ,{transition:"fade-shrink",ease:"ease-out",duration:2,overlap:0.9,rows:6,columns:6,order:"spiral-top-left-reverse"}
-        ,{transition:"fade-shrink",ease:"ease-out",duration:2,overlap:0.9,rows:6,columns:6,order:"spiral-bottom-right"}
-        ,{transition:"fade-shrink",ease:"ease-out",duration:2,overlap:0.9,rows:6,columns:6,order:"spiral-bottom-right-reverse"}
-        ,{transition:"fade-shrink",ease:"ease-out",duration:2,overlap:0.9,rows:6,columns:6,order:"diagonal-top-left"}
-        ,{transition:"fade-shrink",ease:"ease-out",duration:2,overlap:0.9,rows:6,columns:6,order:"diagonal-bottom-right"}
-        ,{transition:"move-diagonal",ease:"ease-out-back",duration:2,overlap:0.9,rows:1,columns:6,order:"random"}
-        ,{transition:"move-diagonal-reverse",ease:"ease-in-back",duration:2,overlap:0.9,rows:1,columns:6,order:"random"}
-        ,{transition:"move-left-right",ease:"ease-out-back",duration:2,overlap:0.8,rows:6,columns:1,order:"rows-first"}
+        ,{transition:"fade",ease:"ease-in",duration:2,overlap:0.9,rows:5,columns:5,order:"rows-first"}
+        ,{transition:"fade",ease:"ease-in",duration:2,overlap:0.9,rows:5,columns:5,order:"columns-first"}
+        ,{transition:"fade",ease:"ease-in",duration:2,overlap:0.9,rows:5,columns:5,order:"diagonal-top-left"}
+        ,{transition:"fade",ease:"ease-in",duration:2,overlap:0.9,rows:5,columns:5,order:"diagonal-top-right"}
+        ,{transition:"fade",ease:"ease-in",duration:2,overlap:0.9,rows:5,columns:5,order:"diagonal-bottom-right"}
+        ,{transition:"fade",ease:"ease-in",duration:2,overlap:0.9,rows:5,columns:5,order:"diagonal-bottom-left"}
+        ,{transition:"fade",ease:"ease-in",duration:2,overlap:0.9,rows:1,columns:5,order:"random"}
+        ,{transition:"fade",ease:"ease-in",duration:2,overlap:0.9,rows:5,columns:1,order:"random"}
+        ,{transition:"fade",ease:"ease-in",duration:2,overlap:0.9,rows:5,columns:5,order:"random"}
+        ,{transition:"fade",ease:"ease-in",duration:2,overlap:0.9,rows:5,columns:5,order:"spiral-top-left"}
+        ,{transition:"fade",ease:"ease-in",duration:2,overlap:0.9,rows:5,columns:5,order:"spiral-top-left-reverse"}
+        ,{transition:"fade",ease:"ease-in",duration:2,overlap:0.9,rows:5,columns:5,order:"spiral-bottom-right"}
+        ,{transition:"fade",ease:"ease-in",duration:2,overlap:0.9,rows:5,columns:5,order:"spiral-bottom-right-reverse"}
+        ,{transition:"fade",ease:"ease-in",duration:2,overlap:0.9,rows:5,columns:5,order:"left-right"}
+        ,{transition:"fade",ease:"ease-in",duration:2,overlap:0.9,rows:5,columns:5,order:"up-down"}
+        //,{transition:"fade-rhombus",ease:"ease-in",duration:2,overlap:0.9,rows:5,columns:5,order:"random"}
+        ,{transition:"grow-horizontal",ease:"ease-out",duration:2,overlap:0.9,rows:1,columns:5,order:"random"}
+        ,{transition:"grow-vertical",ease:"ease-out",duration:2,overlap:0.9,rows:5,columns:1,order:"random"}
+        ,{transition:"fade-grow-horizontal",ease:"ease-out",duration:2,overlap:0.9,rows:1,columns:5,order:"random"}
+        ,{transition:"fade-grow-vertical",ease:"ease-out",duration:2,overlap:0.9,rows:5,columns:1,order:"random"}
+        ,{transition:"grow",ease:"ease-out",duration:2,overlap:0.9,rows:5,columns:5,order:"rows-first"}
+        ,{transition:"shrink",ease:"ease-out",duration:2,overlap:1,rows:5,columns:5,order:"columns-first"}
+        ,{transition:"fade-shrink",ease:"ease-out",duration:2,overlap:0.9,rows:5,columns:5,order:"left-right"}
+        ,{transition:"fade-shrink",ease:"ease-out",duration:2,overlap:0.9,rows:5,columns:5,order:"up-down"}
+        ,{transition:"fade-shrink",ease:"ease-out",duration:2,overlap:0.9,rows:5,columns:5,order:"random"}
+        ,{transition:"fade-shrink",ease:"ease-out",duration:2,overlap:0.9,rows:5,columns:5,order:"spiral-top-left"}
+        ,{transition:"fade-shrink",ease:"ease-out",duration:2,overlap:0.9,rows:5,columns:5,order:"spiral-top-left-reverse"}
+        ,{transition:"fade-shrink",ease:"ease-out",duration:2,overlap:0.9,rows:5,columns:5,order:"spiral-bottom-right"}
+        ,{transition:"fade-shrink",ease:"ease-out",duration:2,overlap:0.9,rows:5,columns:5,order:"spiral-bottom-right-reverse"}
+        ,{transition:"fade-shrink",ease:"ease-out",duration:2,overlap:0.9,rows:5,columns:5,order:"diagonal-top-left"}
+        ,{transition:"fade-shrink",ease:"ease-out",duration:2,overlap:0.9,rows:5,columns:5,order:"diagonal-bottom-right"}
+        ,{transition:"move-diagonal",ease:"ease-out-back",duration:2,overlap:0.9,rows:1,columns:5,order:"random"}
+        ,{transition:"move-diagonal-reverse",ease:"ease-in-back",duration:2,overlap:0.9,rows:1,columns:5,order:"random"}
+        ,{transition:"move-left-right",ease:"ease-out-back",duration:2,overlap:0.8,rows:5,columns:1,order:"rows-first"}
         ,{transition:"move-left-right",ease:"ease",duration:2,overlap:1,rows:2,columns:1,order:"rows-first"}
-        ,{transition:"move-left-right-reverse",ease:"ease-in-back",duration:2,overlap:0.8,rows:6,columns:1,order:"rows-first"}
-        ,{transition:"move-right",ease:"ease-out-back",duration:2,overlap:0.8,rows:6,columns:1,order:"rows-first"}
-        ,{transition:"move-right-reverse",ease:"ease-in-back",duration:2,overlap:0.8,rows:6,columns:1,order:"rows-first"}
-        ,{transition:"move-left",ease:"ease-out-back",duration:2,overlap:0.8,rows:6,columns:1,order:"rows-first"}
-        ,{transition:"move-left-reverse",ease:"ease-in-back",duration:2,overlap:0.8,rows:6,columns:1,order:"rows-first"}
-        ,{transition:"move-up-down",ease:"ease-out-back",duration:2,overlap:0.9,rows:1,columns:8,order:"columns-first"}
+        ,{transition:"move-left-right-reverse",ease:"ease-in-back",duration:2,overlap:0.8,rows:5,columns:1,order:"rows-first"}
+        ,{transition:"move-right",ease:"ease-out-back",duration:2,overlap:0.8,rows:5,columns:1,order:"rows-first"}
+        ,{transition:"move-right-reverse",ease:"ease-in-back",duration:2,overlap:0.8,rows:5,columns:1,order:"rows-first"}
+        ,{transition:"move-left",ease:"ease-out-back",duration:2,overlap:0.8,rows:5,columns:1,order:"rows-first"}
+        ,{transition:"move-left-reverse",ease:"ease-in-back",duration:2,overlap:0.8,rows:5,columns:1,order:"rows-first"}
+        ,{transition:"move-up-down",ease:"ease-out-back",duration:2,overlap:0.9,rows:1,columns:5,order:"columns-first"}
         ,{transition:"move-up-down",ease:"ease",duration:2,overlap:1,rows:1,columns:2,order:"columns-first"}
-        ,{transition:"move-up-down-reverse",ease:"ease-in-back",duration:2,overlap:0.9,rows:1,columns:8,order:"columns-first"}
-        ,{transition:"move-up",ease:"ease-out-back",duration:2,overlap:0.9,rows:1,columns:6,order:"columns-first"}
-        ,{transition:"move-up-reverse",ease:"ease-in-back",duration:2,overlap:0.9,rows:1,columns:6,order:"columns-first"}
-        ,{transition:"move-down",ease:"ease-out-back",duration:2,overlap:0.9,rows:1,columns:6,order:"columns-first"}
-        ,{transition:"move-down-reverse",ease:"ease-in-back",duration:2,overlap:0.9,rows:1,columns:6,order:"columns-first"}
+        ,{transition:"move-up-down-reverse",ease:"ease-in-back",duration:2,overlap:0.9,rows:1,columns:5,order:"columns-first"}
+        ,{transition:"move-up",ease:"ease-out-back",duration:2,overlap:0.9,rows:1,columns:5,order:"columns-first"}
+        ,{transition:"move-up-reverse",ease:"ease-in-back",duration:2,overlap:0.9,rows:1,columns:5,order:"columns-first"}
+        ,{transition:"move-down",ease:"ease-out-back",duration:2,overlap:0.9,rows:1,columns:5,order:"columns-first"}
+        ,{transition:"move-down-reverse",ease:"ease-in-back",duration:2,overlap:0.9,rows:1,columns:5,order:"columns-first"}
         ,{transition:"fly-top-left",ease:"ease-out-back",duration:2,overlap:0.9,rows:1,columns:1,order:"columns-first"}
         ,{transition:"fly-bottom-right",ease:"ease-out-back",duration:2,overlap:0.9,rows:1,columns:1,order:"columns-first"}
         ,{transition:"fly-left",ease:"ease-out-back",duration:2,overlap:0.9,rows:1,columns:1,order:"columns-first"}
@@ -2428,9 +2413,9 @@ Imagik.Static = {
         ,{transition:"pan-left-right",ease:"ease-out-quint",duration:2,overlap:1,rows:3,columns:1,order:"rows-first"}
         ,{transition:"pan-up-down",ease:"ease-out-quint",duration:2,overlap:1,rows:1,columns:2,order:"columns-first"}
         ,{transition:"pan-up-down",ease:"ease-out-quint",duration:2,overlap:1,rows:1,columns:3,order:"columns-first"}
-        ,{transition:"pan-diagonal",ease:"ease-out-quint",duration:2,overlap:1,rows:1,columns:1,order:"columns-first"}
         ,{transition:"pan-diagonal",ease:"ease-out-quint",duration:2,overlap:1,rows:1,columns:2,order:"columns-first"}
         ,{transition:"pan-diagonal",ease:"ease-out-quint",duration:2,overlap:1,rows:1,columns:3,order:"columns-first"}
+        ,{transition:"pan-diagonal",ease:"ease-out-quint",duration:2,overlap:1,rows:1,columns:4,order:"columns-first"}
         ,{transition:"blinds-horizontal",ease:"ease-in-out-quint",duration:2,overlap:0.5,rows:5,columns:5,order:"checkerboard"}
         ,{transition:"blinds-horizontal",ease:"ease-in-out-quint",duration:2,overlap:1,rows:1,columns:5,order:"random"}
         ,{transition:"blinds-vertical",ease:"ease-in-out-quint",duration:2,overlap:0.5,rows:5,columns:5,order:"checkerboard"}

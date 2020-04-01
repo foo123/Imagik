@@ -87,16 +87,20 @@ function $children( sel, el )
     var children, id, guid;
     if ( sel )
     {
-        //children = children.filter(function(child){return (child.matches||child.msMatchesSelector||child.webkitMatchesSelector)(sel);});
-        if ( null == $children.count ) $children.count = 0;
+        children = slice.call(el.children).filter(function(child){return child.matches ? child.matches(sel) : (child.msMatchesSelector ? child.msMatchesSelector(sel) : (child.webkitMatchesSelector ? child.webkitMatchesSelector(sel) : true));});
+        /*if ( null == $children.count ) $children.count = 0;
         id = el.id;
         guid = el.id = id || ('query_children_' + (++$children.count));
         sel = '#' + guid + ' > ' + sel.replace(/,/g, ',#' + guid + ' > ');
         children = $$(sel, el);
         if ( !id ) el.removeAttribute('id');
-        return children;
+        return children;*/
     }
-    return slice.call(el.children);
+    else
+    {
+        children = slice.call(el.children);
+    }
+    return children;
 }
 function $attr( el, key, value )
 {
@@ -119,7 +123,7 @@ function $html( el, html )
 function $empty( el )
 {
     //el.innerHTML = '';
-    while(el.firstChild) $remove(el.firstChild);
+    while(el.firstChild) el.removeChild(el.firstChild);
     return el;
 }
 function $append( el, child )
@@ -187,7 +191,7 @@ function shuffle( a )
 }
 function rows( pieces, rowsi, columnsi )
 {
-    var delays = new Array(rowsi*columnsi), i, j;
+    var delays = new Array(pieces.length), i, j;
     for(i=0;i<columnsi;i++)
     {
         for(j=0;j<rowsi;j++)
@@ -199,7 +203,7 @@ function rows( pieces, rowsi, columnsi )
 }
 function rowsReverse( pieces, rowsi, columnsi )
 {
-    var delays = new Array(rowsi*columnsi), i, j;
+    var delays = new Array(pieces.length), i, j;
     for(i=0;i<columnsi;i++)
     {
         for(j=0;j<rowsi;j++)
@@ -211,7 +215,7 @@ function rowsReverse( pieces, rowsi, columnsi )
 }
 function columns( pieces, rowsi, columnsi )
 {
-    var delays = new Array(rowsi*columnsi), i, j;
+    var delays = new Array(pieces.length), i, j;
     for(i=0;i<columnsi;i++)
     {
         for(j=0;j<rowsi;j++)
@@ -223,7 +227,7 @@ function columns( pieces, rowsi, columnsi )
 }
 function columnsReverse( pieces, rowsi, columnsi )
 {
-    var delays = new Array(rowsi*columnsi), i, j;
+    var delays = new Array(pieces.length), i, j;
     for(i=0;i<columnsi;i++)
     {
         for(j=0;j<rowsi;j++)
@@ -244,7 +248,7 @@ function columnsFirstReverse( pieces, rows, columns )
 }
 function rowsFirst( pieces, rows, columns)
 {
-    var newpieces = new Array(rows*columns), i, j;
+    var newpieces = new Array(pieces.length), i, j;
     for(i=0; i<rows; i++)
     {
         for(j=0;j<columns;j++)
@@ -382,7 +386,7 @@ function spiralBottomRightReverse( pieces, rows, columns )
 }
 function upDown( pieces, rows, columns )
 {
-    var newpieces = new Array(rows*columns), odd = false, i, j;
+    var newpieces = new Array(pieces.length), odd = false, i, j;
     for(i=0;i<columns;i++)
     {
         for(j=0;j<rows;j++)
@@ -400,7 +404,7 @@ function upDownReverse( pieces, rows, columns )
 }
 function leftRight( pieces, rows, columns )
 {
-    var newpieces = new Array(rows*columns), odd = false, i, j;
+    var newpieces = new Array(pieces.length), odd = false, i, j;
     for(i=0;i<rows;i++)
     {
         for(j=0;j<columns;j++)
@@ -422,7 +426,7 @@ function random( pieces, rows, columns )
 }
 function diagonalTopLeft( pieces, rows, columns )
 {
-    var delays = new Array(rows*columns), i, j;
+    var delays = new Array(pieces.length), i, j;
     for(i=0;i<columns;i++)
     {
         for(j=0;j<rows;j++)
@@ -434,7 +438,7 @@ function diagonalTopLeft( pieces, rows, columns )
 }
 function diagonalBottomRight( pieces, rows, columns )
 {
-    var delays = new Array(rows*columns), i, j;
+    var delays = new Array(pieces.length), i, j;
     for(i=0;i<columns;i++)
     {
         for(j=0;j<rows;j++)
@@ -446,7 +450,7 @@ function diagonalBottomRight( pieces, rows, columns )
 }
 function diagonalBottomLeft( pieces, rows, columns )
 {
-    var delays = new Array(rows*columns), i, j;
+    var delays = new Array(pieces.length), i, j;
     for(i=0;i<columns;i++)
     {
         for(j=0;j<rows;j++)
@@ -458,7 +462,7 @@ function diagonalBottomLeft( pieces, rows, columns )
 }
 function diagonalTopRight( pieces, rows, columns )
 {
-    var delays = new Array(rows*columns), i, j;
+    var delays = new Array(pieces.length), i, j;
     for(i=0;i<columns;i++)
     {
         for(j=0;j<rows;j++)
@@ -470,7 +474,7 @@ function diagonalTopRight( pieces, rows, columns )
 }
 function checkerBoard( pieces, rows, columns )
 {
-    var delays = new Array(rows*columns), i, j, odd1 = false, odd2;
+    var delays = new Array(pieces.length), i, j, odd1 = false, odd2;
     for(i=0;i<columns;i++)
     {
         odd2 = odd1;
@@ -530,13 +534,12 @@ function tiles( img, rows, columns, W, H, angle )
             m2 = 1.0/stdMath.tan(angle*toRad);
             imax = 1;
         }
-        columns -= imax;
-        w = 1===columns ? W : (W/columns);
+        w = 1===(columns-imax) ? W : (W/(columns-imax));
         h = 1===rows ? H : (H/rows);
-        pieces = new Array(rows*(columns+imax))
-        s = m2*H/columns;
+        pieces = new Array(rows*columns)
+        s = m2*H/(columns-imax);
         ww = 0===angle ? w : (m1*w + s);
-        for(i=0;i<columns+imax; i++)
+        for(i=0;i<columns; i++)
         {
             for(j=0; j<rows; j++)
             {
@@ -695,7 +698,9 @@ function Imagik( el, options )
         randomOrder: false,
         caption: true,
         controls: true,
-        imgs: null
+        imgs: null,
+        onStart: null, // on Transition Start event handler
+        onComplete: null // on Transition Complete event handler
     };
 
     options = extend(defaults, options||{});

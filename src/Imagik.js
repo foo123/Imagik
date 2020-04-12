@@ -191,51 +191,59 @@ function shuffle( a )
 }
 function rows( pieces, rowsi, columnsi )
 {
-    var delays = new Array(pieces.length), i, j;
-    for(i=0;i<columnsi;i++)
+    var delays = new Array(pieces.length), i, j, k;
+    for(k=0,i=0;i<columnsi;i++)
     {
         for(j=0;j<rowsi;j++)
         {
-            delays[i*rowsi+j] = j;
+            delays[k++/*i*rowsi+j*/] = j;
+            if ( k >= pieces.length ) break;
         }
+        if ( k >= pieces.length ) break;
     }
     return {pieces:pieces, delays:delays, groups:rowsi};
 }
-function rowsReverse( pieces, rowsi, columnsi )
+function rowsReverse( pieces, rows, columns )
 {
-    var delays = new Array(pieces.length), i, j;
-    for(i=0;i<columnsi;i++)
+    var delays = new Array(pieces.length), i, j, k;
+    for(k=0,i=0;i<columns;i++)
     {
-        for(j=0;j<rowsi;j++)
+        for(j=0;j<rows;j++)
         {
-            delays[i*rowsi+j] = rowsi-1-j;
+            delays[k++/*i*rows+j*/] = rows-1-j;
+            if ( k >= pieces.length ) break;
         }
+        if ( k >= pieces.length ) break;
     }
-    return {pieces:pieces, delays:delays, groups:rowsi};
+    return {pieces:pieces, delays:delays, groups:rows};
 }
 function columns( pieces, rowsi, columnsi )
 {
-    var delays = new Array(pieces.length), i, j;
-    for(i=0;i<columnsi;i++)
+    var delays = new Array(pieces.length), i, j, k;
+    for(k=0,i=0;i<columnsi;i++)
     {
         for(j=0;j<rowsi;j++)
         {
-            delays[i*rowsi+j] = i;
+            delays[k++/*i*rowsi+j*/] = i;
+            if ( k >= pieces.length ) break;
         }
+        if ( k >= pieces.length ) break;
     }
     return {pieces:pieces, delays:delays, groups:columnsi};
 }
-function columnsReverse( pieces, rowsi, columnsi )
+function columnsReverse( pieces, rows, columns )
 {
-    var delays = new Array(pieces.length), i, j;
-    for(i=0;i<columnsi;i++)
+    var delays = new Array(pieces.length), i, j, k;
+    for(k=0,i=0;i<columns;i++)
     {
-        for(j=0;j<rowsi;j++)
+        for(j=0;j<rows;j++)
         {
-            delays[i*rowsi+j] = columnsi-1-i;
+            delays[k++/*i*rows+j*/] = columns-1-i;
+            if ( k >= pieces.length ) break;
         }
+        if ( k >= pieces.length ) break;
     }
-    return {pieces:pieces, delays:delays, groups:columnsi};
+    return {pieces:pieces, delays:delays, groups:columns};
 }
 function columnsFirst( pieces, rows, columns )
 {
@@ -263,7 +271,7 @@ function rowsFirstReverse( pieces, rows, columns )
     var o = rowsFirst(pieces,rows,columns);
     return {pieces:o.pieces.reverse(),delays:o.delays,groups:o.groups};
 }
-function spiral( pieces, rows, columns, type)
+function spiral( pieces, rows, columns, type )
 {
     var temp = [], i = 0, j = 0, order = [0,1,2,3], min_i = 0, min_j = 0, max_i = rows-1, max_j = columns-1, dir = 1, mode = 0, inc = true;
     switch( type&3 )
@@ -426,87 +434,102 @@ function random( pieces, rows, columns )
 }
 function diagonalTopLeft( pieces, rows, columns )
 {
-    var delays = new Array(pieces.length), i, j;
-    for(i=0;i<columns;i++)
+    var delays = new Array(pieces.length), i, j, k;
+    for(k=0,i=0;i<columns;i++)
     {
         for(j=0;j<rows;j++)
         {
-            delays[i*rows+j] = i+j;
+            delays[k++/*i*rows+j*/] = i+j;
+            if ( k >= pieces.length ) break;
         }
+        if ( k >= pieces.length ) break;
     }
     return {pieces:pieces, delays:delays, groups:rows+columns-1};
 }
 function diagonalBottomRight( pieces, rows, columns )
 {
-    var delays = new Array(pieces.length), i, j;
-    for(i=0;i<columns;i++)
+    var delays = new Array(pieces.length), i, j, k;
+    for(k=0,i=0;i<columns;i++)
     {
         for(j=0;j<rows;j++)
         {
-            delays[i*rows+j] = columns-1-i+rows-1-j;
+            delays[k++/*i*rows+j*/] = columns-1-i+rows-1-j;
+            if ( k >= pieces.length ) break;
         }
+        if ( k >= pieces.length ) break;
     }
     return {pieces:pieces, delays:delays, groups:rows+columns-1};
 }
 function diagonalBottomLeft( pieces, rows, columns )
 {
-    var delays = new Array(pieces.length), i, j;
-    for(i=0;i<columns;i++)
+    var delays = new Array(pieces.length), i, j, k;
+    for(k=0,i=0;i<columns;i++)
     {
         for(j=0;j<rows;j++)
         {
-            delays[i*rows+j] = i+rows-1-j;
+            delays[k++/*i*rows+j*/] = i+rows-1-j;
+            if ( k >= pieces.length ) break;
         }
+        if ( k >= pieces.length ) break;
     }
     return {pieces:pieces, delays:delays, groups:rows+columns-1};
 }
 function diagonalTopRight( pieces, rows, columns )
 {
-    var delays = new Array(pieces.length), i, j;
-    for(i=0;i<columns;i++)
+    var delays = new Array(pieces.length), i, j, k;
+    for(k=0,i=0;i<columns;i++)
     {
         for(j=0;j<rows;j++)
         {
-            delays[i*rows+j] = columns-1-i+j;
+            delays[k++/*i*rows+j*/] = columns-1-i+j;
+            if ( k >= pieces.length ) break;
         }
+        if ( k >= pieces.length ) break;
     }
     return {pieces:pieces, delays:delays, groups:rows+columns-1};
 }
 function checkerBoard( pieces, rows, columns )
 {
-    var delays = new Array(pieces.length), i, j, odd1 = false, odd2;
-    for(i=0;i<columns;i++)
+    var delays = new Array(pieces.length), i, j, k, odd1 = false, odd2;
+    for(k=0,i=0;i<columns;i++)
     {
         odd2 = odd1;
         for(j=0;j<rows;j++)
         {
-            delays[i*rows+j] = odd2 ? 1 : 0;
+            delays[k++/*i*rows+j*/] = odd2 ? 1 : 0;
+            if ( k >= pieces.length ) break;
             odd2 = !odd2;
         }
         odd1 = !odd1;
+        if ( k >= pieces.length ) break;
     }
     return {pieces:pieces, delays:delays, groups:2};
 }
 function tiles( img, rows, columns, W, H, angle )
 {
-    var i, j, x, y, bx, by, w, h, pieces, tile, ww, s, m1, m2, imax, clipPath, side, margin, margin2, offset;
+    var i, j, ii, jj, x, y, bx, by, w, h, pieces, tile, ww, s, m1, m2, imax, clipPath, size, side, margin, margin2, offset;
     if ( true===angle )
     {
-        side = stdMath.min(W, H)/stdMath.max(rows, columns); w = stdMath.round(side*sqrt2);
-        columns = 2*stdMath.ceil(W/w)+1; rows = 2*stdMath.ceil(H/w)+1;
-        margin = w/2; margin2 = margin/2; offset = 0;
-        pieces = new Array(rows*columns);
-        for(i=0;i<columns; i++)
+        size = stdMath.max(1.0/columns, 1.0/rows);
+        columns = 2*stdMath.ceil(1/size)+2; rows = stdMath.ceil(1/(size*(W/H)))+1;
+        w = stdMath.max(2*W/(columns-2), H/(rows-1)); side = w/sqrt2;
+        margin = w/2; margin2 = margin/2; offset = -margin;
+        pieces = [];
+        for(ii=0,i=0;i<columns; i++)
         {
-            for(j=0; j<rows; j++)
+            for(jj=0,j=0; j<rows; j++)
             {
                 x = margin*i-margin; y = w*j-margin+offset;
                 bx = -x+margin2; by = -y+margin2;
-                pieces[i*rows+j] = {piece:tile=$el('<div class="imagik-tile imagik-diagonal"><div class="imagik-tile-inside" style="width:'+(side+margin)+'px;height:'+(side+margin)+'px;left:'+(-margin2)+'px;top:'+(-margin2)+'px;"></div></div>'), r:rows, c:columns, i:i, j:j, x:x, y:y, bx:bx, by:by, w:side, h:side, u:'px', W:W, H:H, img:img};
-                tile.firstChild.style.backgroundImage = 'url("'+String(img)+'")';
-                tile.firstChild.style.backgroundPosition = String(bx)+'px '+String(by)+'px';
-                tile.firstChild.style.backgroundSize = String(W)+'px auto';
+                if ( stdMath.abs(bx)<W && bx+side+margin<=W && stdMath.abs(by)<H && by+side+margin<=H )
+                {
+                    pieces.push({piece:tile=$el('<div class="imagik-tile imagik-diagonal"><div class="imagik-tile-inside" style="width:'+String(side+margin)+'px;height:'+String(side+margin)+'px;left:'+String(-margin2)+'px;top:'+String(-margin2)+'px;"></div></div>'), r:rows, c:columns, i:ii, j:jj++, x:x, y:y, bx:bx, by:by, w:side, h:side, u:'px', W:W, H:H, img:img, vis:true});
+                    tile.firstChild.style.backgroundImage = 'url("'+String(img)+'")';
+                    tile.firstChild.style.backgroundPosition = String(bx)+'px '+String(by)+'px';
+                    tile.firstChild.style.backgroundSize = String(W)+'px auto';
+                }
             }
+            if ( 0 < jj ) ii++;
             offset = 0===offset ? -margin : 0;
         }
     }
@@ -555,7 +578,7 @@ function tiles( img, rows, columns, W, H, angle )
                 }
                 clipPath = 'border-box polygon('+clipPath.map(function(pt){return String(pt[0])+'px '+String(pt[1])+'px';}).join(',')+')';
                 //clipPath = 'url("data:image/svg+xml,%3Csvg xmlns=\\"http://www.w3.org/2000/svg\\"%3E%3CclipPath id=\\"clipPath-'+i+'-'+j+'\\" clipPathUnits=\\"objectBoundingBox\\"%3E%3Cpolygon points=\\"'+clipPath.map(function(pt){return String(pt[0])+','+String(pt[1])+'';}).join(' ')+'\\" /%3E%3C/clipPath%3E%3C/svg%3E%0A#clipPath-'+i+'-'+j+'")';
-                pieces[i*rows+j] = {piece:tile=$el('<div class="imagik-tile" style="-webkit-clip-path:'+clipPath+';clip-path:'+clipPath+';"><div class="imagik-tile-inside"></div></div>'), r:rows, c:columns, i:i, j:j, x:x, y:y, bx:bx, by:by, w:ww, h:h, u:'px', W:W, H:H, slope:s, angle:angle, img:img};
+                pieces[i*rows+j] = {piece:tile=$el('<div class="imagik-tile" style="-webkit-clip-path:'+clipPath+';clip-path:'+clipPath+';"><div class="imagik-tile-inside"></div></div>'), r:rows, c:columns, i:i, j:j, x:x, y:y, bx:bx, by:by, w:ww, h:h, u:'px', W:W, H:H, slope:s, angle:angle, img:img, vis:true};
                 tile.firstChild.style.backgroundImage = 'url("'+String(img)+'")';
                 tile.firstChild.style.backgroundPosition = String(bx)+'px '+String(by)+'px';
                 tile.firstChild.style.backgroundSize = String(W)+'px auto';
@@ -573,7 +596,7 @@ function tiles( img, rows, columns, W, H, angle )
             {
                 x = w/columns*i*100/w; y = h/rows*j*100/h;
                 bx = -W/columns*i; by = -H/rows*j;
-                pieces[i*rows+j] = {piece:tile=$el('<div class="imagik-tile"><div class="imagik-tile-inside"></div></div>'), r:rows, c:columns, i:i, j:j, x:x, y:y, bx:bx, by:by, w:w, h:h, u:'%', W:W, H:H, img:img};
+                pieces[i*rows+j] = {piece:tile=$el('<div class="imagik-tile"><div class="imagik-tile-inside"></div></div>'), r:rows, c:columns, i:i, j:j, x:x, y:y, bx:bx, by:by, w:w, h:h, u:'%', W:W, H:H, img:img, vis:true};
                 tile.firstChild.style.backgroundImage = 'url("'+String(img)+'")';
                 tile.firstChild.style.backgroundPosition = String(bx)+'px '+String(by)+'px';
                 tile.firstChild.style.backgroundSize = String(W)+'px auto';
@@ -911,6 +934,7 @@ function Imagik( el, options )
     };*/
 
     clearPrev = function( ) {
+        //if ( lastfx && 'fade-rhombus'===lastfx.transition ) return;
         if ( evtCarrier )
         {
             $ev(evtCarrier, 'animationend', endHandler, false);
@@ -936,6 +960,7 @@ function Imagik( el, options )
     endTransition = function( ) {
         clearPrev();
         if ( !imgs ) return;
+        //if ( lastfx && 'fade-rhombus'===lastfx.transition ) return;
         imageLayer.style.backgroundImage = 'url("'+(imgs[ind[current]].currentSrc||imgs[ind[current]].src)+'")'; // enable responsive images (eg through srcset attr)
         imageLayer.href = links[ind[current]];
         imageLayer.style.zIndex = 2;
@@ -1013,6 +1038,7 @@ function Imagik( el, options )
             }
             for(i=0;i<numpiec;i++)
             {
+                if ( !p[i].vis ) continue;
                 dd = $el('<div class="imagik-tile-wrapper"></div>');
                 p[i].piece.id = self.el.id+'-next-'+p[i].i+'-'+p[i].j;
                 p2[i].piece.id = self.el.id+'-current-'+p2[i].i+'-'+p2[i].j;
@@ -1042,7 +1068,7 @@ function Imagik( el, options )
         ngroups = ordobj.groups;
         d = fxi.duration/(ngroups-(ngroups-1)*overlap);
         sd = d*(1-overlap);
-        max = 0;
+        max = -1;
         odd = false;
 
         if ( (is_array(transition.animation) && 2<=transition.animation.length) || (is_array(transition.animation1) && 2<=transition.animation1.length && is_array(transition.animation2) && 2<=transition.animation2.length) )
@@ -1069,11 +1095,12 @@ function Imagik( el, options )
 
         for(i=0;i<numpiec;i++)
         {
+            if ( !p[i].vis ) continue;
             del = ordobj.delays[i]*sd;
             p[i].piece.id = self.el.id+'-tile-'+p[i].i+'-'+p[i].j;
             style += "\n" + '#'+p[i].piece.id+'{left:'+p[i].x+p[i].u+';top:'+p[i].y+p[i].u+';width:'+p[i].w+p[i].u+';height:'+p[i].h+p[i].u+';}';
             $append(animationLayer, p[i].piece);
-            if ( !evtCarrier || max<=del )
+            if ( max<=del )
             {
                 if ( transition.next && transition.next.animation )
                     evtCarrier = transition.next.selector ? ($$('#'+p[i].piece.childNodes[1].id+transition.next.selector, animationLayer)[0]||p[i].piece.childNodes[1]) : p[i].piece.childNodes[1];
@@ -2370,7 +2397,9 @@ Imagik.Static = {
         ,{transition:"fade",ease:"ease-in",duration:2,overlap:0.9,rows:5,columns:5,order:"spiral-bottom-right-reverse"}
         ,{transition:"fade",ease:"ease-in",duration:2,overlap:0.9,rows:5,columns:5,order:"left-right"}
         ,{transition:"fade",ease:"ease-in",duration:2,overlap:0.9,rows:5,columns:5,order:"up-down"}
-        //,{transition:"fade-rhombus",ease:"ease-in",duration:2,overlap:0.9,rows:5,columns:5,order:"random"}
+        ,{transition:"fade-rhombus",ease:"ease-in",duration:2,overlap:0.9,rows:5,columns:5,order:"random"}
+        ,{transition:"fade-rhombus",ease:"ease-in",duration:2,overlap:0.9,rows:5,columns:5,order:"left-right"}
+        ,{transition:"fade-rhombus",ease:"ease-in",duration:2,overlap:0.9,rows:5,columns:5,order:"up-down"}
         ,{transition:"grow-horizontal",ease:"ease-out",duration:2,overlap:0.9,rows:1,columns:5,order:"random"}
         ,{transition:"grow-vertical",ease:"ease-out",duration:2,overlap:0.9,rows:5,columns:1,order:"random"}
         ,{transition:"fade-grow-horizontal",ease:"ease-out",duration:2,overlap:0.9,rows:1,columns:5,order:"random"}

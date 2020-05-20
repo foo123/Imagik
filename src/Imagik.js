@@ -576,7 +576,7 @@ function tiles( img, rows, columns, W, H, angle )
                 {
                     clipPath = [[0, 0], [s, h], [w+s, h], [w, 0]];
                 }
-                clipPath = 'border-box polygon('+clipPath.map(function(pt){return String(pt[0])+'px '+String(pt[1])+'px';}).join(',')+')';
+                clipPath = /*'border-box '+*/'polygon('+clipPath.map(function(pt){return String(pt[0])+'px '+String(pt[1])+'px';}).join(',')+')';
                 //clipPath = 'url("data:image/svg+xml,%3Csvg xmlns=\\"http://www.w3.org/2000/svg\\"%3E%3CclipPath id=\\"clipPath-'+i+'-'+j+'\\" clipPathUnits=\\"objectBoundingBox\\"%3E%3Cpolygon points=\\"'+clipPath.map(function(pt){return String(pt[0])+','+String(pt[1])+'';}).join(' ')+'\\" /%3E%3C/clipPath%3E%3C/svg%3E%0A#clipPath-'+i+'-'+j+'")';
                 pieces[i*rows+j] = {piece:tile=$el('<div class="imagik-tile" style="-webkit-clip-path:'+clipPath+';clip-path:'+clipPath+';"><div class="imagik-tile-inside"></div></div>'), r:rows, c:columns, i:i, j:j, x:x, y:y, bx:bx, by:by, w:ww, h:h, u:'px', W:W, H:H, slope:s, angle:angle, img:img, vis:true};
                 tile.firstChild.style.backgroundImage = 'url("'+String(img)+'")';
@@ -2457,6 +2457,7 @@ Imagik.Static = {
     ]
 
     // utils
+    ,debounce: debounce
     ,extend: extend
     ,translate: translate
     ,linearArray: linearArray

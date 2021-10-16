@@ -1,7 +1,7 @@
 /**
 *
 *    Imagik Responsive CSS3 Slideshow
-*    version 1.1.2
+*    version 1.1.3
 *    https://github.com/foo123/Imagik
 *
 **/
@@ -197,6 +197,7 @@
     transform-origin:center center;
     transform:translate3d(0,0,0); /* enable hardware acceleration */
 }
+.imagik-tile-backface,
 .imagik-tile-inside
 {
     position:absolute !important;
@@ -216,6 +217,15 @@
     background-repeat:no-repeat;
     background-position:0 0;
     background-size:100% auto;
+    backface-visibility:hidden;
+}
+.imagik-tile-backface
+{
+    z-index:2;
+}
+.imagik-tile-inside
+{
+    z-index:1;
 }
 .imagik-tile.imagik-diagonal
 {
@@ -227,6 +237,8 @@
 }
 
 /* fx */
+.imagik-animation-layer.imagik-fx-unfold-horizontal .imagik-tile,
+.imagik-animation-layer.imagik-fx-unfold-vertical .imagik-tile,
 .imagik-webkit .imagik-animation-layer.imagik-fx-flip-horizontal .imagik-tile,
 .imagik-webkit .imagik-animation-layer.imagik-fx-flip-vertical .imagik-tile
 {
@@ -296,17 +308,58 @@
 {
     transform-origin:0 center;
 }
+.imagik-animation-layer.imagik-fx-unfold-horizontal #imagik-tile-0-0,
+.imagik-animation-layer.imagik-fx-unfold-vertical #imagik-tile-0-0
+{
+    z-index: 1;
+    animation:none !important;
+}
+.imagik-animation-layer.imagik-fx-unfold-horizontal #imagik-tile-0-0 .imagik-tile-backface,
+.imagik-animation-layer.imagik-fx-unfold-vertical #imagik-tile-0-0 .imagik-tile-backface
+{
+    display:none !important;
+}
+.imagik-animation-layer.imagik-fx-unfold-vertical .imagik-tile:not(#imagik-tile-0-0)
+{
+    transform-origin:bottom;
+    z-index:2;
+    top:0%;
+}
+.imagik-animation-layer.imagik-fx-unfold-vertical .imagik-tile:not(#imagik-tile-0-0) .imagik-tile-backface
+{
+    transform:rotateX(0deg);
+}
+.imagik-animation-layer.imagik-fx-unfold-vertical .imagik-tile:not(#imagik-tile-0-0) .imagik-tile-inside
+{
+    transform:rotateX(180deg);
+    backface-visibility:visible;
+}
+.imagik-animation-layer.imagik-fx-unfold-horizontal .imagik-tile:not(#imagik-tile-0-0)
+{
+    transform-origin:right;
+    z-index:2;
+    left:0%;
+}
+.imagik-animation-layer.imagik-fx-unfold-horizontal .imagik-tile:not(#imagik-tile-0-0) .imagik-tile-backface
+{
+    transform:rotateY(0deg);
+}
+.imagik-animation-layer.imagik-fx-unfold-horizontal .imagik-tile:not(#imagik-tile-0-0) .imagik-tile-inside
+{
+    transform:rotateY(-180deg);
+    backface-visibility:visible;
+}
 .imagik-animation-layer.imagik-fx-flip-horizontal .imagik-tile-wrapper
 {
     transform-origin:center center;
 }
 .imagik-animation-layer.imagik-fx-flip-horizontal .imagik-tile-current
 {
-    transform:rotateY(0deg);
+    transform:rotateY(180deg);
 }
 .imagik-animation-layer.imagik-fx-flip-horizontal .imagik-tile-next
 {
-    transform:rotateY(-180deg);
+    transform:rotateY(0deg);
 }
 .imagik-animation-layer.imagik-fx-flip-vertical .imagik-tile-wrapper
 {
@@ -430,6 +483,14 @@
 .imagik-animation-layer.imagik-fx-motion-blur .imagik-tile-next
 {
     transform:translate3d(100%,0,0);
+}
+@keyframes imagik-animation-none {
+    from{
+        min-width: 0;
+    }
+    to{
+        min-width: 0;
+    }
 }
 @keyframes imagik-animation-iris {
     from{
@@ -937,5 +998,21 @@
     }
     to{
         transform:rotateX(-180deg);
+    }
+}
+@keyframes imagik-animation-unfold-vertical {
+    from{
+        transform:rotateX(0deg);
+    }
+    to{
+        transform:rotateX(-180deg);
+    }
+}
+@keyframes imagik-animation-unfold-horizontal {
+    from{
+        transform:rotateY(0deg);
+    }
+    to{
+        transform:rotateY(180deg);
     }
 }

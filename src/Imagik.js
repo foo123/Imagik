@@ -1,7 +1,7 @@
 /**
 *
 *    Imagik Responsive CSS3 Slideshow
-*    version 1.1.2
+*    version 1.1.3
 *    https://github.com/foo123/Imagik
 *
 **/
@@ -9,7 +9,7 @@
 "use strict";
 if (typeof define === 'function' && define.amd) define(factory);
 else root.Imagik = factory();
-}('undefined' !== typeof self ? self : this, function Imagik__Factory( ){
+}('undefined' !== typeof self ? self : this, function Imagik__Factory() {
 "use strict";
 
 var stdMath = Math, toRad = stdMath.PI/180, sqrt2 = stdMath.sqrt(2),
@@ -18,31 +18,31 @@ var stdMath = Math, toRad = stdMath.PI/180, sqrt2 = stdMath.sqrt(2),
     HAS = Object.prototype.hasOwnProperty,
     slice = Array.prototype.slice;
 
-function ID( )
+function ID()
 {
     if ( null == ID.N ) ID.N = 0;
     return ++ID.N;
 }
-function is_webkit( )
+function is_webkit()
 {
     return 'webkitRequestAnimationFrame' in window;
 }
-function is_string( x )
+function is_string(x)
 {
     return (x instanceof String) || ('[object String]'===toString.call(x));
 }
-function is_array( x )
+function is_array(x)
 {
     return (x instanceof Array) || ('[object Array]'===toString.call(x));
 }
-function is_obj( x )
+function is_obj(x)
 {
     return /*(x instanceof Object) ||*/ ('[object Object]'===toString.call(x));
 }
-function debounce( fn, delay )
+function debounce(fn, delay)
 {
     var timer = null;
-    return function( ) {
+    return function() {
         var context = this, args = arguments;
         clearTimeout(timer);
         timer = setTimeout(function () {
@@ -50,42 +50,42 @@ function debounce( fn, delay )
         }, delay);
     };
 }
-function extend( o1, o2, ignore )
+function extend(o1, o2, ignore)
 {
     ignore = is_array(ignore) ? ignore : [];
-    for(var k in o2)
+    for (var k in o2)
     {
-        if ( !HAS.call(o2, k) || (-1!==ignore.indexOf(k)) ) continue;
-        if ( is_array(o2[k]) )
+        if (!HAS.call(o2, k) || (-1!==ignore.indexOf(k))) continue;
+        if (is_array(o2[k]))
             o1[k] = extend(is_array(o1[k]) ? o1[k] : new Array(o2[k].length), o2[k]);
-        else if ( is_obj(o2[k]) )
+        else if (is_obj(o2[k]))
             o1[k] = extend(is_obj(o1[k]) ? o1[k] : {}, o2[k]);
         else
             o1[k] = o2[k];
     }
     return o1;
 }
-function $el( htmlString )
+function $el(htmlString)
 {
     var div = document.createElement('div');
     div.innerHTML = htmlString.trim();
     // Change this to div.childNodes to support multiple top-level nodes
     return div.firstChild;
 }
-function $ev( el, evt, handler, add )
+function $ev(el, evt, handler, add)
 {
-    if ( false===add ) el.removeEventListener(evt, handler, false);
+    if (false === add) el.removeEventListener(evt, handler, false);
     else el.addEventListener(evt, handler, false);
     return el;
 }
-function $$( sel, el )
+function $$(sel, el)
 {
     return slice.call((el||document).querySelectorAll(sel));
 }
-function $children( sel, el )
+function $children(sel, el)
 {
     var children, id, guid;
-    if ( sel )
+    if (sel)
     {
         children = slice.call(el.children).filter(function(child){return child.matches ? child.matches(sel) : (child.msMatchesSelector ? child.msMatchesSelector(sel) : (child.webkitMatchesSelector ? child.webkitMatchesSelector(sel) : true));});
         /*if ( null == $children.count ) $children.count = 0;
@@ -102,66 +102,66 @@ function $children( sel, el )
     }
     return children;
 }
-function $attr( el, key, value )
+function $attr(el, key, value)
 {
-    if ( 2 < arguments.length )
+    if (2 < arguments.length)
     {
         el.setAttribute(key, value);
         return el;
     }
     return el ? el.getAttribute(key) : null;
 }
-function $html( el, html )
+function $html(el, html)
 {
-    if ( 1 < arguments.length )
+    if (1 < arguments.length)
     {
         el.innerHTML = String(html).trim();
         return el;
     }
-    return el ? el.innerHTML : '';
+    return el ? el.innerHTML.trim() : '';
 }
-function $empty( el )
+function $empty(el)
 {
-    //el.innerHTML = '';
-    while(el.firstChild) el.removeChild(el.firstChild);
+    //el.textContent = '';
+    while (el.firstChild) el.removeChild(el.firstChild);
     return el;
 }
-function $append( el, child )
+function $append(el, child)
 {
     return el.appendChild(child);
 }
-function $remove( child )
+function $remove(child)
 {
     return child && child.parentNode ? child.parentNode.removeChild(child) : child;
 }
-function $addClass( el, klass )
+function $addClass(el, klass)
 {
     el.classList.add(klass);
     return el;
 }
-function $removeClass( el, klass )
+function $removeClass(el, klass)
 {
     el.classList.remove(klass);
     return el;
 }
-function $hasClass( el, klass )
+function $hasClass(el, klass)
 {
     return el.classList.contains(klass);
 }
-function $style( style, csstext )
+function $style(style, csstext)
 {
-    if ( style.styleSheet ) style.styleSheet.cssText = csstext;
+    if (style.styleSheet) style.styleSheet.cssText = csstext;
     else $append($empty(style), document.createTextNode(csstext));
     return style;
 }
-function $css( obj, style )
+function $css(obj, style)
 {
     var s = '', k, sk;
-    if ( style )
+    if (style)
     {
-        for(k in obj)
+        for (k in obj)
         {
-            if ( !HAS.call(obj, k) ) continue;
+            if (!HAS.call(obj, k)) continue;
             sk = k.replace(/\-([a-zA-Z])/g, function(m0, m1){return m1.toUpperCase();});
             style[sk] = obj[k];
         }
@@ -169,112 +169,114 @@ function $css( obj, style )
     }
     else
     {
-        for(k in obj)
+        for (k in obj)
         {
-            if ( !HAS.call(obj, k) ) continue;
+            if (!HAS.call(obj, k)) continue;
             s += "\n" + k + ':' + obj[k] + ';';
         }
         return s;
     }
 }
-function linearArray( howmany )
+function linearArray(howmany)
 {
     var a = new Array(howmany), i;
-    for(i=0;i<howmany;i++) a[i] = i;
+    for (i=0; i<howmany; i++) a[i] = i;
     return a;
 }
-function shuffle( a )
+function shuffle(a)
 {
     //v1.0
     for(var j, x, i = a.length; i; j = ~~(stdMath.random() * i), x = a[--i], a[i] = a[j], a[j] = x);
     return a;
 }
-function rows( pieces, rowsi, columnsi )
+function rows(pieces, rowsi, columnsi)
 {
     var delays = new Array(pieces.length), i, j, k;
-    for(k=0,i=0;i<columnsi;i++)
+    for (k=0,i=0; i<columnsi; i++)
     {
-        for(j=0;j<rowsi;j++)
+        for (j=0; j<rowsi; j++)
         {
             delays[k++/*i*rowsi+j*/] = j;
-            if ( k >= pieces.length ) break;
+            if (k >= pieces.length) break;
         }
-        if ( k >= pieces.length ) break;
+        if (k >= pieces.length) break;
     }
     return {pieces:pieces, delays:delays, groups:rowsi};
 }
-function rowsReverse( pieces, rows, columns )
+function rowsReverse(pieces, rows, columns)
 {
     var delays = new Array(pieces.length), i, j, k;
-    for(k=0,i=0;i<columns;i++)
+    for (k=0,i=0; i<columns; i++)
     {
-        for(j=0;j<rows;j++)
+        for (j=0; j<rows; j++)
         {
             delays[k++/*i*rows+j*/] = rows-1-j;
-            if ( k >= pieces.length ) break;
+            if (k >= pieces.length) break;
         }
-        if ( k >= pieces.length ) break;
+        if (k >= pieces.length) break;
     }
     return {pieces:pieces, delays:delays, groups:rows};
 }
-function columns( pieces, rowsi, columnsi )
+function columns(pieces, rowsi, columnsi)
 {
     var delays = new Array(pieces.length), i, j, k;
-    for(k=0,i=0;i<columnsi;i++)
+    for(k=0,i=0; i<columnsi; i++)
     {
-        for(j=0;j<rowsi;j++)
+        for (j=0; j<rowsi; j++)
         {
             delays[k++/*i*rowsi+j*/] = i;
-            if ( k >= pieces.length ) break;
+            if (k >= pieces.length) break;
         }
-        if ( k >= pieces.length ) break;
+        if (k >= pieces.length) break;
     }
     return {pieces:pieces, delays:delays, groups:columnsi};
 }
-function columnsReverse( pieces, rows, columns )
+function columnsReverse(pieces, rows, columns)
 {
     var delays = new Array(pieces.length), i, j, k;
-    for(k=0,i=0;i<columns;i++)
+    for (k=0,i=0; i<columns; i++)
     {
-        for(j=0;j<rows;j++)
+        for (j=0; j<rows; j++)
         {
             delays[k++/*i*rows+j*/] = columns-1-i;
-            if ( k >= pieces.length ) break;
+            if (k >= pieces.length) break;
         }
-        if ( k >= pieces.length ) break;
+        if (k >= pieces.length) break;
     }
     return {pieces:pieces, delays:delays, groups:columns};
 }
-function columnsFirst( pieces, rows, columns )
+function columnsFirst(pieces, rows, columns)
 {
-    return({pieces:pieces,delays:linearArray(pieces.length),groups:pieces.length});
+    return({pieces:pieces, delays:linearArray(pieces.length), groups:pieces.length});
 }
-function columnsFirstReverse( pieces, rows, columns )
+function columnsFirstReverse(pieces, rows, columns)
 {
     var o = columnsFirst(pieces,rows,columns);
-    return {pieces:o.pieces.reverse(),delays:o.delays,groups:o.groups};
+    return {pieces:o.pieces.reverse(), delays:o.delays, groups:o.groups};
 }
-function rowsFirst( pieces, rows, columns)
+function rowsFirst(pieces, rows, columns)
 {
     var newpieces = new Array(pieces.length), i, j;
-    for(i=0; i<rows; i++)
+    for (i=0; i<rows; i++)
     {
-        for(j=0;j<columns;j++)
+        for (j=0; j<columns; j++)
         {
             newpieces[i*columns+j] = pieces[j*rows+i];
         }
     }
-    return {pieces:newpieces,delays:linearArray(pieces.length),groups:pieces.length};
+    return {pieces:newpieces, delays:linearArray(pieces.length), groups:pieces.length};
 }
-function rowsFirstReverse( pieces, rows, columns )
+function rowsFirstReverse(pieces, rows, columns)
 {
     var o = rowsFirst(pieces,rows,columns);
-    return {pieces:o.pieces.reverse(),delays:o.delays,groups:o.groups};
+    return {pieces:o.pieces.reverse(), delays:o.delays, groups:o.groups};
 }
-function spiral( pieces, rows, columns, type )
+function spiral(pieces, rows, columns, type)
 {
-    var temp = [], i = 0, j = 0, order = [0,1,2,3], min_i = 0, min_j = 0, max_i = rows-1, max_j = columns-1, dir = 1, mode = 0, inc = true;
-    switch( type&3 )
+    var temp = [], i = 0, j = 0, order = [0,1,2,3],
+        min_i = 0, min_j = 0, max_i = rows-1, max_j = columns-1,
+        dir = 1, mode = 0, inc = true;
+    switch (type & 3)
     {
         case 1: i = min_i;
                 j = max_j;
@@ -297,18 +299,18 @@ function spiral( pieces, rows, columns, type )
                 dir=1;
                 break;
     }
-    while( (max_i>=min_i) && (max_j>=min_j) )
+    while ((max_i >= min_i) && (max_j >= min_j))
     {
-        if ( inc ) temp.push(pieces[j*rows+i]);
+        if (inc) temp.push(pieces[j*rows+i]);
         inc = true;
-        switch( order[mode] )
+        switch (order[mode])
         {
             case 0: // left to right
-                if ( j>=max_j )
+                if (j >= max_j)
                 {
-                    mode = (mode+1)&3;
+                    mode = (mode + 1) & 3;
                     inc = false;
-                    if ( dir==1 )
+                    if (1 === dir)
                         min_i++;
                     else
                         max_i--;
@@ -317,11 +319,11 @@ function spiral( pieces, rows, columns, type )
                     j++;
                 break;
             case 1: // top to bottom
-                if ( i>=max_i )
+                if (i >= max_i)
                 {
-                    mode = (mode+1)&3;
+                    mode = (mode + 1) & 3;
                     inc = false;
-                    if ( dir==1 )
+                    if (1 === dir)
                         max_j--;
                     else
                         min_j++;
@@ -330,11 +332,11 @@ function spiral( pieces, rows, columns, type )
                     i++;
                 break;
             case 2: // right to left
-                if ( j<=min_j )
+                if (j <= min_j)
                 {
-                    mode = (mode+1)&3;
+                    mode = (mode + 1) & 3;
                     inc = false;
-                    if ( dir==1 )
+                    if (1 === dir)
                         max_i--;
                     else
                         min_i++;
@@ -343,11 +345,11 @@ function spiral( pieces, rows, columns, type )
                     j--;
                 break;
             case 3:  // bottom to top
-                if ( i<=min_i )
+                if (i <= min_i)
                 {
-                    mode = (mode+1)&3;
+                    mode = (mode + 1) & 3;
                     inc = false;
-                    if ( dir==1 )
+                    if (1 === dir)
                         min_j++;
                     else
                         max_j--;
@@ -357,171 +359,173 @@ function spiral( pieces, rows, columns, type )
                 break;
         }
     }
-    if ( type>=4 ) temp = temp.reverse();
-    return {pieces:temp,delays:linearArray(temp.length),groups:temp.length};
+    if (type >= 4) temp = temp.reverse();
+    return {pieces:temp, delays:linearArray(temp.length), groups:temp.length};
 }
-function spiralTopLeft( pieces, rows, columns )
+function spiralTopLeft(pieces, rows, columns)
 {
     return spiral(pieces,rows,columns,0);
 }
-function spiralTopRight( pieces, rows, columns )
+function spiralTopRight(pieces, rows, columns)
 {
     return spiral(pieces,rows,columns,1);
 }
-function spiralBottomLeft( pieces, rows, columns )
+function spiralBottomLeft(pieces, rows, columns)
 {
     return spiral(pieces,rows,columns,2);
 }
-function spiralBottomRight( pieces, rows, columns)
+function spiralBottomRight(pieces, rows, columns)
 {
     return spiral(pieces,rows,columns,3);
 }
-function spiralTopLeftReverse( pieces, rows, columns )
+function spiralTopLeftReverse(pieces, rows, columns)
 {
     return spiral(pieces,rows,columns,4);
 }
-function spiralTopRightReverse( pieces, rows, columns )
+function spiralTopRightReverse(pieces, rows, columns)
 {
     return spiral(pieces,rows,columns,5);
 }
-function spiralBottomLeftReverse( pieces, rows, columns )
+function spiralBottomLeftReverse(pieces, rows, columns)
 {
     return spiral(pieces,rows,columns,6);
 }
-function spiralBottomRightReverse( pieces, rows, columns )
+function spiralBottomRightReverse(pieces, rows, columns)
 {
     return spiral(pieces,rows,columns,7);
 }
-function upDown( pieces, rows, columns )
+function upDown(pieces, rows, columns)
 {
     var newpieces = new Array(pieces.length), odd = false, i, j;
-    for(i=0;i<columns;i++)
+    for (i=0; i<columns; i++)
     {
-        for(j=0;j<rows;j++)
+        for (j=0; j<rows; j++)
         {
             newpieces[i*rows+j]= odd ? pieces[i*rows+rows-1-j] : pieces[i*rows+j];
         }
         odd = !odd;
     }
-    return {pieces:newpieces,delays:linearArray(pieces.length),groups:pieces.length};
+    return {pieces:newpieces, delays:linearArray(pieces.length), groups:pieces.length};
 }
-function upDownReverse( pieces, rows, columns )
+function upDownReverse(pieces, rows, columns)
 {
     var o = upDown(pieces,rows,columns);
-    return {pieces:o.pieces.reverse(),delays:o.delays,groups:o.groups};
+    return {pieces:o.pieces.reverse(), delays:o.delays, groups:o.groups};
 }
-function leftRight( pieces, rows, columns )
+function leftRight(pieces, rows, columns)
 {
     var newpieces = new Array(pieces.length), odd = false, i, j;
-    for(i=0;i<rows;i++)
+    for (i=0; i<rows; i++)
     {
-        for(j=0;j<columns;j++)
+        for (j=0; j<columns; j++)
         {
             newpieces[i*columns+j] = odd ? pieces[(columns-1-j)*rows+i] : pieces[j*rows+i];
         }
         odd = !odd;
     }
-    return {pieces:newpieces,delays:linearArray(pieces.length),groups:pieces.length};
+    return {pieces:newpieces, delays:linearArray(pieces.length), groups:pieces.length};
 }
-function leftRightReverse( pieces, rows, columns )
+function leftRightReverse(pieces, rows, columns)
 {
     var o = leftRight(pieces,rows,columns);
-    return {pieces:o.pieces.reverse(),delays:o.delays,groups:o.groups};
+    return {pieces:o.pieces.reverse(), delays:o.delays, groups:o.groups};
 }
-function random( pieces, rows, columns )
+function random(pieces, rows, columns)
 {
-    return {pieces:shuffle(pieces),delays:linearArray(pieces.length),groups:pieces.length};
+    return {pieces:shuffle(pieces), delays:linearArray(pieces.length), groups:pieces.length};
 }
-function diagonalTopLeft( pieces, rows, columns )
+function diagonalTopLeft(pieces, rows, columns)
 {
     var delays = new Array(pieces.length), i, j, k;
-    for(k=0,i=0;i<columns;i++)
+    for (k=0,i=0; i<columns; i++)
     {
-        for(j=0;j<rows;j++)
+        for (j=0; j<rows; j++)
         {
             delays[k++/*i*rows+j*/] = i+j;
-            if ( k >= pieces.length ) break;
+            if (k >= pieces.length) break;
         }
-        if ( k >= pieces.length ) break;
+        if (k >= pieces.length) break;
     }
     return {pieces:pieces, delays:delays, groups:rows+columns-1};
 }
-function diagonalBottomRight( pieces, rows, columns )
+function diagonalBottomRight(pieces, rows, columns)
 {
     var delays = new Array(pieces.length), i, j, k;
-    for(k=0,i=0;i<columns;i++)
+    for (k=0,i=0; i<columns; i++)
     {
-        for(j=0;j<rows;j++)
+        for (j=0; j<rows; j++)
         {
             delays[k++/*i*rows+j*/] = columns-1-i+rows-1-j;
-            if ( k >= pieces.length ) break;
+            if (k >= pieces.length) break;
         }
-        if ( k >= pieces.length ) break;
+        if (k >= pieces.length) break;
     }
     return {pieces:pieces, delays:delays, groups:rows+columns-1};
 }
-function diagonalBottomLeft( pieces, rows, columns )
+function diagonalBottomLeft(pieces, rows, columns)
 {
     var delays = new Array(pieces.length), i, j, k;
-    for(k=0,i=0;i<columns;i++)
+    for (k=0,i=0; i<columns; i++)
     {
-        for(j=0;j<rows;j++)
+        for (j=0; j<rows; j++)
         {
             delays[k++/*i*rows+j*/] = i+rows-1-j;
-            if ( k >= pieces.length ) break;
+            if (k >= pieces.length) break;
         }
-        if ( k >= pieces.length ) break;
+        if (k >= pieces.length) break;
     }
     return {pieces:pieces, delays:delays, groups:rows+columns-1};
 }
-function diagonalTopRight( pieces, rows, columns )
+function diagonalTopRight(pieces, rows, columns)
 {
     var delays = new Array(pieces.length), i, j, k;
-    for(k=0,i=0;i<columns;i++)
+    for (k=0,i=0; i<columns; i++)
     {
-        for(j=0;j<rows;j++)
+        for (j=0; j<rows; j++)
         {
             delays[k++/*i*rows+j*/] = columns-1-i+j;
-            if ( k >= pieces.length ) break;
+            if (k >= pieces.length) break;
         }
-        if ( k >= pieces.length ) break;
+        if (k >= pieces.length) break;
     }
     return {pieces:pieces, delays:delays, groups:rows+columns-1};
 }
-function checkerBoard( pieces, rows, columns )
+function checkerBoard(pieces, rows, columns)
 {
     var delays = new Array(pieces.length), i, j, k, odd1 = false, odd2;
-    for(k=0,i=0;i<columns;i++)
+    for (k=0,i=0; i<columns; i++)
     {
         odd2 = odd1;
-        for(j=0;j<rows;j++)
+        for (j=0; j<rows; j++)
         {
             delays[k++/*i*rows+j*/] = odd2 ? 1 : 0;
-            if ( k >= pieces.length ) break;
+            if (k >= pieces.length) break;
             odd2 = !odd2;
         }
         odd1 = !odd1;
-        if ( k >= pieces.length ) break;
+        if (k >= pieces.length) break;
     }
     return {pieces:pieces, delays:delays, groups:2};
 }
-function tiles( img, rows, columns, W, H, angle )
+function tiles(img, rows, columns, W, H, angle, backface, previmg)
 {
-    var i, j, ii, jj, x, y, bx, by, w, h, pieces, tile, ww, s, m1, m2, imax, clipPath, size, side, margin, margin2, offset;
-    if ( true===angle )
+    var i, j, ii, jj, x, y, bx, by, w, h,
+        pieces, tile, ww, s, m1, m2, imax,
+        clipPath, size, side, margin, margin2, offset;
+    if (true === angle)
     {
         size = stdMath.max(1.0/columns, 1.0/rows);
         columns = 2*stdMath.ceil(1/size)+2; rows = stdMath.ceil(1/(size*(W/H)))+1;
         w = stdMath.max(2*W/(columns-2), H/(rows-1)); side = w/sqrt2;
         margin = w/2; margin2 = margin/2; offset = -margin;
         pieces = [];
-        for(ii=0,i=0;i<columns; i++)
+        for (ii=0,i=0; i<columns; i++)
         {
-            for(jj=0,j=0; j<rows; j++)
+            for (jj=0,j=0; j<rows; j++)
             {
                 x = margin*i-margin; y = w*j-margin+offset;
                 bx = -x+margin2; by = -y+margin2;
-                if ( stdMath.abs(bx)<W && bx+side+margin<=W && stdMath.abs(by)<H && by+side+margin<=H )
+                if (stdMath.abs(bx) < W && bx+side+margin <= W && stdMath.abs(by) < H && by+side+margin <= H)
                 {
                     pieces.push({piece:tile=$el('<div class="imagik-tile imagik-diagonal"><div class="imagik-tile-inside" style="width:'+String(side+margin)+'px;height:'+String(side+margin)+'px;left:'+String(-margin2)+'px;top:'+String(-margin2)+'px;"></div></div>'), r:rows, c:columns, i:ii, j:jj++, x:x, y:y, bx:bx, by:by, w:side, h:side, u:'px', W:W, H:H, img:img, vis:true});
                     tile.firstChild.style.backgroundImage = 'url("'+String(img)+'")';
@@ -529,23 +533,23 @@ function tiles( img, rows, columns, W, H, angle )
                     tile.firstChild.style.backgroundSize = String(W)+'px auto';
                 }
             }
-            if ( 0 < jj ) ii++;
+            if (0 < jj) ii++;
             offset = 0===offset ? -margin : 0;
         }
     }
-    else if ( null != angle )
+    else if (null != angle)
     {
         angle = angle || 0;
-        if ( angle<0 ) angle = -angle;
-        if( angle>90 ) angle = angle % 90;
-        if ( 0===angle ) { s = rows; rows = columns; columns = s; }
-        if ( 90===angle )
+        if (angle < 0) angle = -angle;
+        if (angle > 90) angle = angle % 90;
+        if (0 === angle) {s = rows; rows = columns; columns = s;}
+        if (90 === angle)
         {
             m1 = 1.0;
             m2 = 0.0;
             imax = 0;
         }
-        else if ( 0===angle )
+        else if (0 === angle)
         {
             m1 = 0.0;
             m2 = 1.0;
@@ -562,13 +566,13 @@ function tiles( img, rows, columns, W, H, angle )
         pieces = new Array(rows*columns)
         s = m2*H/(columns-imax);
         ww = 0===angle ? w : (m1*w + s);
-        for(i=0;i<columns; i++)
+        for (i=0; i<columns; i++)
         {
-            for(j=0; j<rows; j++)
+            for (j=0; j<rows; j++)
             {
                 x = w*(i-imax); y = h*j;
                 bx = -x; by = -y;
-                if ( 0===angle )
+                if (0 === angle)
                 {
                     clipPath = [[0, 0], [w, 0], [w, h], [0, h]];
                 }
@@ -590,9 +594,9 @@ function tiles( img, rows, columns, W, H, angle )
         w = 1===columns ? 100 : (W/columns*101/W);
         h = 1===rows ? 100 : (H/rows*101/H);
         pieces = new Array(rows*columns);
-        for(i=0;i<columns; i++)
+        for (i=0; i<columns; i++)
         {
-            for(j=0; j<rows; j++)
+            for (j=0; j<rows; j++)
             {
                 x = w/columns*i*100/w; y = h/rows*j*100/h;
                 bx = -W/columns*i; by = -H/rows*j;
@@ -600,17 +604,24 @@ function tiles( img, rows, columns, W, H, angle )
                 tile.firstChild.style.backgroundImage = 'url("'+String(img)+'")';
                 tile.firstChild.style.backgroundPosition = String(bx)+'px '+String(by)+'px';
                 tile.firstChild.style.backgroundSize = String(W)+'px auto';
+                if (backface && previmg)
+                {
+                    tile.appendChild($el('<div class="imagik-tile-backface"></div>'));
+                    tile.childNodes[1].style.backgroundImage = 'url("'+String(previmg)+'")';
+                    tile.childNodes[1].style.backgroundPosition = String(-W/columns*(i+(backface[0]||0)))+'px '+String(-H/rows*(j+(backface[1]||0)))+'px';
+                    tile.childNodes[1].style.backgroundSize = String(W)+'px auto';
+                }
             }
         }
     }
     return pieces;
 }
-function destroy( pieces )
+function destroy(pieces)
 {
-    if ( !pieces ) return pieces;
-    for(var p=0;p<pieces.length;p++)
+    if (!pieces) return pieces;
+    for(var p=0; p<pieces.length; p++)
     {
-        if ( pieces[p].piece )
+        if (pieces[p].piece)
         {
             $empty(pieces[p].piece);
             $remove(pieces[p].piece);
@@ -621,38 +632,38 @@ function destroy( pieces )
     pieces = null;
     return pieces;
 }
-function translate( where, what )
+function translate(where, what)
 {
     var i, j, k, p, c, e, evaluator, r, done;
-    if ( is_string(where) )
+    if (is_string(where))
     {
         where = where.replace(prop_re, function(m0, m1){
             return HAS.call(what, m1) ? String(what[m1]) : m0;
         });
         j = 0;
-        while( -1!==(i=where.indexOf('$(', j)) )
+        while (-1 !== (i=where.indexOf('$(', j)))
         {
             p = 1; k = 2; e = ''; done = false;
-            while( i+k<where.length )
+            while (i+k < where.length)
             {
                 c = where.charAt(i+k);
-                if ( ')' === c )
+                if (')' === c)
                 {
                     p--;
-                    if ( 0===p )
+                    if (0 === p)
                     {
                         done = true;
                         break;
                     }
                 }
-                else if ( '(' === c )
+                else if ('(' === c)
                 {
                     p++;
                 }
                 e += c;
                 k++;
             }
-            if ( done )
+            if (done)
             {
                 try {
                     evaluator = new Function('', 'return String('+e+');');
@@ -669,30 +680,30 @@ function translate( where, what )
     }
     else
     {
-        for(var n in where)
+        for (var n in where)
         {
-            if ( HAS.call(where, n) )
+            if (HAS.call(where, n))
                 where[n] = translate(where[n], what);
         }
     }
     return where;
 }
-function hook( id, handler )
+function hook(id, handler)
 {
-    if ( false === handler )
+    if (false === handler)
     {
         delete hook.handlers[id];
     }
-    else if ( "function" === typeof handler )
+    else if ("function" === typeof handler)
     {
         hook.handlers[id] = handler;
-        if ( !hook.hooked )
+        if (!hook.hooked)
         {
             // global window resize handler for all slideshow instances
             $ev(window, 'resize', debounce(function(evt){
-                for(var id in hook.handlers)
+                for (var id in hook.handlers)
                 {
-                    if ( !HAS.call(hook.handlers, id) || ("function" !== typeof hook.handlers[id]) ) continue;
+                    if (!HAS.call(hook.handlers, id) || ("function" !== typeof hook.handlers[id])) continue;
                     hook.handlers[id](evt);
                 }
             }, 100));
@@ -703,10 +714,10 @@ function hook( id, handler )
 hook.handlers = {};
 hook.hooked = false;
 
-function Imagik( el, options )
+function Imagik(el, options)
 {
     var self = this;
-    if ( !(self instanceof Imagik) ) return new Imagik(el, options);
+    if (!(self instanceof Imagik)) return new Imagik(el, options);
 
     var defaults = {
         aspectRatio: 1.0,
@@ -727,7 +738,7 @@ function Imagik( el, options )
     };
 
     options = extend(defaults, options||{});
-    if ( !options.aspectRatio ) options.aspectRatio = 1.0;
+    if (!options.aspectRatio) options.aspectRatio = 1.0;
     options.rows = stdMath.max(1, stdMath.min(100, options.rows));
     options.columns = stdMath.max(1, stdMath.min(100, options.columns));
     options.overlap = stdMath.max(0.0, stdMath.min(1.0, options.overlap));
@@ -736,7 +747,7 @@ function Imagik( el, options )
 
     self.id = ID();
     self.el = el;
-    if ( !self.el.id ) self.el.id = 'imagik-instance-'+self.id;
+    if (!self.el.id) self.el.id = 'imagik-instance-'+self.id;
     self.options = options;
     self.style = $el('<style id="imagik-css-'+self.id+'" type="text/css" media="all"></style>');
     $append(self.style, document.createTextNode(''));
@@ -750,8 +761,8 @@ function Imagik( el, options )
         getRandomTransition, toggleActive, prepareTransition, clearPrev, endHandler, endTransition
     ;
 
-    self.autoResize = function( ) {
-        if ( self.el && holder )
+    self.autoResize = function() {
+        if (self.el && holder)
         {
             W = stdMath.round(self.el.clientWidth); H = stdMath.round(W/self.options.aspectRatio);
             holder.style.width = String(W)+'px';
@@ -761,14 +772,14 @@ function Imagik( el, options )
         return self;
     };
 
-    self.init = function( ) {
-        if ( !self.el || $$('.imagik-holder', self.el).length ) return self;
+    self.init = function() {
+        if (!self.el || $$('.imagik-holder', self.el).length) return self;
 
         holder = $el('<div class="imagik-holder"></div>');
-        if ( is_webkit() ) $addClass(holder, 'imagik-webkit');
+        if (is_webkit()) $addClass(holder, 'imagik-webkit');
 
         // parse dom data
-        $children('div', self.el).forEach(function( div ) {
+        $children('div', self.el).forEach(function(div) {
             var klass, thisfx = {}, i, link, data, kv;
             thisfx.transition = self.options.transition;
             thisfx.delay = self.options.delay;
@@ -779,13 +790,13 @@ function Imagik( el, options )
             thisfx.overlap = self.options.overlap;
             thisfx.duration = self.options.duration;
             klass = $attr(div, 'class');
-            if ( klass!="" && klass!=null )
+            if (klass != "" && klass != null)
             {
                 data = klass.split(" ");
-                for(i=0;i<data.length;i++)
+                for (i=0; i<data.length; i++)
                 {
                     kv = data[i].trim().split("=");
-                    if ( 2 <= kv.length ) thisfx[kv[0].trim()] = kv[1].trim();
+                    if (2 <= kv.length) thisfx[kv[0].trim()] = kv[1].trim();
                 }
                 thisfx.rows = stdMath.max(1, stdMath.min(100, parseInt(thisfx.rows, 10)));
                 thisfx.columns = stdMath.max(1, stdMath.min(100, parseInt(thisfx.columns, 10)));
@@ -795,17 +806,17 @@ function Imagik( el, options )
             }
             link = $children('a', div)[0];
             imgs.push($children('img', link||div)[0]);
-            links.push($attr(link, 'href')||'#');
+            links.push($attr(link, 'href') || '#');
             fx.push(thisfx);
             captions.push($html($$('div', div)[0]).trim());
             $remove(div);
         });
 
         // add options data
-        if ( is_array(self.options.imgs) )
+        if (is_array(self.options.imgs))
         {
             self.options.imgs.forEach(function(img){
-                if ( !img || !img.src ) return;
+                if (!img || !img.src) return;
                 var thisfx = {};
                 thisfx.transition = img.transition!=null ? img.transition : self.options.transition;
                 thisfx.ease = img.ease!=null ? img.ease : self.options.ease;
@@ -840,12 +851,12 @@ function Imagik( el, options )
 
         var i, anc, prevBt, nextBt, playBt, bullets, buttons;
 
-        if ( self.options.caption )
+        if (self.options.caption)
         {
             caption = $el('<div class="imagik-caption"></div>');
             $append(holder, caption);
         }
-        if ( self.options.controls )
+        if (self.options.controls)
         {
             //controls = $el('<div class="imagik-controls"></div>');
             //$append(controls, bullets=$el('<div class="bullets"></div>'));
@@ -858,19 +869,19 @@ function Imagik( el, options )
             $append(holder, prevBt);
             $append(holder, nextBt);
             $append(holder, playBt);
-            $ev(prevBt, 'click', function( evt ) {
+            $ev(prevBt, 'click', function(evt) {
                 evt.stopPropagation();
-                if ( paused ) return;
+                if (paused) return;
                 self.prevTransition();
             });
-            $ev(nextBt, 'click', function( evt ) {
+            $ev(nextBt, 'click', function(evt) {
                 evt.stopPropagation();
-                if ( paused ) return;
+                if (paused) return;
                 self.nextTransition();
             });
-            $ev(holder, 'click', function( evt ) {
+            $ev(holder, 'click', function(evt) {
                 paused = !paused;
-                if ( paused )
+                if (paused)
                 {
                     self.stopPlay();
                     $addClass(holder, 'paused');
@@ -881,7 +892,7 @@ function Imagik( el, options )
                     $removeClass(holder, 'paused');
                 }
             });
-            /*for(i=0;i<imgs.length;i++)
+            /*for (i=0; i<imgs.length; i++)
             {
                 anc = $el('<a class="bullet" href="javascript:void(0)" rel="'+i+'" title="'+(i+1)+'"></a>');
                 $append(bullets, anc);
@@ -895,17 +906,17 @@ function Imagik( el, options )
 
         ind = linearArray(imgs.length);
         // randomize order
-        if ( self.options.randomOrder ) shuffle(ind);
+        if (self.options.randomOrder) shuffle(ind);
 
         prevcurrent = 0; current = 0;
         imageLayer.style.backgroundImage = 'url("'+(imgs[ind[current]].currentSrc||imgs[ind[current]].src)+'")'; // enable responsive images (eg through srcset attr)
         imageLayer.href = links[ind[current]];
         $addClass(holder, 'imagik-show-image');
-        /*if ( self.options.controls )
+        /*if (self.options.controls)
         {
             toggleActive();
         }*/
-        if ( self.options.caption && captions[ind[current]]!=null && captions[ind[current]]!="" )
+        if (self.options.caption && captions[ind[current]] != null && captions[ind[current]] != "")
         {
             $html(caption, captions[ind[current]]);
             $addClass(caption, 'show');
@@ -919,13 +930,13 @@ function Imagik( el, options )
         return self;
     };
 
-    getRandomTransition = function( ) {
-        if ( randindex >= randtrans.length )
+    getRandomTransition = function() {
+        if (randindex >= randtrans.length)
         {
             randtrans = shuffle(Imagik.Static.randomTransitions.slice());
             randindex = 0;
         }
-        return randindex<randtrans.length ? randtrans[randindex++] : null;
+        return randindex < randtrans.length ? randtrans[randindex++] : null;
     };
 
     /*toggleActive = function( ) {
@@ -933,127 +944,127 @@ function Imagik( el, options )
         $addClass($$('[rel="'+current+'"]', controls)[0], "active");
     };*/
 
-    clearPrev = function( ) {
-        //if ( lastfx && 'fade-rhombus'===lastfx.transition ) return;
-        if ( evtCarrier )
+    clearPrev = function() {
+        //if (lastfx && 'fade-rhombus'===lastfx.transition) return;
+        if (evtCarrier)
         {
             $ev(evtCarrier, 'animationend', endHandler, false);
             $empty(animationLayer);
             $removeClass(animationLayer, 'imagik-fx-'+lastfx.transition);
             $removeClass(animationLayer, 'imagik-fx');
         }
-        if ( p2!=null ) p2 = destroy(p2);
-        if ( p!=null ) p = destroy(p);
+        if (p2 != null) p2 = destroy(p2);
+        if (p != null) p = destroy(p);
         evtCarrier = null;
         $addClass(holder, 'imagik-show-image');
     };
 
-    endHandler = function( ) {
+    endHandler = function() {
         setTimeout(endTransition, 10);
     };
 
-    prepareTransition = function( ) {
-        if ( imgs && imgs.length>0 && dotimer )
+    prepareTransition = function() {
+        if (imgs && imgs.length>0 && dotimer)
             timer = setTimeout(function(){self.doTransition("+1");}, 1000*fx[ind[current]].delay);
     };
 
-    endTransition = function( ) {
+    endTransition = function() {
         clearPrev();
-        if ( !imgs ) return;
-        //if ( lastfx && 'fade-rhombus'===lastfx.transition ) return;
+        if (!imgs) return;
+        //if (lastfx && 'fade-rhombus'===lastfx.transition) return;
         imageLayer.style.backgroundImage = 'url("'+(imgs[ind[current]].currentSrc||imgs[ind[current]].src)+'")'; // enable responsive images (eg through srcset attr)
         imageLayer.href = links[ind[current]];
         imageLayer.style.zIndex = 2;
-        if ( self.options.caption && captions[ind[current]]!=null && captions[ind[current]]!="" )
+        if (self.options.caption && captions[ind[current]] != null && captions[ind[current]] != "")
             $addClass($html(caption, captions[ind[current]]), 'show');
         prepareTransition();
 
         // signal completion if handler given
-        if ( "function"===typeof self.options.onComplete ) self.options.onComplete(self);
+        if ("function"===typeof self.options.onComplete) self.options.onComplete(self);
     };
 
-    self.doTransition = function( dir ) {
+    self.doTransition = function(dir) {
         var i, dd, fxi, transition, order, ease, r, c, overlap, ordobj, ngroups, d, sd, del, max, odd, animations = {}, str, selector, angle = null;
 
         clearTimeout(timer);
         clearPrev();
-        if ( !self.el || !imgs || !imgs.length ) return self;
+        if (!self.el || !imgs || !imgs.length) return self;
 
         prevcurrent = current;
 
-        if ( dir==="+1" ) current = (current+1)%imgs.length;
-        else if ( dir==="-1" )  current = (current+imgs.length-1)%imgs.length;
-        else  current = parseInt(dir, 10);
+        if (dir === "+1") current = (current + 1) % imgs.length;
+        else if (dir === "-1")  current = (current + imgs.length - 1) % imgs.length;
+        else current = parseInt(dir, 10);
 
-        if ( self.options.caption ) $removeClass(caption, 'show');
-        //if ( self.options.controls ) toggleActive();
+        if (self.options.caption) $removeClass(caption, 'show');
+        //if (self.options.controls) toggleActive();
         // signal completion if handler given
 
         // signal start if handler given
-        if ( "function"===typeof self.options.onStart ) self.options.onStart(self);
+        if ("function"===typeof self.options.onStart) self.options.onStart(self);
 
         $style(self.style, style='');
-        fxi = fx[ind[current]]; if ( "random"===fxi.transition ) fxi = getRandomTransition();
-        if ( !fxi || !fxi.transition || !HAS.call(Imagik.Static.transitions, fxi.transition) )
+        fxi = fx[ind[current]]; if ("random" === fxi.transition) fxi = getRandomTransition();
+        if (!fxi || !fxi.transition || !HAS.call(Imagik.Static.transitions, fxi.transition))
         {
             imageLayer.style.backgroundImage = 'url("'+(imgs[ind[current]].currentSrc||imgs[ind[current]].src)+'")';
             return self;
         }
         transition = extend({}, Imagik.Static.transitions[fxi.transition]);
-        order = fxi.order || 'rows-first'; if ( !HAS.call(Imagik.Static.order, order) ) order = 'rows-first';
-        ease = fxi.ease || 'linear'; if ( HAS.call(Imagik.Static.ease, ease) ) ease = Imagik.Static.ease[ease];
+        order = fxi.order || 'rows-first'; if (!HAS.call(Imagik.Static.order, order)) order = 'rows-first';
+        ease = fxi.ease || 'linear'; if (HAS.call(Imagik.Static.ease, ease)) ease = Imagik.Static.ease[ease];
         r = null!=transition.rows ? transition.rows : fxi.rows;
         c = null!=transition.columns ? transition.columns : fxi.columns;
         overlap = null!=transition.overlap ? transition.overlap : fxi.overlap;
         angle = null!=transition.angle ? transition.angle : null;
-        selector = is_string(transition.selector)&&transition.selector.length ? transition.selector : '';
+        selector = is_string(transition.selector) && transition.selector.length ? transition.selector : '';
         lastfx = fxi;
 
-        if ( transition.reverse )
+        if (transition.reverse)
         {
-            p = tiles((imgs[ind[prevcurrent]].currentSrc||imgs[ind[prevcurrent]].src), r, c, W, H, angle);
+            p = tiles((imgs[ind[prevcurrent]].currentSrc||imgs[ind[prevcurrent]].src), r, c, W, H, angle, transition.backface, (imgs[ind[current]].currentSrc||imgs[ind[current]].src));
             imageLayer.style.backgroundImage = 'url("'+(imgs[ind[current]].currentSrc||imgs[ind[current]].src)+'")'; // enable responsive images (eg through srcset attr)
         }
         else
         {
-            p = tiles((imgs[ind[current]].currentSrc||imgs[ind[current]].src), r, c, W, H, angle); // enable responsive images (eg through srcset attr)
+            p = tiles((imgs[ind[current]].currentSrc||imgs[ind[current]].src), r, c, W, H, angle, transition.backface, (imgs[ind[prevcurrent]].currentSrc||imgs[ind[prevcurrent]].src)); // enable responsive images (eg through srcset attr)
         }
 
         numpiec = p.length;
-        if ( transition.current || transition.next )
+        if (transition.current || transition.next)
         {
             imageLayer.style.backgroundImage = 'none';
             p2 = tiles((imgs[ind[prevcurrent]].currentSrc||imgs[ind[prevcurrent]].src), r, c, W, H, angle);
-            if ( is_obj(transition.current) && is_array(transition.current.animation) && 2<=transition.current.animation.length )
+            if (is_obj(transition.current) && is_array(transition.current.animation) && 2 <= transition.current.animation.length)
             {
                 animations['animation-'+self.el.id+'-current'] = '@keyframes imagik-animation-'+self.el.id+'-current{'+transition.current.animation.map(function(step, n){
                     return String(100*n/(transition.current.animation.length-1))+'%{'+$css(translate(step, p[0]))+'}';
                 }).join("\n")+'}';
             }
-            if ( is_obj(transition.next) && is_array(transition.next.animation) && 2<=transition.next.animation.length )
+            if (is_obj(transition.next) && is_array(transition.next.animation) && 2 <= transition.next.animation.length)
             {
                 animations['animation-'+self.el.id+'-next'] = '@keyframes imagik-animation-'+self.el.id+'-next{'+transition.next.animation.map(function(step, n){
                     return String(100*n/(transition.next.animation.length-1))+'%{'+$css(translate(step, p[0]))+'}';
                 }).join("\n")+'}';
             }
-            for(i=0;i<numpiec;i++)
+            for (i=0; i<numpiec; i++)
             {
-                if ( !p[i].vis ) continue;
+                if (!p[i].vis) continue;
                 dd = $el('<div class="imagik-tile-wrapper"></div>');
                 p[i].piece.id = self.el.id+'-next-'+p[i].i+'-'+p[i].j;
                 p2[i].piece.id = self.el.id+'-current-'+p2[i].i+'-'+p2[i].j;
                 $append(dd, $addClass($addClass(p2[i].piece, 'imagik-tile-current'), 'imagik-tile-'+p2[i].i+'-'+p2[i].j));
                 $append(dd, $addClass($addClass(p[i].piece, 'imagik-tile-next'), 'imagik-tile-'+p[i].i+'-'+p[i].j));
 
-                if ( is_obj(transition.current) )
+                if (is_obj(transition.current))
                 {
                     str = $css(translate(extend({}, transition.current, ['animation','selector','reverse']), p2[i]));
-                    if ( str.length ) style += "\n" + '#'+p2[i].piece.id+'{'+str+'}';
+                    if (str.length) style += "\n" + '#'+p2[i].piece.id+'{'+str+'}';
                 }
-                if ( is_obj(transition.next) )
+                if (is_obj(transition.next))
                 {
                     str = $css(translate(extend({}, transition.next, ['animation','selector','reverse']), p[i]));
-                    if ( str.length ) style += "\n" + '#'+p[i].piece.id+'{'+str+'}';
+                    if (str.length) style += "\n" + '#'+p[i].piece.id+'{'+str+'}';
                 }
 
                 p2[i].piece = dd;
@@ -1071,14 +1082,14 @@ function Imagik( el, options )
         max = -1;
         odd = false;
 
-        if ( (is_array(transition.animation) && 2<=transition.animation.length) || (is_array(transition.animation1) && 2<=transition.animation1.length && is_array(transition.animation2) && 2<=transition.animation2.length) )
+        if ((is_array(transition.animation) && 2 <= transition.animation.length) || (is_array(transition.animation1) && 2 <= transition.animation1.length && is_array(transition.animation2) && 2 <= transition.animation2.length))
         {
-            if ( transition.animation1 && transition.animation2 )
+            if (transition.animation1 && transition.animation2)
             {
                 animations['animation-'+self.el.id+'-even'] = '@keyframes imagik-animation-'+self.el.id+'-even{'+transition.animation2.map(function(step, n){
                     return String(100*n/(transition.animation2.length-1))+'%{'+$css(translate(step, p[0]))+'}';
                 }).join("\n")+'}';
-                if ( 1<p.length )
+                if (1 < p.length)
                 {
                     animations['animation-'+self.el.id+'-odd'] = '@keyframes imagik-animation-'+self.el.id+'-odd{'+transition.animation1.map(function(step, n){
                         return String(100*n/(transition.animation1.length-1))+'%{'+$css(translate(step, p[1]))+'}';
@@ -1093,34 +1104,34 @@ function Imagik( el, options )
             }
         }
 
-        for(i=0;i<numpiec;i++)
+        for (i=0; i<numpiec; i++)
         {
-            if ( !p[i].vis ) continue;
+            if (!p[i].vis) continue;
             del = ordobj.delays[i]*sd;
             p[i].piece.id = self.el.id+'-tile-'+p[i].i+'-'+p[i].j;
             style += "\n" + '#'+p[i].piece.id+'{left:'+p[i].x+p[i].u+';top:'+p[i].y+p[i].u+';width:'+p[i].w+p[i].u+';height:'+p[i].h+p[i].u+';}';
             $append(animationLayer, p[i].piece);
-            if ( max<=del )
+            if (max <= del)
             {
-                if ( transition.next && transition.next.animation )
+                if (transition.next && transition.next.animation)
                     evtCarrier = transition.next.selector ? ($$('#'+p[i].piece.childNodes[1].id+transition.next.selector, animationLayer)[0]||p[i].piece.childNodes[1]) : p[i].piece.childNodes[1];
-                else if ( transition.current && transition.current.animation )
+                else if (transition.current && transition.current.animation)
                     evtCarrier = transition.current.selector ? ($$('#'+p[i].piece.childNodes[0].id+transition.current.selector, animationLayer)[0]||p[i].piece.childNodes[0]) : p[i].piece.childNodes[0];
                 else
                     evtCarrier = selector.length ? ($$('#'+p[i].piece.id+selector, animationLayer)[0]||p[i].piece) : p[i].piece;
                 max = del;
             }
-            if ( transition.current && transition.current.animation )
+            if (transition.current && transition.current.animation)
             {
-                    style += "\n" + '#'+p[i].piece.childNodes[0].id+(transition.current.selector||'')+'{animation:imagik-animation-'+(is_array(transition.current.animation)?(self.el.id+'-current'):String(transition.current.animation))+' '+d+'s '+ease+' '+del+'s 1 '+(transition.current.reverse?'reverse both':'normal both')+' running;}';
+                style += "\n" + '#'+p[i].piece.childNodes[0].id+(transition.current.selector||'')+'{animation:imagik-animation-'+(is_array(transition.current.animation)?(self.el.id+'-current'):String(transition.current.animation))+' '+d+'s '+ease+' '+del+'s 1 '+(transition.current.reverse?'reverse both':'normal both')+' running;}';
             }
-            if ( transition.next && transition.next.animation )
+            if (transition.next && transition.next.animation)
             {
-                    style += "\n" + '#'+p[i].piece.childNodes[1].id+(transition.next.selector||'')+'{animation:imagik-animation-'+(is_array(transition.next.animation)?(self.el.id+'-next'):String(transition.next.animation))+' '+d+'s '+ease+' '+del+'s 1 '+(transition.next.reverse?'reverse both':'normal both')+' running;}';
+                style += "\n" + '#'+p[i].piece.childNodes[1].id+(transition.next.selector||'')+'{animation:imagik-animation-'+(is_array(transition.next.animation)?(self.el.id+'-next'):String(transition.next.animation))+' '+d+'s '+ease+' '+del+'s 1 '+(transition.next.reverse?'reverse both':'normal both')+' running;}';
             }
-            if ( is_array(transition.animation1) && 2<=transition.animation1.length && is_array(transition.animation2) && 2<=transition.animation2.length )
+            if (is_array(transition.animation1) && 2 <= transition.animation1.length && is_array(transition.animation2) && 2 <= transition.animation2.length)
             {
-                if ( odd )
+                if (odd)
                 {
                     style += "\n" + '#'+p[i].piece.id+selector+'{animation:imagik-animation-'+self.el.id+'-odd '+d+'s '+ease+' '+del+'s 1 '+(transition.reverse?'reverse both':'normal both')+' running;}';
                 }
@@ -1129,15 +1140,15 @@ function Imagik( el, options )
                     style += "\n" + '#'+p[i].piece.id+selector+'{animation:imagik-animation-'+self.el.id+'-even '+d+'s '+ease+' '+del+'s 1 '+(transition.reverse?'reverse both':'normal both')+' running;}';
                 }
             }
-            else if ( is_array(transition.animation) && 2<=transition.animation.length )
+            else if (is_array(transition.animation) && 2 <= transition.animation.length)
             {
                 style += "\n" + '#'+p[i].piece.id+selector+'{animation:imagik-animation-'+self.el.id+' '+d+'s '+ease+' '+del+'s 1 '+(transition.reverse?'reverse both':'normal both')+' running;}';
             }
-            else if ( transition.animation || (transition.animation1 && transition.animation2) )
+            else if (transition.animation || (transition.animation1 && transition.animation2))
             {
-                if ( transition.animation1 && transition.animation2 )
+                if (transition.animation1 && transition.animation2)
                 {
-                    if ( odd )
+                    if (odd)
                     {
                         style += "\n" + '#'+p[i].piece.id+selector+'{animation:imagik-animation-'+String(transition.animation1)+' '+d+'s '+ease+' '+del+'s 1 '+(transition.reverse?'reverse both':'normal both')+' running;}';
                     }
@@ -1156,9 +1167,9 @@ function Imagik( el, options )
         $addClass(animationLayer, 'imagik-fx');
         $addClass(animationLayer, 'imagik-fx-'+lastfx.transition);
         $removeClass(holder, 'imagik-show-image');
-        for(i in animations)
+        for (i in animations)
         {
-            if ( HAS.call(animations, i) )
+            if (HAS.call(animations, i))
                 style = "\n" + animations[i] + style;
         }
         $style(self.style, style);
@@ -1167,29 +1178,29 @@ function Imagik( el, options )
         return self;
     };
 
-    self.stopPlay = function( ) {
+    self.stopPlay = function() {
         dotimer = false;
         clearTimeout(timer);
         return self;
     };
 
-    self.resumePlay = function( ) {
+    self.resumePlay = function() {
         dotimer = true;
         return self.doTransition("+1");
     };
 
-    self.nextTransition = function( ) {
+    self.nextTransition = function() {
         return self.doTransition("+1");
     };
 
-    self.prevTransition = function( ) {
+    self.prevTransition = function() {
         return self.doTransition("-1");
     };
 
-    self.dispose = function( ) {
+    self.dispose = function() {
         hook(self.id, false);
-        if ( p2!=null ) p2 = destroy(p2);
-        if ( p!=null ) p = destroy(p);
+        if (p2 != null) p2 = destroy(p2);
+        if (p != null) p = destroy(p);
         $empty(animationLayer);
         $empty(holder);
         $remove(holder);
@@ -1207,7 +1218,7 @@ function Imagik( el, options )
     // go
     self.init();
 }
-Imagik.VERSION = "1.1.2";
+Imagik.VERSION = "1.1.3";
 Imagik.Static = {
 
     transitions: {
@@ -1915,6 +1926,18 @@ Imagik.Static = {
             next:true,
             animation:"flip-vertical"
         }
+        ,"unfold-horizontal":{
+            rows:1,
+            columns:2,
+            backface:[-1, 0],
+            animation:"unfold-horizontal"
+        }
+        ,"unfold-vertical":{
+            columns:1,
+            rows:2,
+            backface:[0, -1],
+            animation:"unfold-vertical"
+        }
         ,"rotate":{
             animation:"rotate"
         }
@@ -2364,6 +2387,8 @@ Imagik.Static = {
         ,{transition:"flip-vertical",ease:"ease-out-back",duration:2,overlap:0.9,rows:5,columns:5,order:"diagonal-bottom-right"}
         ,{transition:"flip-vertical",ease:"ease-out-back",duration:2,overlap:0.9,rows:5,columns:5,order:"diagonal-bottom-left"}
         ,{transition:"flip-vertical",ease:"ease-out-back",duration:2,overlap:0.9,rows:5,columns:5,order:"random"}
+        ,{transition:"unfold-horizontal",ease:"ease-out",duration:2,order:"rows-first"}
+        ,{transition:"unfold-vertical",ease:"ease-out",duration:2,order:"rows-first"}
         ,{transition:"shuffle-left",ease:"ease-in-out",duration:2,overlap:1,rows:1,columns:1,order:"rows-first"}
         ,{transition:"shuffle-right",ease:"ease-in-out",duration:2,overlap:1,rows:1,columns:1,order:"rows-first"}
         ,{transition:"fold-left",ease:"ease-in-out",duration:2,overlap:1,rows:1,columns:1,order:"rows-first"}

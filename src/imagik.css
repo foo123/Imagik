@@ -233,7 +233,8 @@
 .imagik-animation-layer.imagik-fx-unfold-vertical .imagik-tile
 {
     backface-visibility:visible;
-    transform-style:preserve-3d;
+    transform-style:preserve-3d !important;
+    overflow:visible;
 }
 .imagik-webkit .imagik-animation-layer.imagik-fx-flip-horizontal .imagik-tile,
 .imagik-webkit .imagik-animation-layer.imagik-fx-flip-vertical .imagik-tile
@@ -328,7 +329,7 @@
 }
 .imagik-animation-layer.imagik-fx-unfold-vertical .imagik-tile.tile-odd .imagik-tile-inside
 {
-    transform:rotateX(180deg);
+    transform:rotateX(-180deg);
     backface-visibility:visible;
 }
 .imagik-animation-layer.imagik-fx-unfold-horizontal .imagik-tile.tile-odd

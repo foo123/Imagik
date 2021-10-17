@@ -977,7 +977,6 @@ function Imagik(el, options)
     };*/
 
     clearPrev = function() {
-        //if (lastfx && 'fade-rhombus'===lastfx.transition) return;
         if (evtCarrier)
         {
             $ev(evtCarrier, 'animationend', endHandler, false);
@@ -1003,7 +1002,6 @@ function Imagik(el, options)
     endTransition = function() {
         clearPrev();
         if (!imgs) return;
-        //if (lastfx && 'fade-rhombus'===lastfx.transition) return;
         imageLayer.style.backgroundImage = 'url("'+(imgs[ind[current]].currentSrc||imgs[ind[current]].src)+'")'; // enable responsive images (eg through srcset attr)
         imageLayer.href = links[ind[current]];
         imageLayer.style.zIndex = 2;

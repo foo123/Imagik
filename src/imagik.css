@@ -217,7 +217,6 @@
     background-repeat:no-repeat;
     background-position:0 0;
     background-size:100% auto;
-    backface-visibility:hidden;
 }
 .imagik-tile.imagik-diagonal
 {
@@ -233,7 +232,7 @@
 .imagik-animation-layer.imagik-fx-unfold-vertical .imagik-tile
 {
     backface-visibility:visible;
-    transform-style:preserve-3d !important;
+    transform-style:preserve-3d;
     overflow:visible;
 }
 .imagik-webkit .imagik-animation-layer.imagik-fx-flip-horizontal .imagik-tile,
@@ -354,11 +353,11 @@
 }
 .imagik-animation-layer.imagik-fx-flip-horizontal .imagik-tile-current
 {
-    transform:rotateY(180deg);
+    transform:rotateY(0deg);
 }
 .imagik-animation-layer.imagik-fx-flip-horizontal .imagik-tile-next
 {
-    transform:rotateY(0deg);
+    transform:rotateY(-180deg);
 }
 .imagik-animation-layer.imagik-fx-flip-vertical .imagik-tile-wrapper
 {

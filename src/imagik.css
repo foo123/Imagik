@@ -219,14 +219,6 @@
     background-size:100% auto;
     backface-visibility:hidden;
 }
-.imagik-tile-backface
-{
-    z-index:2;
-}
-.imagik-tile-inside
-{
-    z-index:1;
-}
 .imagik-tile.imagik-diagonal
 {
     transform:translate3d(0,0,0) rotateZ(-45deg);
@@ -238,7 +230,11 @@
 
 /* fx */
 .imagik-animation-layer.imagik-fx-unfold-horizontal .imagik-tile,
-.imagik-animation-layer.imagik-fx-unfold-vertical .imagik-tile,
+.imagik-animation-layer.imagik-fx-unfold-vertical .imagik-tile
+{
+    backface-visibility:visible;
+    transform-style:preserve-3d;
+}
 .imagik-webkit .imagik-animation-layer.imagik-fx-flip-horizontal .imagik-tile,
 .imagik-webkit .imagik-animation-layer.imagik-fx-flip-vertical .imagik-tile
 {
@@ -328,6 +324,7 @@
 .imagik-animation-layer.imagik-fx-unfold-vertical .imagik-tile.tile-odd .imagik-tile-backface
 {
     transform:rotateX(0deg);
+    backface-visibility:hidden;
 }
 .imagik-animation-layer.imagik-fx-unfold-vertical .imagik-tile.tile-odd .imagik-tile-inside
 {
@@ -343,6 +340,7 @@
 .imagik-animation-layer.imagik-fx-unfold-horizontal .imagik-tile.tile-odd .imagik-tile-backface
 {
     transform:rotateY(0deg);
+    backface-visibility:hidden;
 }
 .imagik-animation-layer.imagik-fx-unfold-horizontal .imagik-tile.tile-odd .imagik-tile-inside
 {

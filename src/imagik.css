@@ -308,43 +308,43 @@
 {
     transform-origin:0 center;
 }
-.imagik-animation-layer.imagik-fx-unfold-horizontal #imagik-tile-0-0,
-.imagik-animation-layer.imagik-fx-unfold-vertical #imagik-tile-0-0
+.imagik-animation-layer.imagik-fx-unfold-horizontal .imagik-tile.tile-even,
+.imagik-animation-layer.imagik-fx-unfold-vertical .imagik-tile.tile-even
 {
-    z-index: 1;
+    z-index:1;
     animation:none !important;
 }
-.imagik-animation-layer.imagik-fx-unfold-horizontal #imagik-tile-0-0 .imagik-tile-backface,
-.imagik-animation-layer.imagik-fx-unfold-vertical #imagik-tile-0-0 .imagik-tile-backface
+.imagik-animation-layer.imagik-fx-unfold-horizontal .imagik-tile.tile-even .imagik-tile-backface,
+.imagik-animation-layer.imagik-fx-unfold-vertical .imagik-tile.tile-even .imagik-tile-backface
 {
     display:none !important;
 }
-.imagik-animation-layer.imagik-fx-unfold-vertical .imagik-tile:not(#imagik-tile-0-0)
+.imagik-animation-layer.imagik-fx-unfold-vertical .imagik-tile.tile-odd
 {
-    transform-origin:bottom;
+    transform-origin:bottom !important;
     z-index:2;
-    top:0%;
+    top:var(--yb) !important;
 }
-.imagik-animation-layer.imagik-fx-unfold-vertical .imagik-tile:not(#imagik-tile-0-0) .imagik-tile-backface
+.imagik-animation-layer.imagik-fx-unfold-vertical .imagik-tile.tile-odd .imagik-tile-backface
 {
     transform:rotateX(0deg);
 }
-.imagik-animation-layer.imagik-fx-unfold-vertical .imagik-tile:not(#imagik-tile-0-0) .imagik-tile-inside
+.imagik-animation-layer.imagik-fx-unfold-vertical .imagik-tile.tile-odd .imagik-tile-inside
 {
     transform:rotateX(180deg);
     backface-visibility:visible;
 }
-.imagik-animation-layer.imagik-fx-unfold-horizontal .imagik-tile:not(#imagik-tile-0-0)
+.imagik-animation-layer.imagik-fx-unfold-horizontal .imagik-tile.tile-odd
 {
-    transform-origin:right;
+    transform-origin:right !important;
     z-index:2;
-    left:0%;
+    left:var(--xb) !important;
 }
-.imagik-animation-layer.imagik-fx-unfold-horizontal .imagik-tile:not(#imagik-tile-0-0) .imagik-tile-backface
+.imagik-animation-layer.imagik-fx-unfold-horizontal .imagik-tile.tile-odd .imagik-tile-backface
 {
     transform:rotateY(0deg);
 }
-.imagik-animation-layer.imagik-fx-unfold-horizontal .imagik-tile:not(#imagik-tile-0-0) .imagik-tile-inside
+.imagik-animation-layer.imagik-fx-unfold-horizontal .imagik-tile.tile-odd .imagik-tile-inside
 {
     transform:rotateY(-180deg);
     backface-visibility:visible;

@@ -122,13 +122,35 @@ function $html(el, html)
 }
 function $empty(el)
 {
-    //el.textContent = '';
-    while (el.firstChild) el.removeChild(el.firstChild);
+    var range = null;
+    try {
+        range = document.createRange();
+    } catch (e) {
+        range = null;
+    }
+    if (range)
+    {
+        range.setStart(el, 0);
+        range.setEnd(el, el.childNodes.length);
+        range.deleteContents();
+        //range.detach();
+    }
+    else
+    {
+        //el.textContent = '';
+        while (el.firstChild) el.removeChild(el.firstChild);
+    }
     return el;
 }
 function $append(el, child)
 {
     return el.appendChild(child);
+}
+function $appendAll(el, children)
+{
+    var frag = document.createDocumentFragment(), i, l = children.length;
+    for (i=0; i<l; i++) frag.appendChild(children[i]);
+    return el.appendChild(frag);
 }
 function $remove(child)
 {
@@ -509,7 +531,7 @@ function checkerBoard(pieces, rows, columns)
 }
 function tiles(img, rows, columns, W, H, angle, backface, previmg)
 {
-    var i, j, ii, jj, x, y, bx, by, w, h,
+    var i, j, ii, jj, x, y, bx, by, w, h, odd,
         pieces, tile, ww, s, m1, m2, imax,
         clipPath, size, side, margin, margin2, offset;
     if (true === angle)
@@ -594,23 +616,33 @@ function tiles(img, rows, columns, W, H, angle, backface, previmg)
         w = 1===columns ? 100 : (W/columns*101/W);
         h = 1===rows ? 100 : (H/rows*101/H);
         pieces = new Array(rows*columns);
+        odd = false;
         for (i=0; i<columns; i++)
         {
             for (j=0; j<rows; j++)
             {
                 x = w/columns*i*100/w; y = h/rows*j*100/h;
                 bx = -W/columns*i; by = -H/rows*j;
-                pieces[i*rows+j] = {piece:tile=$el('<div class="imagik-tile"><div class="imagik-tile-inside"></div></div>'), r:rows, c:columns, i:i, j:j, x:x, y:y, bx:bx, by:by, w:w, h:h, u:'%', W:W, H:H, img:img, vis:true};
+                pieces[i*rows+j] = {piece:tile=$el('<div class="imagik-tile '+(odd ? 'tile-odd' : 'tile-even')+'"><div class="imagik-tile-inside"></div></div>'), r:rows, c:columns, i:i, j:j, x:x, y:y, bx:bx, by:by, w:w, h:h, u:'%', W:W, H:H, img:img, vis:true};
                 tile.firstChild.style.backgroundImage = 'url("'+String(img)+'")';
                 tile.firstChild.style.backgroundPosition = String(bx)+'px '+String(by)+'px';
                 tile.firstChild.style.backgroundSize = String(W)+'px auto';
+                //$attr(tile, 'data-x', String(x));
+                //$attr(tile, 'data-y', String(y));
+                tile.style.setProperty('--x', String(x)+'%')
+                tile.style.setProperty('--y', String(y)+'%')
                 if (backface && previmg)
                 {
                     tile.appendChild($el('<div class="imagik-tile-backface"></div>'));
                     tile.childNodes[1].style.backgroundImage = 'url("'+String(previmg)+'")';
                     tile.childNodes[1].style.backgroundPosition = String(-W/columns*(i+(backface[0]||0)))+'px '+String(-H/rows*(j+(backface[1]||0)))+'px';
                     tile.childNodes[1].style.backgroundSize = String(W)+'px auto';
+                    //$attr(tile, 'data-xb', String(w/columns*(i+(backface[0]||0))*100/w));
+                    //$attr(tile, 'data-yb', String(h/rows*(j+(backface[1]||0))*100/h));
+                    tile.style.setProperty('--xb', String(w/columns*(i+(backface[0]||0))*100/w)+'%')
+                    tile.style.setProperty('--yb', String(h/rows*(j+(backface[1]||0))*100/h)+'%')
                 }
+                odd = !odd;
             }
         }
     }
@@ -619,7 +651,7 @@ function tiles(img, rows, columns, W, H, angle, backface, previmg)
 function destroy(pieces)
 {
     if (!pieces) return pieces;
-    for(var p=0; p<pieces.length; p++)
+    for(var p=0,pl=pieces.length; p<pl; p++)
     {
         if (pieces[p].piece)
         {
@@ -1110,16 +1142,18 @@ function Imagik(el, options)
             del = ordobj.delays[i]*sd;
             p[i].piece.id = self.el.id+'-tile-'+p[i].i+'-'+p[i].j;
             style += "\n" + '#'+p[i].piece.id+'{left:'+p[i].x+p[i].u+';top:'+p[i].y+p[i].u+';width:'+p[i].w+p[i].u+';height:'+p[i].h+p[i].u+';}';
-            $append(animationLayer, p[i].piece);
             if (max <= del)
             {
-                if (transition.next && transition.next.animation)
-                    evtCarrier = transition.next.selector ? ($$('#'+p[i].piece.childNodes[1].id+transition.next.selector, animationLayer)[0]||p[i].piece.childNodes[1]) : p[i].piece.childNodes[1];
-                else if (transition.current && transition.current.animation)
-                    evtCarrier = transition.current.selector ? ($$('#'+p[i].piece.childNodes[0].id+transition.current.selector, animationLayer)[0]||p[i].piece.childNodes[0]) : p[i].piece.childNodes[0];
-                else
-                    evtCarrier = selector.length ? ($$('#'+p[i].piece.id+selector, animationLayer)[0]||p[i].piece) : p[i].piece;
-                max = del;
+                if (!transition.animate || p[i].piece.matches(transition.animate) || $$(transition.animate, p[i].piece).length)
+                {
+                    if (transition.next && transition.next.animation)
+                        evtCarrier = transition.next.selector ? ($$('#'+p[i].piece.childNodes[1].id+transition.next.selector, animationLayer)[0]||p[i].piece.childNodes[1]) : p[i].piece.childNodes[1];
+                    else if (transition.current && transition.current.animation)
+                        evtCarrier = transition.current.selector ? ($$('#'+p[i].piece.childNodes[0].id+transition.current.selector, animationLayer)[0]||p[i].piece.childNodes[0]) : p[i].piece.childNodes[0];
+                    else
+                        evtCarrier = selector.length ? ($$('#'+p[i].piece.id+selector, animationLayer)[0]||p[i].piece) : p[i].piece;
+                    max = del;
+                }
             }
             if (transition.current && transition.current.animation)
             {
@@ -1164,6 +1198,7 @@ function Imagik(el, options)
             }
             odd = !odd;
         }
+        $appendAll(animationLayer, p.filter(function(pi){return pi.vis;}).map(function(pi){return pi.piece;}));
         $addClass(animationLayer, 'imagik-fx');
         $addClass(animationLayer, 'imagik-fx-'+lastfx.transition);
         $removeClass(holder, 'imagik-show-image');
@@ -1928,14 +1963,14 @@ Imagik.Static = {
         }
         ,"unfold-horizontal":{
             rows:1,
-            columns:2,
             backface:[-1, 0],
+            animate:".tile-odd",
             animation:"unfold-horizontal"
         }
         ,"unfold-vertical":{
             columns:1,
-            rows:2,
             backface:[0, -1],
+            animate:".tile-odd",
             animation:"unfold-vertical"
         }
         ,"rotate":{
@@ -2387,8 +2422,18 @@ Imagik.Static = {
         ,{transition:"flip-vertical",ease:"ease-out-back",duration:2,overlap:0.9,rows:5,columns:5,order:"diagonal-bottom-right"}
         ,{transition:"flip-vertical",ease:"ease-out-back",duration:2,overlap:0.9,rows:5,columns:5,order:"diagonal-bottom-left"}
         ,{transition:"flip-vertical",ease:"ease-out-back",duration:2,overlap:0.9,rows:5,columns:5,order:"random"}
-        ,{transition:"unfold-horizontal",ease:"ease-out",duration:2,order:"rows-first"}
-        ,{transition:"unfold-vertical",ease:"ease-out",duration:2,order:"rows-first"}
+        ,{transition:"unfold-horizontal",ease:"ease-in-out",duration:2,overlap:1,columns:2,order:"rows-first"}
+        ,{transition:"unfold-horizontal",ease:"ease-in-out",duration:2,overlap:0.92,columns:4,order:"random"}
+        ,{transition:"unfold-horizontal",ease:"ease-in-out",duration:2,overlap:0.92,columns:6,order:"random"}
+        ,{transition:"unfold-horizontal",ease:"ease-in-out",duration:2,overlap:0.92,columns:8,order:"random"}
+        ,{transition:"unfold-horizontal",ease:"ease-in-out",duration:2,overlap:0.92,columns:10,order:"random"}
+        ,{transition:"unfold-horizontal",ease:"ease-in-out",duration:2,overlap:0.92,columns:14,order:"random"}
+        ,{transition:"unfold-vertical",ease:"ease-in-out",duration:2,overlap:1,rows:2,order:"rows-first"}
+        ,{transition:"unfold-vertical",ease:"ease-in-out",duration:2,overlap:0.92,rows:4,order:"random"}
+        ,{transition:"unfold-vertical",ease:"ease-in-out",duration:2,overlap:0.92,rows:6,order:"random"}
+        ,{transition:"unfold-vertical",ease:"ease-in-out",duration:2,overlap:0.92,rows:8,order:"random"}
+        ,{transition:"unfold-vertical",ease:"ease-in-out",duration:2,overlap:0.92,rows:10,order:"random"}
+        ,{transition:"unfold-vertical",ease:"ease-in-out",duration:2,overlap:0.92,rows:14,order:"random"}
         ,{transition:"shuffle-left",ease:"ease-in-out",duration:2,overlap:1,rows:1,columns:1,order:"rows-first"}
         ,{transition:"shuffle-right",ease:"ease-in-out",duration:2,overlap:1,rows:1,columns:1,order:"rows-first"}
         ,{transition:"fold-left",ease:"ease-in-out",duration:2,overlap:1,rows:1,columns:1,order:"rows-first"}

@@ -12,7 +12,7 @@
     width:60px;
     height:60px;
     display:block;
-    background:rgba(255,255,255,0.6) url("./prev.png") no-repeat center center;
+    background:rgba(255,255,255,0.6) url('data:image/svg+xml;utf8,<svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 500 500"><g transform="translate(-90,80)"><g transform-origin="center" transform="scale(-1,1)"><path d="M250.606,154.389l-150-149.996c-5.857-5.858-15.355-5.858-21.213,0.001	c-5.857,5.858-5.857,15.355,0.001,21.213l139.393,139.39L79.393,304.394c-5.857,5.858-5.857,15.355,0.001,21.213	C82.322,328.536,86.161,330,90,330s7.678-1.464,10.607-4.394l149.999-150.004c2.814-2.813,4.394-6.628,4.394-10.606	C255,161.018,253.42,157.202,250.606,154.389z"/></g></g></svg>') no-repeat center center;
     background-size:cover;
     border-radius:50%;
     overflow:hidden;
@@ -29,7 +29,7 @@
     width:60px;
     height:60px;
     display:block;
-    background:rgba(255,255,255,0.6) url("./next.png") no-repeat center center;
+    background:rgba(255,255,255,0.6) url('data:image/svg+xml;utf8,<svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 500 500"><g transform="translate(100,80)"><path d="M250.606,154.389l-150-149.996c-5.857-5.858-15.355-5.858-21.213,0.001	c-5.857,5.858-5.857,15.355,0.001,21.213l139.393,139.39L79.393,304.394c-5.857,5.858-5.857,15.355,0.001,21.213	C82.322,328.536,86.161,330,90,330s7.678-1.464,10.607-4.394l149.999-150.004c2.814-2.813,4.394-6.628,4.394-10.606	C255,161.018,253.42,157.202,250.606,154.389z"/></g></svg>') no-repeat center center;
     background-size:cover;
     border-radius:50%;
     overflow:hidden;
@@ -62,17 +62,17 @@
 .imagik-play-pause
 {
     position:absolute;
-    width:180px;
-    height:180px;
+    width:120px;
+    height:120px;
     display:block;
-    background:rgba(255,255,255,0.5) url("./play.png") no-repeat center center;
+    background:rgba(255,255,255,0.5) url('data:image/svg+xml;utf8,<svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 600 600"><g transform="translate(110,70)"><path d="M393.538,203.629L102.557,5.543c-9.793-6.666-22.468-7.372-32.94-1.832c-10.472,5.538-17.022,16.413-17.022,28.26v396.173	c0,11.846,6.55,22.721,17.022,28.26c10.471,5.539,23.147,4.834,32.94-1.832l290.981-198.087 c8.746-5.954,13.98-15.848,13.98-26.428C407.519,219.477,402.285,209.582,393.538,203.629z"/></g></svg>') no-repeat center center;
     background-size:cover;
     border-radius:50%;
     overflow:hidden;
     top:50%;
     left:50%;
-    margin-top:-90px;
-    margin-left:-90px;
+    margin-top:-60px;
+    margin-left:-60px;
     z-index:5;
     opacity:0;
     transform:scale(0);
@@ -82,7 +82,6 @@
 }
 .paused .imagik-play-pause
 {
-    background-image:url("./pause.png");
     opacity:1;
     transform:scale(1);
     transition:all 0.4s cubic-bezier(0.175, 0.885, 0.320, 1.275);

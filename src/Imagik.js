@@ -146,12 +146,6 @@ function $append(el, child)
 {
     return el.appendChild(child);
 }
-function $appendAll(el, children)
-{
-    var frag = document.createDocumentFragment(), i, l = children.length;
-    for (i=0; i<l; i++) frag.appendChild(children[i]);
-    return el.appendChild(frag);
-}
 function $remove(child)
 {
     return child && child.parentNode ? child.parentNode.removeChild(child) : child;
@@ -588,6 +582,7 @@ function tiles(img, rows, columns, W, H, angle, backface, previmg)
         pieces = new Array(rows*columns)
         s = m2*H/(columns-imax);
         ww = 0===angle ? w : (m1*w + s);
+        odd = false;
         for (i=0; i<columns; i++)
         {
             for (j=0; j<rows; j++)
@@ -604,10 +599,13 @@ function tiles(img, rows, columns, W, H, angle, backface, previmg)
                 }
                 clipPath = /*'border-box '+*/'polygon('+clipPath.map(function(pt){return String(pt[0])+'px '+String(pt[1])+'px';}).join(',')+')';
                 //clipPath = 'url("data:image/svg+xml,%3Csvg xmlns=\\"http://www.w3.org/2000/svg\\"%3E%3CclipPath id=\\"clipPath-'+i+'-'+j+'\\" clipPathUnits=\\"objectBoundingBox\\"%3E%3Cpolygon points=\\"'+clipPath.map(function(pt){return String(pt[0])+','+String(pt[1])+'';}).join(' ')+'\\" /%3E%3C/clipPath%3E%3C/svg%3E%0A#clipPath-'+i+'-'+j+'")';
-                pieces[i*rows+j] = {piece:tile=$el('<div class="imagik-tile" style="-webkit-clip-path:'+clipPath+';clip-path:'+clipPath+';"><div class="imagik-tile-inside"></div></div>'), r:rows, c:columns, i:i, j:j, x:x, y:y, bx:bx, by:by, w:ww, h:h, u:'px', W:W, H:H, slope:s, angle:angle, img:img, vis:true};
+                pieces[i*rows+j] = {piece:tile=$el('<div class="imagik-tile'+(odd ? ' tile-odd' : ' tile-even')+(j&1 ? ' row-odd' : ' row-even')+(i&1 ? ' column-odd' : ' column-even')+'" style="-webkit-clip-path:'+clipPath+';clip-path:'+clipPath+';"><div class="imagik-tile-inside"></div></div>'), r:rows, c:columns, i:i, j:j, x:x, y:y, bx:bx, by:by, w:ww, h:h, u:'px', W:W, H:H, slope:s, angle:angle, img:img, vis:true};
                 tile.firstChild.style.backgroundImage = 'url("'+String(img)+'")';
                 tile.firstChild.style.backgroundPosition = String(bx)+'px '+String(by)+'px';
                 tile.firstChild.style.backgroundSize = String(W)+'px auto';
+                tile.style.setProperty('--x', String(x)+'%')
+                tile.style.setProperty('--y', String(y)+'%')
+                odd = !odd;
             }
         }
     }
@@ -623,7 +621,7 @@ function tiles(img, rows, columns, W, H, angle, backface, previmg)
             {
                 x = w/columns*i*100/w; y = h/rows*j*100/h;
                 bx = -W/columns*i; by = -H/rows*j;
-                pieces[i*rows+j] = {piece:tile=$el('<div class="imagik-tile '+(odd ? 'tile-odd' : 'tile-even')+'"><div class="imagik-tile-inside"></div></div>'), r:rows, c:columns, i:i, j:j, x:x, y:y, bx:bx, by:by, w:w, h:h, u:'%', W:W, H:H, img:img, vis:true};
+                pieces[i*rows+j] = {piece:tile=$el('<div class="imagik-tile'+(odd ? ' tile-odd' : ' tile-even')+(j&1 ? ' row-odd' : ' row-even')+(i&1 ? ' column-odd' : ' column-even')+'"><div class="imagik-tile-inside"></div></div>'), r:rows, c:columns, i:i, j:j, x:x, y:y, bx:bx, by:by, w:w, h:h, u:'%', W:W, H:H, img:img, vis:true};
                 tile.firstChild.style.backgroundImage = 'url("'+String(img)+'")';
                 tile.firstChild.style.backgroundPosition = String(bx)+'px '+String(by)+'px';
                 tile.firstChild.style.backgroundSize = String(W)+'px auto';
@@ -631,10 +629,10 @@ function tiles(img, rows, columns, W, H, angle, backface, previmg)
                 //$attr(tile, 'data-y', String(y));
                 tile.style.setProperty('--x', String(x)+'%')
                 tile.style.setProperty('--y', String(y)+'%')
-                if (backface && previmg)
+                if (backface)
                 {
                     tile.appendChild($el('<div class="imagik-tile-backface"></div>'));
-                    tile.childNodes[1].style.backgroundImage = 'url("'+String(previmg)+'")';
+                    tile.childNodes[1].style.backgroundImage = 'url("'+String(previmg||img)+'")';
                     tile.childNodes[1].style.backgroundPosition = String(-W/columns*(i+(backface[0]||0)))+'px '+String(-H/rows*(j+(backface[1]||0)))+'px';
                     tile.childNodes[1].style.backgroundSize = String(W)+'px auto';
                     //$attr(tile, 'data-xb', String(w/columns*(i+(backface[0]||0))*100/w));
@@ -752,6 +750,7 @@ function Imagik(el, options)
     if (!(self instanceof Imagik)) return new Imagik(el, options);
 
     var defaults = {
+        debug: false,
         aspectRatio: 1.0,
         transition: "random",
         ease: "linear",
@@ -1010,14 +1009,16 @@ function Imagik(el, options)
         prepareTransition();
 
         // signal completion if handler given
-        if ("function"===typeof self.options.onComplete) self.options.onComplete(self);
+        if ("function" === typeof self.options.onComplete) self.options.onComplete(self);
     };
 
     self.doTransition = function(dir) {
-        var i, dd, fxi, transition, order, ease, r, c, overlap, ordobj, ngroups, d, sd, del, max, odd, animations = {}, str, selector, angle = null;
+        var i, dd, fxi, transition, order, ease, r, c, overlap, ordobj, ngroups,
+            d, sd, del, max, odd, animations = {}, str, selector, angle = null, frag = null;
 
         clearTimeout(timer);
         clearPrev();
+        $style(self.style, style='');
         if (!self.el || !imgs || !imgs.length) return self;
 
         prevcurrent = current;
@@ -1031,10 +1032,9 @@ function Imagik(el, options)
         // signal completion if handler given
 
         // signal start if handler given
-        if ("function"===typeof self.options.onStart) self.options.onStart(self);
+        if ("function" === typeof self.options.onStart) self.options.onStart(self);
 
-        $style(self.style, style='');
-        fxi = fx[ind[current]]; if ("random" === fxi.transition) fxi = getRandomTransition();
+        fxi = fx[ind[current]]; if ("random" === fxi.transition) {fxi = getRandomTransition();}
         if (!fxi || !fxi.transition || !HAS.call(Imagik.Static.transitions, fxi.transition))
         {
             imageLayer.style.backgroundImage = 'url("'+(imgs[ind[current]].currentSrc||imgs[ind[current]].src)+'")';
@@ -1043,9 +1043,9 @@ function Imagik(el, options)
         transition = extend({}, Imagik.Static.transitions[fxi.transition]);
         order = fxi.order || 'rows-first'; if (!HAS.call(Imagik.Static.order, order)) order = 'rows-first';
         ease = fxi.ease || 'linear'; if (HAS.call(Imagik.Static.ease, ease)) ease = Imagik.Static.ease[ease];
-        r = null!=transition.rows ? transition.rows : fxi.rows;
-        c = null!=transition.columns ? transition.columns : fxi.columns;
-        overlap = null!=transition.overlap ? transition.overlap : fxi.overlap;
+        r = null!=transition.rows ? transition.rows : (null!=fxi.rows ? fxi.rows : self.options.rows);
+        c = null!=transition.columns ? transition.columns : (null!=fxi.columns ? fxi.columns : self.options.columns);
+        overlap = null!=transition.overlap ? transition.overlap : (null!=fxi.overlap ? fxi.overlap : self.options.overlap);
         angle = null!=transition.angle ? transition.angle : null;
         selector = is_string(transition.selector) && transition.selector.length ? transition.selector : '';
         lastfx = fxi;
@@ -1058,13 +1058,14 @@ function Imagik(el, options)
         else
         {
             p = tiles((imgs[ind[current]].currentSrc||imgs[ind[current]].src), r, c, W, H, angle, transition.backface, (imgs[ind[prevcurrent]].currentSrc||imgs[ind[prevcurrent]].src)); // enable responsive images (eg through srcset attr)
+            imageLayer.style.backgroundImage = 'url("'+(imgs[ind[prevcurrent]].currentSrc||imgs[ind[prevcurrent]].src)+'")'; // enable responsive images (eg through srcset attr)
         }
 
         numpiec = p.length;
         if (transition.current || transition.next)
         {
             imageLayer.style.backgroundImage = 'none';
-            p2 = tiles((imgs[ind[prevcurrent]].currentSrc||imgs[ind[prevcurrent]].src), r, c, W, H, angle);
+            p2 = tiles((imgs[ind[prevcurrent]].currentSrc||imgs[ind[prevcurrent]].src), r, c, W, H, angle/*, transition.backface*/);
             if (is_obj(transition.current) && is_array(transition.current.animation) && 2 <= transition.current.animation.length)
             {
                 animations['animation-'+self.el.id+'-current'] = '@keyframes imagik-animation-'+self.el.id+'-current{'+transition.current.animation.map(function(step, n){
@@ -1134,10 +1135,11 @@ function Imagik(el, options)
             }
         }
 
+        frag = document.createDocumentFragment();
         for (i=0; i<numpiec; i++)
         {
             if (!p[i].vis) continue;
-            del = ordobj.delays[i]*sd;
+            del = ordobj.delays[i]*sd || 0;
             p[i].piece.id = self.el.id+'-tile-'+p[i].i+'-'+p[i].j;
             style += "\n" + '#'+p[i].piece.id+'{left:'+p[i].x+p[i].u+';top:'+p[i].y+p[i].u+';width:'+p[i].w+p[i].u+';height:'+p[i].h+p[i].u+';}';
             if (max <= del)
@@ -1195,8 +1197,9 @@ function Imagik(el, options)
                 }
             }
             odd = !odd;
+            $append(frag, p[i].piece);
         }
-        $appendAll(animationLayer, p.filter(function(pi){return pi.vis;}).map(function(pi){return pi.piece;}));
+        $append(animationLayer, frag); frag = null;
         $addClass(animationLayer, 'imagik-fx');
         $addClass(animationLayer, 'imagik-fx-'+lastfx.transition);
         $removeClass(holder, 'imagik-show-image');
@@ -1206,6 +1209,10 @@ function Imagik(el, options)
                 style = "\n" + animations[i] + style;
         }
         $style(self.style, style);
+        if (self.options.debug)
+        {
+            console.log('Imagik: Transition='+lastfx.transition+', Image='+(imgs[ind[current]].currentSrc||imgs[ind[current]].src), evtCarrier);
+        }
         $ev(evtCarrier, 'animationend', endHandler);
 
         return self;
@@ -2443,12 +2450,12 @@ Imagik.Static = {
         ,{transition:"rotate",ease:"ease-out",duration:2,overlap:1,rows:4,columns:4,order:"columns-first"}
         ,{transition:"rotate-reverse",ease:"ease-out",duration:2,overlap:1,rows:4,columns:4,order:"columns-first"}
         ,{transition:"scale",ease:"ease-in-out-quint",duration:2,overlap:1,rows:3,columns:3,order:"columns-first"}
-        ,{transition:"iris",ease:"ease-out",duration:2,rows:1,columns:1,order:"rows-first"}
-        ,{transition:"iris-reverse",ease:"ease-out",duration:2,rows:1,columns:1,order:"rows-first"}
+        ,{transition:"iris",ease:"ease-out",duration:2,rows:1,columns:1,overlap:1,order:"rows-first"}
+        ,{transition:"iris-reverse",ease:"ease-out",duration:2,rows:1,columns:1,overlap:1,order:"rows-first"}
         ,{transition:"tv",ease:"ease",duration:2,rows:1,columns:1,order:"rows-first"}
-        ,{transition:"brightness",ease:"linear",duration:2,rows:1,columns:1,order:"rows-first"}
-        ,{transition:"darkness",ease:"linear",duration:2,rows:1,columns:1,order:"rows-first"}
-        ,{transition:"fade-zoom",ease:"ease-out",duration:2,rows:1,columns:1,order:"rows-first"}
+        ,{transition:"brightness",ease:"linear",duration:2,rows:1,columns:1,overlap:1,order:"rows-first"}
+        ,{transition:"darkness",ease:"linear",duration:2,rows:1,columns:1,overlap:1,order:"rows-first"}
+        ,{transition:"fade-zoom",ease:"ease-out",duration:2,rows:1,columns:1,overlap:1,order:"rows-first"}
         ,{transition:"fade",ease:"ease-in",duration:2,overlap:0.9,rows:1,columns:1,order:"rows-first"}
         ,{transition:"fade",ease:"ease-in",duration:2,overlap:0.9,rows:5,columns:5,order:"rows-first"}
         ,{transition:"fade",ease:"ease-in",duration:2,overlap:0.9,rows:5,columns:5,order:"columns-first"}

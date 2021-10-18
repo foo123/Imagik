@@ -584,6 +584,7 @@ div, a {
 document.getElementById('version').textContent = 'v.'+Imagik.VERSION;
 document.addEventListener("DOMContentLoaded", function(event) {
     new Imagik(document.getElementById('imagik'), {
+        debug: true,
         aspectRatio: 1920/1080,
         caption: true,
         controls: true,

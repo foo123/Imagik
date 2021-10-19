@@ -227,17 +227,17 @@
 }
 
 /* fx */
+.imagik-webkit .imagik-animation-layer.imagik-fx-flip-horizontal .imagik-tile,
+.imagik-webkit .imagik-animation-layer.imagik-fx-flip-vertical .imagik-tile
+{
+    backface-visibility:visible; /* needed to fix a bug in webkit (Chrome/Opera) that makes flip of 100% disappear and not render */
+}
 .imagik-animation-layer.imagik-fx-unfold-horizontal .imagik-tile,
 .imagik-animation-layer.imagik-fx-unfold-vertical .imagik-tile
 {
     backface-visibility:visible;
     transform-style:preserve-3d;
     overflow:visible;
-}
-.imagik-webkit .imagik-animation-layer.imagik-fx-flip-horizontal .imagik-tile,
-.imagik-webkit .imagik-animation-layer.imagik-fx-flip-vertical .imagik-tile
-{
-    backface-visibility:visible; /* needed to fix a bug in webkit (Chrome/Opera) that makes flip of 100% disappear and not render */
 }
 .imagik-animation-layer.imagik-fx-cubes-left .imagik-tile-wrapper
 {

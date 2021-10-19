@@ -523,6 +523,10 @@ function checkerBoard(pieces, rows, columns)
     }
     return {pieces:pieces, delays:delays, groups:2};
 }
+function calc(i, n, z)
+{
+    return 0 === i ? 0 : (0 === (100 % n) ? i*stdMath.floor(100/n) : z/n*i*100/z);
+}
 function tiles(img, rows, columns, W, H, angle, backface, previmg)
 {
     var i, j, ii, jj, x, y, bx, by, w, h, odd,
@@ -598,7 +602,6 @@ function tiles(img, rows, columns, W, H, angle, backface, previmg)
                     clipPath = [[0, 0], [s, h], [w+s, h], [w, 0]];
                 }
                 clipPath = /*'border-box '+*/'polygon('+clipPath.map(function(pt){return String(pt[0])+'px '+String(pt[1])+'px';}).join(',')+')';
-                //clipPath = 'url("data:image/svg+xml,%3Csvg xmlns=\\"http://www.w3.org/2000/svg\\"%3E%3CclipPath id=\\"clipPath-'+i+'-'+j+'\\" clipPathUnits=\\"objectBoundingBox\\"%3E%3Cpolygon points=\\"'+clipPath.map(function(pt){return String(pt[0])+','+String(pt[1])+'';}).join(' ')+'\\" /%3E%3C/clipPath%3E%3C/svg%3E%0A#clipPath-'+i+'-'+j+'")';
                 pieces[i*rows+j] = {piece:tile=$el('<div class="imagik-tile'+(odd ? ' tile-odd' : ' tile-even')+(j&1 ? ' row-odd' : ' row-even')+(i&1 ? ' column-odd' : ' column-even')+'" style="-webkit-clip-path:'+clipPath+';clip-path:'+clipPath+';"><div class="imagik-tile-inside"></div></div>'), r:rows, c:columns, i:i, j:j, x:x, y:y, bx:bx, by:by, w:ww, h:h, u:'px', W:W, H:H, slope:s, angle:angle, img:img, vis:true};
                 tile.firstChild.style.backgroundImage = 'url("'+String(img)+'")';
                 tile.firstChild.style.backgroundPosition = String(bx)+'px '+String(by)+'px';
@@ -611,34 +614,30 @@ function tiles(img, rows, columns, W, H, angle, backface, previmg)
     }
     else
     {
-        w = 1===columns ? 100 : (W/columns*101/W);
-        h = 1===rows ? 100 : (H/rows*101/H);
+        w = 0 === (100 % columns) ? stdMath.floor(100/columns) : (W/columns*101/W);
+        h = 0 === (100 % rows) ? stdMath.floor(100/rows) : (H/rows*101/H);
         pieces = new Array(rows*columns);
         odd = false;
         for (i=0; i<columns; i++)
         {
             for (j=0; j<rows; j++)
             {
-                x = w/columns*i*100/w; y = h/rows*j*100/h;
-                bx = -W/columns*i; by = -H/rows*j;
+                x = calc(i, columns, w); y = calc(j, rows, h);
+                bx = -i*W/columns; by = -j*H/rows;
                 pieces[i*rows+j] = {piece:tile=$el('<div class="imagik-tile'+(odd ? ' tile-odd' : ' tile-even')+(j&1 ? ' row-odd' : ' row-even')+(i&1 ? ' column-odd' : ' column-even')+'"><div class="imagik-tile-inside"></div></div>'), r:rows, c:columns, i:i, j:j, x:x, y:y, bx:bx, by:by, w:w, h:h, u:'%', W:W, H:H, img:img, vis:true};
                 tile.firstChild.style.backgroundImage = 'url("'+String(img)+'")';
                 tile.firstChild.style.backgroundPosition = String(bx)+'px '+String(by)+'px';
                 tile.firstChild.style.backgroundSize = String(W)+'px auto';
-                //$attr(tile, 'data-x', String(x));
-                //$attr(tile, 'data-y', String(y));
-                tile.style.setProperty('--x', String(x)+'%')
-                tile.style.setProperty('--y', String(y)+'%')
+                tile.style.setProperty('--x', String(x)+'%');
+                tile.style.setProperty('--y', String(y)+'%');
                 if (backface)
                 {
                     tile.appendChild($el('<div class="imagik-tile-backface"></div>'));
                     tile.childNodes[1].style.backgroundImage = 'url("'+String(previmg||img)+'")';
-                    tile.childNodes[1].style.backgroundPosition = String(-W/columns*(i+(backface[0]||0)))+'px '+String(-H/rows*(j+(backface[1]||0)))+'px';
+                    tile.childNodes[1].style.backgroundPosition = String(-(i+(backface[0]||0))*W/columns)+'px '+String(-(j+(backface[1]||0))*H/rows)+'px';
                     tile.childNodes[1].style.backgroundSize = String(W)+'px auto';
-                    //$attr(tile, 'data-xb', String(w/columns*(i+(backface[0]||0))*100/w));
-                    //$attr(tile, 'data-yb', String(h/rows*(j+(backface[1]||0))*100/h));
-                    tile.style.setProperty('--xb', String(w/columns*(i+(backface[0]||0))*100/w)+'%')
-                    tile.style.setProperty('--yb', String(h/rows*(j+(backface[1]||0))*100/h)+'%')
+                    tile.style.setProperty('--xb', String(calc(i+(backface[0]||0), columns, w))+'%');
+                    tile.style.setProperty('--yb', String(calc(j+(backface[1]||0), rows, h))+'%');
                 }
                 odd = !odd;
             }
@@ -770,11 +769,11 @@ function Imagik(el, options)
 
     options = extend(defaults, options||{});
     if (!options.aspectRatio) options.aspectRatio = 1.0;
-    options.rows = stdMath.max(1, stdMath.min(100, options.rows));
-    options.columns = stdMath.max(1, stdMath.min(100, options.columns));
-    options.overlap = stdMath.max(0.0, stdMath.min(1.0, options.overlap));
-    options.duration = stdMath.max(0.0, options.duration);
-    options.delay = stdMath.max(0.0, options.delay);
+    options.rows = stdMath.max(1, stdMath.min(100, (+options.rows)||0));
+    options.columns = stdMath.max(1, stdMath.min(100, (+options.columns)||0));
+    options.overlap = stdMath.max(0.0, stdMath.min(1.0, (+options.overlap)||0));
+    options.duration = stdMath.max(0.0, (+options.duration)||0);
+    options.delay = stdMath.max(0.0, (+options.delay)||0);
 
     self.id = ID();
     self.el = el;
@@ -1211,8 +1210,9 @@ function Imagik(el, options)
         $style(self.style, style);
         if (self.options.debug)
         {
-            console.log('Imagik: Transition='+lastfx.transition+', Image='+(imgs[ind[current]].currentSrc||imgs[ind[current]].src), evtCarrier);
+            console.log('Imagik(#'+self.el.id+'): Transition='+lastfx.transition+', Image='+(imgs[ind[current]].currentSrc||imgs[ind[current]].src), evtCarrier);
         }
+        //if (self.options.debug && lastfx.stop) return self;
         $ev(evtCarrier, 'animationend', endHandler);
 
         return self;

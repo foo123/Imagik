@@ -1,7 +1,7 @@
 /**
 *
 *    Imagik Responsive CSS3 Slideshow
-*    version 1.1.3
+*    version 1.1.4
 *    https://github.com/foo123/Imagik
 *
 **/

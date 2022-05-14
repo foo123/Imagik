@@ -1,7 +1,7 @@
 /**
 *
 *    Imagik Responsive CSS3 Slideshow
-*    version 1.1.3
+*    version 1.1.4
 *    https://github.com/foo123/Imagik
 *
 **/
@@ -227,11 +227,11 @@
 }
 
 /* fx */
-.imagik-webkit .imagik-animation-layer.imagik-fx-flip-horizontal .imagik-tile,
+/*.imagik-webkit .imagik-animation-layer.imagik-fx-flip-horizontal .imagik-tile,
 .imagik-webkit .imagik-animation-layer.imagik-fx-flip-vertical .imagik-tile
 {
-    backface-visibility:visible; /* needed to fix a bug in webkit (Chrome/Opera) that makes flip of 100% disappear and not render */
-}
+    backface-visibility:visible; /* NOT needed to fix a bug in webkit (Chrome/Opera) that makes flip of 100% disappear and not render * /
+}*/
 .imagik-animation-layer.imagik-fx-unfold-horizontal .imagik-tile,
 .imagik-animation-layer.imagik-fx-unfold-vertical .imagik-tile
 {

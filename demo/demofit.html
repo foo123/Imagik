@@ -1,0 +1,277 @@
+<!doctype html>
+<!--[if lt IE 7]>
+<html lang="en" class="ie lt-ie9 lt-ie8 lt-ie7">
+<![endif]-->
+<!--[if IE 7]>
+<html lang="en" class="ie lt-ie9 lt-ie8">
+<![endif]-->
+<!--[if IE 8]>
+<html lang="en" class="ie lt-ie9">
+<![endif]-->
+<!--[if gt IE 8]><!-->
+<html lang="en" class="no-ie">
+<!--<![endif]-->
+<head>
+<title>Imagik Fully-Featured, Fully-Customisable and Extendable Responsive CSS3 Slideshow</title>
+
+<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+<meta name="description" content="Imagik Fully-Featured, Fully-Customisable and Extendable Responsive CSS3 Slideshow" />
+<meta property="og:title" content="Imagik Fully-Featured, Fully-Customisable and Extendable Responsive CSS3 Slideshow">
+<meta property="og:description" content="Imagik Fully-Featured, Fully-Customisable and Extendable Responsive CSS3 Slideshow">
+<meta property="og:image" content="https://foo123.github.io/thumbs/imagik.jpg">
+<meta property="og:url" content="https://foo123.github.io/examples/imagik/">
+<meta name="twitter:card" content="summary">
+
+
+<link rel="stylesheet" type="text/css" href="./common.min.css" />
+
+<link href="../src/imagik.css" rel="stylesheet" type="text/css" />
+<style type="text/css">
+body {
+    background-color:#121212;
+    color:#aaa;
+    font-size:12px;
+}
+
+div, a {
+    position:relative;
+}
+
+.block {
+    position:relative;
+    display:block;
+    margin: 10px;
+    padding: 0;
+}
+.button {
+    -moz-box-shadow:inset 0px 1px 0px 0px #f5978e;
+    -webkit-box-shadow:inset 0px 1px 0px 0px #f5978e;
+    box-shadow:inset 0px 1px 0px 0px #f5978e;
+    background:-webkit-gradient( ease, left top, left bottom, color-stop(0.05, #f24537), color-stop(1, #c62d1f) );
+    background:-moz-ease-gradient( center top, #f24537 5%, #c62d1f 100% );
+    filter:progid:DXImageTransform.Microsoft.gradient(startColorstr='#f24537', endColorstr='#c62d1f');
+    background-color:#f24537;
+    -webkit-border-top-left-radius:20px;
+    -moz-border-radius-topleft:20px;
+    border-top-left-radius:20px;
+    -webkit-border-top-right-radius:20px;
+    -moz-border-radius-topright:20px;
+    border-top-right-radius:20px;
+    -webkit-border-bottom-right-radius:20px;
+    -moz-border-radius-bottomright:20px;
+    border-bottom-right-radius:20px;
+    -webkit-border-bottom-left-radius:20px;
+    -moz-border-radius-bottomleft:20px;
+    border-bottom-left-radius:20px;
+    text-indent:0;
+    border:1px solid #d02718;
+    display:inline-block;
+    color:#ffffff;
+    font-family:Arial;
+    font-size:15px;
+    font-weight:bold;
+    font-style:normal;
+    height:50px;
+    line-height:50px;
+    width:200px;
+    text-decoration:none;
+    text-align:center;
+    text-shadow:1px 1px 0px #810e05;
+}
+.button:hover {
+    background:-webkit-gradient( ease, left top, left bottom, color-stop(0.05, #c62d1f), color-stop(1, #f24537) );
+    background:-moz-ease-gradient( center top, #c62d1f 5%, #f24537 100% );
+    filter:progid:DXImageTransform.Microsoft.gradient(startColorstr='#c62d1f', endColorstr='#f24537');
+    background-color:#c62d1f;
+}.button:active {
+    position:relative;
+    top:1px;
+}
+.button {
+    margin: 3px 2px;
+    position:relative;
+    cursor:pointer;
+}
+#forkongithub a{background:#c83022;color:#fff;}
+#header {
+    text-align: center;
+}
+
+#imagik {
+    position: relative;
+    width: 100%;
+    min-width: 300px;
+    max-width: 1700px;
+    margin: 10px auto;
+}
+#imagik .imagik-caption {
+    position: absolute !important;
+    margin: 0 !important;
+    display: block !important;
+    top: 0 !important; left: auto !important; right: 0 !important;
+    width: 0 !important;
+    height: 0 !important;
+    box-sizing: border-box !important;
+    z-index: -1000 !important;
+    pointer-events: none !important;
+    background: rgba(0,0,0,0.3) !important;
+    opacity: 0 !important;
+    transition: opacity 0.5s linear 0.2s !important;
+    overflow: hidden !important;
+}
+#imagik .imagik-caption.show {
+    pointer-events: auto !important;
+    width: 40% !important;
+    height: 100% !important;
+    z-index: 4 !important;
+    opacity: 1 !important;
+}
+#imagik .caption-heading {
+    position: absolute;
+    display: block;
+    box-sizing: border-box;
+    text-align: center;
+    margin: 0;
+    left: -100%;
+    top: 20%;
+    font-weight: bold;
+    font-size: 6em;
+    width: 70%;
+    color: #fff;
+    transform: translate(-50%, -50%);
+}
+#imagik .caption-text {
+    position: absolute;
+    display: block;
+    box-sizing: border-box;
+    padding: 10px 20px;
+    text-align: left;
+    margin: 0;
+    left: 200%;
+    top: 60%;
+    height: 40%;
+    overflow-y: auto;
+    font-weight: normal;
+    font-style: italic;
+    font-size: 3em;
+    width: 100%;
+    color: #fff;
+    transform: translate(-50%, -50%);
+}
+#imagik .show > .caption-heading {
+    animation: slide-left 0.5s ease 0.7s 1 normal both running;
+}
+#imagik .show > .caption-text {
+    animation: slide-right 0.5s ease 0.7s 1 normal both running;
+}
+/* do an extra animation on static image shown */
+@keyframes slide-left {
+    from{
+        left:-100%;
+    }
+    to{
+        left:50%;
+    }
+}
+@keyframes slide-right {
+    from{
+        left:200%;
+    }
+    to{
+        left:50%;
+    }
+}
+/*.imagik-show-image .imagik-image-layer
+{
+    animation: kenburns-effect 8s linear 0.5s 1 normal both running;
+    transform-origin:0 0;
+}
+@keyframes kenburns-effect {
+    from{
+        background-position:0 0;
+        transform:scale(1);
+    }
+    to{
+        background-position:-5% -5%;
+        transform:scale(1.1);
+    }
+}*/
+@media all and (max-width: 1280px) {
+#imagik .caption-heading {
+    font-size: 3em;
+}
+#imagik .caption-text {
+    font-size: 2em;
+}
+}
+@media all and (max-width: 640px) {
+#imagik .caption-heading {
+    font-size: 1.6em;
+    top: 25%;
+}
+#imagik .caption-text {
+    font-size: 1.1em;
+}
+}
+</style>
+
+
+
+<script type="text/javascript" src="../src/Imagik.js"></script>
+
+</head>
+<body class="responsive-864-container">
+    <span id="forkongithub"><a href="https://github.com/foo123/Imagik">Slide me on GitHub</a></span>
+
+
+<header id="header">
+    <h1>Imagik <span id="version"></span> Fully-Featured, Fully-Customisable and Extendable Responsive CSS3 Slideshow</h1>
+</header>
+
+<div id="imagik">
+    <div class="transition=flip-horizontal rows=5 columns=5 overlap=0.9 ease=ease-out-back order=diagonal-bottom-right duration=2 delay=4">
+        <img src="./assets/landscape1.jpg" alt="Landscape 1" />
+        <div><h4 class="caption-heading">A Caption</h4><p class="caption-text">Some text here..Some text here..Some text here..Some text here..Some text here..Some text here..</p></div>
+    </div>
+    <div class="transition=fade rows=6 columns=8 overlap=0.9 ease=ease-in order=spiral-top-left duration=2 delay=4">
+        <img src="./assets/landscape2.jpg" alt="Landscape 2" />
+        <div><h4 class="caption-heading">A Caption</h4><p class="caption-text">Some text here..Some text here..Some text here..Some text here..Some text here..Some text here..</p></div>
+    </div>
+    <div class="transition=fade-shrink rows=6 columns=8 overlap=0.8 ease=ease order=diagonal-bottom-right duration=2 delay=4">
+        <img src="./assets/landscape1.jpg" alt="Landscape 1" />
+        <div><h4 class="caption-heading">A Caption</h4><p class="caption-text">Some text here..Some text here..Some text here..Some text here..Some text here..Some text here..</p></div>
+    </div>
+    <div class="transition=random delay=4">
+        <img src="./assets/landscape2.jpg" alt="Landscape 2" />
+        <div><h4 class="caption-heading">This transition is random</h4><p class="caption-text">Some text here..Some text here..Some text here..Some text here..Some text here..Some text here..</p></div>
+    </div>
+</div>
+<br />
+<p style="text-align:center">
+    <span style="font-size:12px;font-style:oblique;">Hint:  View the Page Source Code</span>
+</p>
+
+<script>//<![CDATA[
+document.getElementById('version').textContent = 'v.'+Imagik.VERSION;
+document.addEventListener("DOMContentLoaded", function(event) {
+    new Imagik(document.getElementById('imagik'), {
+        debug: true,
+        aspectRatio: 1920/1080,
+        fit: true,
+        caption: true,
+        controls: true,
+        randomOrder: false,
+        transition: "random",
+        ease: "ease",
+        order: "random",
+        rows: 1,
+        columns: 1,
+        overlap: 0.9,
+        duration: 2,
+        delay: 4
+    });
+});
+//]]></script>
+</body>
+</html>

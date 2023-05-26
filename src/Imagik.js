@@ -529,20 +529,45 @@ function calc(i, n, z)
 {
     return 0 === i ? 0 : (0 === (100 % n) ? i*stdMath.floor(100/n) : z/n*i*100/z);
 }
-function dofit(w, h, W, H)
+function dofit(img, W, H, fit)
 {
-    var s = '', sx = W/w, sy = H/h, tx = 0, ty = 0;
+    if (!fit || !img || !img.loaded) return [String(W)+'px auto', 0, 0];
+    var w = img.width, h = img.height, s = '',
+        sx = w ? W/w : 1, sy = h ? H/h : 1,
+        tx = 0, ty = 0;
     if (h * sx >= H)
     {
         s = String(W)+'px auto'; // W
-        tx = 0; // center
-        ty = (H - sx*h)/2; // center
+        tx = 0; // left,center,right
+        switch (fit[0])
+        {
+            case 'top':
+            ty = 0; // top
+            break;
+            case 'bottom':
+            ty = (H - sx*h); // bottom
+            break;
+            default:
+            ty = (H - sx*h)/2; // center
+            break;
+        }
     }
     else //if (w * sy >= W)
     {
         s = 'auto '+String(H)+'px'; // H
-        ty = 0; // center
-        tx = (W - sy*w)/2; // center
+        ty = 0; // top,center,bottom
+        switch (fit[1])
+        {
+            case 'left':
+            tx = 0; // left
+            break;
+            case 'right':
+            tx = (W - sy*w); // right
+            break;
+            default:
+            tx = (W - sy*w)/2; // center
+            break;
+        }
     }
     return [s, tx, ty];
 }
@@ -566,7 +591,7 @@ function tiles(img, rows, columns, W, H, angle, fit, backface, previmg)
                 bx = -x+margin2; by = -y+margin2;
                 if (stdMath.abs(bx) < W && bx+side+margin <= W && stdMath.abs(by) < H && by+side+margin <= H)
                 {
-                    transform = fit ? dofit(img.width, img.height, W, H) : [String(W)+'px auto',0,0];
+                    transform = dofit(img, W, H, fit);
                     pieces.push({piece:tile=$el('<div class="imagik-tile imagik-diagonal"><div class="imagik-tile-inside" style="width:'+String(side+margin)+'px;height:'+String(side+margin)+'px;left:'+String(-margin2)+'px;top:'+String(-margin2)+'px;"></div></div>'), r:rows, c:columns, i:ii, j:jj++, x:x, y:y, bx:bx, by:by, w:side, h:side, u:'px', W:W, H:H, img:img, vis:true});
                     tile.firstChild.style.backgroundImage = 'url("'+String(img)+'")';
                     tile.firstChild.style.backgroundPosition = String(bx+transform[1])+'px '+String(by+transform[2])+'px';
@@ -622,7 +647,7 @@ function tiles(img, rows, columns, W, H, angle, fit, backface, previmg)
                     clipPath = [[0, 0], [s, h], [w+s, h], [w, 0]];
                 }
                 clipPath = /*'border-box '+*/'polygon('+clipPath.map(function(pt){return String(pt[0])+'px '+String(pt[1])+'px';}).join(',')+')';
-                transform = fit ? dofit(img.width, img.height, W, H) : [String(W)+'px auto',0,0];
+                transform = dofit(img, W, H, fit);
                 pieces[i*rows+j] = {piece:tile=$el('<div class="imagik-tile'+(odd ? ' tile-odd' : ' tile-even')+(j&1 ? ' row-odd' : ' row-even')+(i&1 ? ' column-odd' : ' column-even')+'" style="-webkit-clip-path:'+clipPath+';clip-path:'+clipPath+';"><div class="imagik-tile-inside"></div></div>'), r:rows, c:columns, i:i, j:j, x:x, y:y, bx:bx, by:by, w:ww, h:h, u:'px', W:W, H:H, slope:s, angle:angle, img:img, vis:true};
                 tile.firstChild.style.backgroundImage = 'url("'+String(img)+'")';
                 tile.firstChild.style.backgroundPosition = String(bx+transform[1])+'px '+String(by+transform[2])+'px';
@@ -646,7 +671,7 @@ function tiles(img, rows, columns, W, H, angle, fit, backface, previmg)
                 x = calc(i, columns, w); y = calc(j, rows, h);
                 bx = -i*W/columns;
                 by = -j*H/rows;
-                transform = fit ? dofit(img.width, img.height, W, H) : [String(W)+'px auto',0,0];
+                transform = dofit(img, W, H, fit);
                 pieces[i*rows+j] = {piece:tile=$el('<div class="imagik-tile'+(odd ? ' tile-odd' : ' tile-even')+(j&1 ? ' row-odd' : ' row-even')+(i&1 ? ' column-odd' : ' column-even')+'"><div class="imagik-tile-inside"></div></div>'), r:rows, c:columns, i:i, j:j, x:x, y:y, bx:bx, by:by, w:w, h:h, u:'%', W:W, H:H, img:img, vis:true};
                 tile.firstChild.style.backgroundImage = 'url("'+String(img)+'")';
                 tile.firstChild.style.backgroundPosition = String(bx+transform[1])+'px '+String(by+transform[2])+'px';
@@ -656,7 +681,7 @@ function tiles(img, rows, columns, W, H, angle, fit, backface, previmg)
                 if (backface)
                 {
                     previmg = previmg || img;
-                    transform = fit ? dofit(previmg.width, previmg.height, W, H) : [String(W)+'px auto',0,0];
+                    transform = dofit(previmg, W, H, fit);
                     tile.appendChild($el('<div class="imagik-tile-backface"></div>'));
                     tile.childNodes[1].style.backgroundImage = 'url("'+String(previmg)+'")';
                     tile.childNodes[1].style.backgroundPosition = String(-(i+(backface[0]||0))*W/columns+transform[1])+'px '+String(-(j+(backface[1]||0))*H/rows+transform[2])+'px';
@@ -832,6 +857,42 @@ function Imagik(el, options)
     options.overlap = stdMath.max(0.0, stdMath.min(1.0, (+options.overlap)||0));
     options.duration = stdMath.max(0.0, (+options.duration)||0);
     options.delay = stdMath.max(0.0, (+options.delay)||0);
+    fit = options.fit;
+    if (fit)
+    {
+        if (fit.toLowerCase && fit.split)
+        {
+            fit = fit.trim().toLowerCase().split(/\s+/g).slice(0, 2);
+            switch (fit[0])
+            {
+                case 'top':
+                case 'bottom':
+                break;
+
+                default:
+                fit[0] = 'center';
+                break;
+            }
+            switch (fit[1])
+            {
+                case 'left':
+                case 'right':
+                break;
+
+                default:
+                fit[1] = 'center';
+                break;
+            }
+        }
+        else
+        {
+            fit = ['center', 'center'];
+        }
+    }
+    else
+    {
+        fit = null;
+    }
 
     self.id = ID();
     self.el = el;
@@ -846,7 +907,7 @@ function Imagik(el, options)
         imgs = [], links = [], fx = [], captions = [], ind = [],
         current = -1, prevcurrent = -1, timer, dotimer = true,
         paused = false, p = null, p2 = null,
-        transform, curimg, displayimg,
+        transform, curimg, displayimg, fit,
         numpiec = 0, style = '', lastfx = null, evtCarrier = null, W, H,
         randtrans = shuffle(Imagik.Static.randomTransitions.slice()), randindex = 0,
         getRandomTransition, toggleActive, prepareTransition,
@@ -856,7 +917,7 @@ function Imagik(el, options)
     displayimg = function(curimg, showimg) {
         if (curimg)
         {
-            transform = self.options.fit ? dofit(curimg.width, curimg.height, W, H) : [String(W)+'px auto', 0, 0];
+            transform = dofit(curimg, W, H, fit);
             if (showimg) imageLayer.style.backgroundImage = 'url("'+curimg+'")';
             imageLayer.style.backgroundPosition = String(transform[1])+'px '+String(transform[2])+'px';
             imageLayer.style.backgroundSize = transform[0];
@@ -1016,7 +1077,7 @@ function Imagik(el, options)
 
             prepareTransition();
         };
-        if (self.options.fit)
+        if (fit)
         {
             curimg = Img(imgs[ind[current]].currentSrc||imgs[ind[current]].src);
             curimg.onload(proceed);
@@ -1103,12 +1164,12 @@ function Imagik(el, options)
         // signal start if handler given
         if ("function" === typeof self.options.onStart) self.options.onStart(self);
 
-        curimg = self.options.fit ? Img(imgs[ind[current]].currentSrc||imgs[ind[current]].src) : (imgs[ind[current]].currentSrc||imgs[ind[current]].src);
+        curimg = fit ? Img(imgs[ind[current]].currentSrc||imgs[ind[current]].src) : (imgs[ind[current]].currentSrc||imgs[ind[current]].src);
 
         fxi = fx[ind[current]]; if ("random" === fxi.transition) {fxi = getRandomTransition();}
         if (!fxi || !fxi.transition || !HAS.call(Imagik.Static.transitions, fxi.transition))
         {
-            if (self.options.fit)
+            if (fit)
             {
                 curimg.onload(function() {
                     displayimg(curimg, true);
@@ -1134,12 +1195,12 @@ function Imagik(el, options)
         proceed = function() {
             if (transition.reverse)
             {
-                p = tiles(previmg, r, c, W, H, angle, self.options.fit, transition.backface, curimg);
+                p = tiles(previmg, r, c, W, H, angle, fit, transition.backface, curimg);
                 displayimg(curimg, true);
             }
             else
             {
-                p = tiles(curimg, r, c, W, H, angle, self.options.fit, transition.backface, previmg);
+                p = tiles(curimg, r, c, W, H, angle, fit, transition.backface, previmg);
                 displayimg(previmg, true);
             }
 
@@ -1147,7 +1208,7 @@ function Imagik(el, options)
             if (transition.current || transition.next)
             {
                 imageLayer.style.backgroundImage = 'none';
-                p2 = tiles(previmg, r, c, W, H, angle, self.options.fit/*, transition.backface*/);
+                p2 = tiles(previmg, r, c, W, H, angle, fit/*, transition.backface*/);
                 if (is_obj(transition.current) && is_array(transition.current.animation) && 2 <= transition.current.animation.length)
                 {
                     animations['animation-'+self.el.id+'-current'] = '@keyframes imagik-animation-'+self.el.id+'-current{'+transition.current.animation.map(function(step, n){
@@ -1299,7 +1360,7 @@ function Imagik(el, options)
             $ev(evtCarrier, 'animationend', endHandler);
         };
 
-        if (self.options.fit)
+        if (fit)
         {
             curimg.onload(proceed);
         }
